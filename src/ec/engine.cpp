@@ -48,9 +48,14 @@ void Engine::removeEntity(int eID)
     }
 }
 
-std::map<int, std::unique_ptr<Entity> >::iterator Engine::getEntityIterator()
+std::map<int, std::unique_ptr<Entity> >::iterator Engine::getEntityIterBegin()
 {
     return entityMap.begin();
+}
+
+std::map<int, std::unique_ptr<Entity> >::iterator Engine::getEntityIterEnd()
+{
+    return entityMap.end();
 }
 
 void Engine::update(sf::Time dt, Context context)

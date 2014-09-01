@@ -1,11 +1,13 @@
 
 #include "game.hpp"
 
+#include "seoSplasher/splashState.hpp"
+
 // set packfile name/filepath if one is being used
-#define PACKFILE_NAME ""
+#define PACKFILE_NAME "seoSplasherResources.dat"
 
 // set to true if a packfile is being used
-#define IS_USING_PACKFILE false
+#define IS_USING_PACKFILE true
 
 // if not using cmake to build and using the ResourcePacker lib,
 // define ResourcePacker_FOUND
@@ -83,10 +85,14 @@ void Game::draw()
 // Resource IDs must be listed in resourceIdentifiers.hpp
 void Game::registerResources()
 {
+    resourceManager.registerTexture(Textures::WALL, "wall.png");
 }
 
 // register states via stateStack
 // State IDs must be listed in stateIdentifiers.hpp
 void Game::registerStates()
 {
+    stateStack.registerState<SplashState>(States::SPLASH);
+
+    stateStack.pushState(States::SPLASH);
 }

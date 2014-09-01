@@ -17,8 +17,11 @@ set(Game_Project_SOURCES
     stateStack.cpp
     ec/engine.cpp
     ec/entity.cpp
-    ec/nMove.cpp
     ec/system.cpp
+    seoSplasher/nDraw.cpp
+    seoSplasher/nMove.cpp
+    seoSplasher/splashState.cpp
+    seoSplasher/utility.cpp
     main.cpp)
 
 if(WIN32)

@@ -18,7 +18,8 @@ public:
     void addDrawSystem(std::unique_ptr<Node> type);
     void addEntity(std::unique_ptr<Entity> entity);
     void removeEntity(int eID);
-    std::map<int, std::unique_ptr<Entity> >::iterator getEntityIterator();
+    std::map<int, std::unique_ptr<Entity> >::iterator getEntityIterBegin();
+    std::map<int, std::unique_ptr<Entity> >::iterator getEntityIterEnd();
 
     void update(sf::Time dt, Context context);
     void draw(Context context);
