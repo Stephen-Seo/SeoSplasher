@@ -16,7 +16,11 @@ namespace Textures
 {
     enum ID
     {
-        WALL
+        WALL,
+        BREAKABLE,
+        BALLOON_0,
+        SUPER_BALLOON_0,
+        PLAYER_ONE
     };
 }
 

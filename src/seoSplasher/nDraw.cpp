@@ -8,7 +8,8 @@
 #include "../context.hpp"
 
 nDraw::nDraw() :
-sprite(nullptr)
+sprite(nullptr),
+pos(nullptr)
 {}
 
 bool nDraw::checkEntity(Entity& entity)
@@ -31,6 +32,9 @@ void nDraw::getCReferencesFromEntity(Entity& entity)
 
 void nDraw::update(sf::Time dt, Context context)
 {
+    if(*entityRemoved)
+        return;
+
     sf::Transform transform;
     transform.translate(pos->x, pos->y);
 

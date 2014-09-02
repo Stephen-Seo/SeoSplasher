@@ -1,21 +1,22 @@
 
-#ifndef N_MOVE_HPP
-#define N_MOVE_HPP
-
-#include <list>
-#include <typeindex>
+#ifndef N_PCONTROL_HPP
+#define N_PCONTROL_HPP
 
 #include "../ec/node.hpp"
 
-#include "../ec/cPosition.hpp"
-#include "../ec/cVelocity.hpp"
+struct cPlayerControl;
+struct cPosition;
+struct cVelocity;
+struct cLiving;
 
-struct nMove : Node
+struct nPControl : Node
 {
-    nMove();
+    nPControl();
 
+    cPlayerControl* control;
     cPosition* pos;
     cVelocity* vel;
+    cLiving* living;
 
     bool checkEntity(Entity& entity);
     std::unique_ptr<Node> getNewNode();

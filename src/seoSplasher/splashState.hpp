@@ -4,6 +4,8 @@
 
 #include "../state.hpp"
 
+#include "cPlayerControl.hpp"
+
 class SplashState : public State
 {
 public:
@@ -15,7 +17,19 @@ public:
 private:
     sf::RectangleShape fieldBG;
 
+    unsigned char IDcounter;
+
+    cPlayerControl::Direction dir;
+    bool placeBalloon;
+    bool placeAction;
+    bool kick;
+    bool kickAction;
+
+    bool wUp, aLeft, sDown, dRight;
+
     void addWall(float x, float y);
+    void addCombatant(bool isPlayer);
+    void checkReleasedInput();
 };
 
 #endif

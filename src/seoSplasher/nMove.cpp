@@ -1,13 +1,13 @@
 
 #include "nMove.hpp"
 
+#include <cmath>
+
 #include "../context.hpp"
 #include "gridInfo.hpp"
 #include "utility.hpp"
 #include "cBreakable.hpp"
 #include "cWall.hpp"
-
-std::list<std::type_index> nMove::colList;
 
 nMove::nMove() :
 pos(nullptr),
@@ -34,29 +34,85 @@ void nMove::getCReferencesFromEntity(Entity& entity)
 
 void nMove::update(sf::Time dt, Context context)
 {
-    if(nMove::colList.empty())
-    {
-        nMove::colList.push_back(std::type_index(typeid(cBreakable)));
-        nMove::colList.push_back(std::type_index(typeid(cWall)));
-    }
+    if(*entityRemoved)
+        return;
 
     float prev = pos->x;
     pos->x += vel->x * dt.asSeconds();
 
-    HitInfo info = Utility::collideAgainstComponentList(pos->x, pos->y, nMove::colList, *context.ecEngine);
-
-    if(!info.hit.empty())
+    if(pos->x < (float)GRID_OFFSET_X || pos->x >= (float)(GRID_RIGHT - GRID_SQUARE_SIZE))
     {
         pos->x = prev;
+    }
+    else
+    {
+        HitInfo info = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cWall)), *context.ecEngine);
+
+        if(!info.hit.empty())
+        {
+            if(info.hit.size() == 1)
+            {
+                cPosition* hpos = static_cast<cPosition*>(info.hit.front()->getComponent(std::type_index(typeid(cPosition))));
+                float offset = std::abs(pos->y - hpos->y);
+                if(offset >= (float)(GRID_SQUARE_SIZE - 5) && offset <= (float)(GRID_SQUARE_SIZE + 5))
+                {
+                    if(pos->y > hpos->y)
+                    {
+                        pos->y = hpos->y + (float)GRID_SQUARE_SIZE;
+                    }
+                    else
+                    {
+                        pos->y = hpos->y - (float)GRID_SQUARE_SIZE;
+                    }
+                }
+                else
+                {
+                    pos->x = prev;
+                }
+            }
+            else
+            {
+                pos->x = prev;
+            }
+        }
     }
 
     prev = pos->y;
     pos->y += vel->y * dt.asSeconds();
 
-    info = Utility::collideAgainstComponentList(pos->x, pos->y, nMove::colList, *context.ecEngine);
-
-    if(!info.hit.empty())
+    if(pos->y < (float)GRID_OFFSET_Y || pos->y >= (float)(GRID_BOTTOM - GRID_SQUARE_SIZE))
     {
         pos->y = prev;
+    }
+    else
+    {
+        HitInfo info = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cWall)), *context.ecEngine);
+        if(!info.hit.empty())
+        {
+            if(info.hit.size() == 1)
+            {
+                cPosition* hpos = static_cast<cPosition*>(info.hit.front()->getComponent(std::type_index(typeid(cPosition))));
+                float offset = std::abs(pos->x - hpos->x);
+                if(offset >= (float)(GRID_SQUARE_SIZE - 5) && offset <= (float)(GRID_SQUARE_SIZE + 5))
+                {
+                    if(pos->x > hpos->x)
+                    {
+                        pos->x = hpos->x + (float)GRID_SQUARE_SIZE;
+                    }
+                    else
+                    {
+                        pos->x = hpos->x - (float)GRID_SQUARE_SIZE;
+                    }
+                }
+                else
+                {
+                    pos->y = prev;
+                }
+            }
+            else
+            {
+                pos->y = prev;
+            }
+        }
     }
 }

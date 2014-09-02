@@ -4,7 +4,9 @@
 
 #define DEFAULT_BALLOONS 1
 #define DEFAULT_RANGE 3
-#define DEFAULT_SPEED 15.0f
+#define DEFAULT_SPEED 80.0f
+#define SPEED_UP_MULT 25.0f
+#define SUPER_RANGE 10
 
 #include "../ec/component.hpp"
 
@@ -21,6 +23,8 @@ struct cLiving : Component
     unsigned char pierceUpgrade = 0;
     unsigned char spreadUpgrade = 0;
     unsigned char ghostUpgrade = 0;
+
+    unsigned char sBalloonInPlay = 0;
 };
 
 #endif

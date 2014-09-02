@@ -18,8 +18,10 @@ set(Game_Project_SOURCES
     ec/engine.cpp
     ec/entity.cpp
     ec/system.cpp
+    seoSplasher/cPlayerControl.cpp
     seoSplasher/nDraw.cpp
     seoSplasher/nMove.cpp
+    seoSplasher/nPControl.cpp
     seoSplasher/splashState.cpp
     seoSplasher/utility.cpp
     main.cpp)

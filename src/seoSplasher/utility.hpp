@@ -7,6 +7,8 @@
 
 class Entity;
 class Engine;
+struct cLiving;
+struct Context;
 
 struct HitInfo
 {
@@ -19,6 +21,8 @@ namespace Utility
     HitInfo collideAgainstComponent(const float& x, const float& y, const std::type_index& type, Engine& engine);
     HitInfo collideAgainstComponentList(const float& x, const float& y, const std::list<std::type_index>& types, Engine& engine);
     bool collide(const float& xOne, const float& yOne, const float& xTwo, const float& yTwo);
+
+    void createBalloon(const float& x, const float& y, cLiving& living, const Context& context, unsigned char ID);
 };
 
 #endif
