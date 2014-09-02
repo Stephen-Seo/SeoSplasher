@@ -121,8 +121,9 @@ void Utility::createBalloon(const float& x, const float& y, cLiving& living, con
     Entity* balloon = new Entity;
 
     cPosition* pos = new cPosition;
-    pos->x = x;
-    pos->y = y;
+    sf::Vector2f v = alignToGrid(x,y);
+    pos->x = v.x;
+    pos->y = v.y;
     pos->rot = 0.0f;
     balloon->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
 
@@ -166,4 +167,14 @@ void Utility::createBalloon(const float& x, const float& y, cLiving& living, con
     }
 
     context.ecEngine->addEntity(std::unique_ptr<Entity>(balloon));
+}
+
+sf::Vector2f Utility::alignToGrid(const float& x, const float& y)
+{
+    sf::Vector2f v;
+
+    v.x = (float)((int)((x - (float)GRID_OFFSET_X) / 32.0f + 0.5f)) * 32.0f + (float)GRID_OFFSET_X;
+    v.y = (float)((int)((y - (float)GRID_OFFSET_Y) / 32.0f + 0.5f)) * 32.0f + (float)GRID_OFFSET_Y;
+
+    return v;
 }

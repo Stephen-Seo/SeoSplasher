@@ -5,6 +5,8 @@
 #include <list>
 #include <typeindex>
 
+#include <SFML/System.hpp>
+
 class Entity;
 class Engine;
 struct cLiving;
@@ -23,6 +25,8 @@ namespace Utility
     bool collide(const float& xOne, const float& yOne, const float& xTwo, const float& yTwo);
 
     void createBalloon(const float& x, const float& y, cLiving& living, const Context& context, unsigned char ID);
+
+    sf::Vector2f alignToGrid(const float& x, const float& y);
 };
 
 #endif
