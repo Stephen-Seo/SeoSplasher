@@ -1,6 +1,7 @@
 
 #include "splashState.hpp"
 
+#include "nBalloon.hpp"
 #include "nPControl.hpp"
 #include "nMove.hpp"
 #include "nDraw.hpp"
@@ -13,6 +14,7 @@
 #include "cLiving.hpp"
 #include "cPlayerControl.hpp"
 #include "cAIControl.hpp"
+#include "nSplosion.hpp"
 
 
 SplashState::SplashState(StateStack& stack, Context context) :
@@ -35,6 +37,9 @@ dRight(false)
     tset.insert(Textures::PLAYER_ONE);
     tset.insert(Textures::BALLOON_0);
     tset.insert(Textures::SUPER_BALLOON_0);
+    tset.insert(Textures::SPLOSION_PLUS);
+    tset.insert(Textures::SPLOSION_VERT);
+    tset.insert(Textures::SPLOSION_HORIZ);
 
     context.resourceManager->loadResources(getNeededResources());
 
@@ -42,6 +47,8 @@ dRight(false)
     // add systems
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nPControl));
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nMove));
+    context.ecEngine->addSystem(std::unique_ptr<Node>(new nBalloon));
+    context.ecEngine->addSystem(std::unique_ptr<Node>(new nSplosion));
     context.ecEngine->addDrawSystem(std::unique_ptr<Node>(new nDraw));
 
     // add entities

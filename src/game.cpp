@@ -90,6 +90,9 @@ void Game::registerResources()
     resourceManager.registerTexture(Textures::BALLOON_0, "balloon00.png");
     resourceManager.registerTexture(Textures::SUPER_BALLOON_0, "superBalloon00.png");
     resourceManager.registerTexture(Textures::PLAYER_ONE, "debugPlayer.png");
+    resourceManager.registerTexture(Textures::SPLOSION_PLUS, "splosionPLUS.png");
+    resourceManager.registerTexture(Textures::SPLOSION_VERT, "splosionVERT.png");
+    resourceManager.registerTexture(Textures::SPLOSION_HORIZ, "splosionHORIZ.png");
 }
 
 // register states via stateStack

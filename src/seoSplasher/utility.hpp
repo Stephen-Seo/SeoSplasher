@@ -11,6 +11,8 @@ class Entity;
 class Engine;
 struct cLiving;
 struct Context;
+struct cBalloon;
+struct cDamage;
 
 struct HitInfo
 {
@@ -25,6 +27,8 @@ namespace Utility
     bool collide(const float& xOne, const float& yOne, const float& xTwo, const float& yTwo);
 
     void createBalloon(const float& x, const float& y, cLiving& living, const Context& context, unsigned char ID);
+    void createExplosion(const float& x, const float& y, cBalloon& balloon, const Context& context, bool horizontal, bool vertical);
+    void createExplosion(const float& x, const float& y, cDamage& damage, const Context& context, bool horizontal, bool vertical);
 
     sf::Vector2f alignToGrid(const float& x, const float& y);
 };

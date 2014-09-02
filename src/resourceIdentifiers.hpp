@@ -20,7 +20,10 @@ namespace Textures
         BREAKABLE,
         BALLOON_0,
         SUPER_BALLOON_0,
-        PLAYER_ONE
+        PLAYER_ONE,
+        SPLOSION_PLUS,
+        SPLOSION_VERT,
+        SPLOSION_HORIZ
     };
 }
 

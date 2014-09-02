@@ -6,7 +6,7 @@
 
 struct cControl : Component
 {
-    bool fired = false;
+    bool* fired = nullptr;
 };
 
 #endif

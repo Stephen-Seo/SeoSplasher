@@ -1,28 +1,28 @@
 
-#ifndef N_MOVE_HPP
-#define N_MOVE_HPP
-
-#define MAX_MOVE_OFFSET 8
-
-#include <list>
-#include <typeindex>
+#ifndef N_SPLOSION_HPP
+#define N_SPLOSION_HPP
 
 #include "../ec/node.hpp"
 
-#include "../ec/cPosition.hpp"
-#include "../ec/cVelocity.hpp"
+struct cPosition;
+struct cDamage;
+struct cTimer;
 
-struct nMove : Node
+struct nSplosion : Node
 {
-    nMove();
+public:
+    nSplosion();
 
     cPosition* pos;
-    cVelocity* vel;
+    cDamage* damage;
+    cTimer* timer;
 
     bool checkEntity(Entity& entity);
     std::unique_ptr<Node> getNewNode();
     void getCReferencesFromEntity(Entity& entity);
     void update(sf::Time dt, Context context);
+private:
+    unsigned char ID;
 };
 
 #endif

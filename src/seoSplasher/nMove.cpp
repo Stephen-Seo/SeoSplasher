@@ -54,7 +54,7 @@ void nMove::update(sf::Time dt, Context context)
             {
                 cPosition* hpos = static_cast<cPosition*>(info.hit.front()->getComponent(std::type_index(typeid(cPosition))));
                 float offset = std::abs(pos->y - hpos->y);
-                if(offset >= (float)(GRID_SQUARE_SIZE - 5) && offset <= (float)(GRID_SQUARE_SIZE + 5))
+                if(offset >= (float)(GRID_SQUARE_SIZE - MAX_MOVE_OFFSET) && offset <= (float)(GRID_SQUARE_SIZE + MAX_MOVE_OFFSET))
                 {
                     if(pos->y > hpos->y)
                     {
@@ -93,7 +93,7 @@ void nMove::update(sf::Time dt, Context context)
             {
                 cPosition* hpos = static_cast<cPosition*>(info.hit.front()->getComponent(std::type_index(typeid(cPosition))));
                 float offset = std::abs(pos->x - hpos->x);
-                if(offset >= (float)(GRID_SQUARE_SIZE - 5) && offset <= (float)(GRID_SQUARE_SIZE + 5))
+                if(offset >= (float)(GRID_SQUARE_SIZE - MAX_MOVE_OFFSET) && offset <= (float)(GRID_SQUARE_SIZE + MAX_MOVE_OFFSET))
                 {
                     if(pos->x > hpos->x)
                     {
