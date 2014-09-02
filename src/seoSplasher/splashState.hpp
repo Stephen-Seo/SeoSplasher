@@ -4,7 +4,10 @@
 
 #include "../state.hpp"
 
+#include <random>
+
 #include "cPlayerControl.hpp"
+#include "cPowerup.hpp"
 
 class SplashState : public State
 {
@@ -27,9 +30,14 @@ private:
 
     bool wUp, aLeft, sDown, dRight;
 
+    std::mt19937 gen;
+
     void addWall(float x, float y);
     void addCombatant(bool isPlayer);
     void checkReleasedInput();
+    void addBreakable(float x, float y, cPowerup::Powerup powerup = cPowerup::NONE);
+    void initBreakables();
+    bool validBreakableCoordinate(int x, int y);
 };
 
 #endif

@@ -88,11 +88,42 @@ void Game::registerResources()
     resourceManager.registerTexture(Textures::WALL, "wall.png");
     resourceManager.registerTexture(Textures::BREAKABLE, "breakable.png");
     resourceManager.registerTexture(Textures::BALLOON_0, "balloon00.png");
+    resourceManager.registerTexture(Textures::BALLOON_1, "balloon01.png");
+    resourceManager.registerTexture(Textures::BALLOON_2, "balloon02.png");
     resourceManager.registerTexture(Textures::SUPER_BALLOON_0, "superBalloon00.png");
+    resourceManager.registerTexture(Textures::SUPER_BALLOON_1, "superBalloon01.png");
+    resourceManager.registerTexture(Textures::SUPER_BALLOON_2, "superBalloon02.png");
     resourceManager.registerTexture(Textures::PLAYER_ONE, "debugPlayer.png");
     resourceManager.registerTexture(Textures::SPLOSION_PLUS, "splosionPLUS.png");
     resourceManager.registerTexture(Textures::SPLOSION_VERT, "splosionVERT.png");
     resourceManager.registerTexture(Textures::SPLOSION_HORIZ, "splosionHORIZ.png");
+    resourceManager.registerTexture(Textures::BALLOON_UP_0, "balloonUp00.png");
+    resourceManager.registerTexture(Textures::BALLOON_UP_1, "balloonUp01.png");
+    resourceManager.registerTexture(Textures::BALLOON_UP_2, "balloonUp02.png");
+    resourceManager.registerTexture(Textures::RANGE_UP_0, "rangeUp00.png");
+    resourceManager.registerTexture(Textures::RANGE_UP_1, "rangeUp01.png");
+    resourceManager.registerTexture(Textures::RANGE_UP_2, "rangeUp02.png");
+    resourceManager.registerTexture(Textures::SPEED_UP_0, "speedUp00.png");
+    resourceManager.registerTexture(Textures::SPEED_UP_1, "speedUp01.png");
+    resourceManager.registerTexture(Textures::SPEED_UP_2, "speedUp02.png");
+    resourceManager.registerTexture(Textures::KICK_UPGRADE_0, "kickUpgrade00.png");
+    resourceManager.registerTexture(Textures::KICK_UPGRADE_1, "kickUpgrade01.png");
+    resourceManager.registerTexture(Textures::KICK_UPGRADE_2, "kickUpgrade02.png");
+    resourceManager.registerTexture(Textures::RCONTROL_UPGRADE_0, "rControl00.png");
+    resourceManager.registerTexture(Textures::RCONTROL_UPGRADE_1, "rControl01.png");
+    resourceManager.registerTexture(Textures::RCONTROL_UPGRADE_2, "rControl02.png");
+    resourceManager.registerTexture(Textures::SBALLOON_UPGRADE_0, "superBalloonUp00.png");
+    resourceManager.registerTexture(Textures::SBALLOON_UPGRADE_1, "superBalloonUp01.png");
+    resourceManager.registerTexture(Textures::SBALLOON_UPGRADE_2, "superBalloonUp02.png");
+    resourceManager.registerTexture(Textures::PIERCE_UPGRADE_0, "pierceUp00.png");
+    resourceManager.registerTexture(Textures::PIERCE_UPGRADE_1, "pierceUp01.png");
+    resourceManager.registerTexture(Textures::PIERCE_UPGRADE_2, "pierceUp02.png");
+    resourceManager.registerTexture(Textures::SPREAD_UPGRADE_0, "spreadUp00.png");
+    resourceManager.registerTexture(Textures::SPREAD_UPGRADE_1, "spreadUp01.png");
+    resourceManager.registerTexture(Textures::SPREAD_UPGRADE_2, "spreadUp02.png");
+    resourceManager.registerTexture(Textures::GHOST_UPGRADE_0, "ghostUp00.png");
+    resourceManager.registerTexture(Textures::GHOST_UPGRADE_1, "ghostUp01.png");
+    resourceManager.registerTexture(Textures::GHOST_UPGRADE_2, "ghostUp02.png");
 }
 
 // register states via stateStack

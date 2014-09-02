@@ -15,6 +15,7 @@
 #include "cTimer.hpp"
 #include "../resourceManager.hpp"
 #include "cDamage.hpp"
+#include "cAnimated.hpp"
 
 HitInfo Utility::collideAll(const float& x, const float& y, Engine& engine)
 {
@@ -203,10 +204,22 @@ void Utility::createBalloon(const float& x, const float& y, cLiving& living, con
     if(isSuper)
     {
         sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SUPER_BALLOON_0));
+
+        cAnimated* animated = new cAnimated;
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_1));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_2));
+        balloon->addComponent(std::type_index(typeid(cAnimated)), std::unique_ptr<Component>(animated));
     }
     else
     {
         sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::BALLOON_0));
+
+        cAnimated* animated = new cAnimated;
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_1));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_2));
+        balloon->addComponent(std::type_index(typeid(cAnimated)), std::unique_ptr<Component>(animated));
     }
     balloon->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
 

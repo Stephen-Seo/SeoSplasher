@@ -7,6 +7,7 @@
 struct cPowerup : Component
 {
     enum Powerup {
+        NONE,
         BALLOON_UP,
         RANGE_UP,
         SPEED_UP,

@@ -1,6 +1,8 @@
 
 #include "splashState.hpp"
 
+#include <ctime>
+
 #include "nBalloon.hpp"
 #include "nPControl.hpp"
 #include "nMove.hpp"
@@ -15,6 +17,10 @@
 #include "cPlayerControl.hpp"
 #include "cAIControl.hpp"
 #include "nSplosion.hpp"
+#include "nAnimated.hpp"
+#include "cBreakable.hpp"
+#include "gridInfo.hpp"
+#include "nBreakable.hpp"
 
 
 SplashState::SplashState(StateStack& stack, Context context) :
@@ -29,17 +35,49 @@ kickAction(false),
 wUp(false),
 aLeft(false),
 sDown(false),
-dRight(false)
+dRight(false),
+gen((unsigned int)std::time(NULL))
 {
     // resources
     tset.insert(Textures::WALL);
     tset.insert(Textures::BREAKABLE);
     tset.insert(Textures::PLAYER_ONE);
     tset.insert(Textures::BALLOON_0);
+    tset.insert(Textures::BALLOON_1);
+    tset.insert(Textures::BALLOON_2);
     tset.insert(Textures::SUPER_BALLOON_0);
+    tset.insert(Textures::SUPER_BALLOON_1);
+    tset.insert(Textures::SUPER_BALLOON_2);
     tset.insert(Textures::SPLOSION_PLUS);
     tset.insert(Textures::SPLOSION_VERT);
     tset.insert(Textures::SPLOSION_HORIZ);
+    tset.insert(Textures::BALLOON_UP_0);
+    tset.insert(Textures::BALLOON_UP_1);
+    tset.insert(Textures::BALLOON_UP_2);
+    tset.insert(Textures::RANGE_UP_0);
+    tset.insert(Textures::RANGE_UP_1);
+    tset.insert(Textures::RANGE_UP_2);
+    tset.insert(Textures::SPEED_UP_0);
+    tset.insert(Textures::SPEED_UP_1);
+    tset.insert(Textures::SPEED_UP_2);
+    tset.insert(Textures::KICK_UPGRADE_0);
+    tset.insert(Textures::KICK_UPGRADE_1);
+    tset.insert(Textures::KICK_UPGRADE_2);
+    tset.insert(Textures::RCONTROL_UPGRADE_0);
+    tset.insert(Textures::RCONTROL_UPGRADE_1);
+    tset.insert(Textures::RCONTROL_UPGRADE_2);
+    tset.insert(Textures::SBALLOON_UPGRADE_0);
+    tset.insert(Textures::SBALLOON_UPGRADE_1);
+    tset.insert(Textures::SBALLOON_UPGRADE_2);
+    tset.insert(Textures::PIERCE_UPGRADE_0);
+    tset.insert(Textures::PIERCE_UPGRADE_1);
+    tset.insert(Textures::PIERCE_UPGRADE_2);
+    tset.insert(Textures::SPREAD_UPGRADE_0);
+    tset.insert(Textures::SPREAD_UPGRADE_1);
+    tset.insert(Textures::SPREAD_UPGRADE_2);
+    tset.insert(Textures::GHOST_UPGRADE_0);
+    tset.insert(Textures::GHOST_UPGRADE_1);
+    tset.insert(Textures::GHOST_UPGRADE_2);
 
     context.resourceManager->loadResources(getNeededResources());
 
@@ -49,6 +87,8 @@ dRight(false)
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nMove));
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nBalloon));
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nSplosion));
+    context.ecEngine->addSystem(std::unique_ptr<Node>(new nAnimated));
+    context.ecEngine->addSystem(std::unique_ptr<Node>(new nBreakable));
     context.ecEngine->addDrawSystem(std::unique_ptr<Node>(new nDraw));
 
     // add entities
@@ -68,6 +108,8 @@ dRight(false)
     }
 
     addCombatant(true);
+
+    initBreakables();
 
     // other initializations
     fieldBG.setFillColor(sf::Color(127,127,127));
@@ -245,4 +287,197 @@ void SplashState::checkReleasedInput()
     {
         dir = cPlayerControl::NONE;
     }
+}
+
+void SplashState::addBreakable(float x, float y, cPowerup::Powerup powerup)
+{
+    Entity* breakable = new Entity;
+
+    cPosition* pos = new cPosition;
+    pos->x = x;
+    pos->y = y;
+    pos->rot = 0.0f;
+    breakable->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
+
+    cPowerup* cpowerup = new cPowerup;
+    cpowerup->powerup = powerup;
+    breakable->addComponent(std::type_index(typeid(cPowerup)), std::unique_ptr<Component>(cpowerup));
+
+    breakable->addComponent(std::type_index(typeid(cBreakable)), std::unique_ptr<Component>(new cBreakable));
+
+    cSprite* sprite = new cSprite;
+    sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::BREAKABLE));
+    breakable->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
+
+    getContext().ecEngine->addEntity(std::unique_ptr<Entity>(breakable));
+}
+
+void SplashState::initBreakables()
+{
+    unsigned char powerups;
+
+    std::list<sf::Vector2i> validPoints;
+    for(int i = 0; i < GRID_WIDTH; ++i)
+    {
+        for(int j = 0; j < GRID_HEIGHT; ++j)
+        {
+            if(validBreakableCoordinate(i,j))
+                validPoints.push_back(sf::Vector2i(i,j));
+        }
+    }
+
+    unsigned char maxValid = validPoints.size();
+    sf::Vector2i v;
+    unsigned int r;
+    // balloon up
+    for(powerups = NUM_BALLOON_UP; powerups > 0; --powerups)
+    {
+        std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
+        auto iter = validPoints.begin();
+        for(r = dist(gen); r != 0; ++iter)
+        {
+            --r;
+        }
+        v = *iter;
+
+        addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::BALLOON_UP);
+    }
+
+    // range up
+    for(powerups = NUM_RANGE_UP; powerups > 0; --powerups)
+    {
+        std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
+        auto iter = validPoints.begin();
+        for(r = dist(gen); r != 0; ++iter)
+        {
+            --r;
+        }
+        v = *iter;
+
+        addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::RANGE_UP);
+    }
+
+    // speed up
+    for(powerups = NUM_SPEED_UP; powerups > 0; --powerups)
+    {
+        std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
+        auto iter = validPoints.begin();
+        for(r = dist(gen); r != 0; ++iter)
+        {
+            --r;
+        }
+        v = *iter;
+
+        addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::SPEED_UP);
+    }
+
+    // kick upgrade
+    for(powerups = NUM_KICK_UPGRADE; powerups > 0; --powerups)
+    {
+        std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
+        auto iter = validPoints.begin();
+        for(r = dist(gen); r != 0; ++iter)
+        {
+            --r;
+        }
+        v = *iter;
+
+        addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::KICK_UPGRADE);
+    }
+
+    // remote control
+    for(powerups = NUM_RCONTROL_UPGRADE; powerups > 0; --powerups)
+    {
+        std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
+        auto iter = validPoints.begin();
+        for(r = dist(gen); r != 0; ++iter)
+        {
+            --r;
+        }
+        v = *iter;
+
+        addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::RCONTROL_UPGRADE);
+    }
+
+    // super balloon
+    for(powerups = NUM_SBALLOON_UPGRADE; powerups > 0; --powerups)
+    {
+        std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
+        auto iter = validPoints.begin();
+        for(r = dist(gen); r != 0; ++iter)
+        {
+            --r;
+        }
+        v = *iter;
+
+        addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::SBALLOON_UPGRADE);
+    }
+
+    // pierce upgrade
+    for(powerups = NUM_PIERCE_UPGRADE; powerups > 0; --powerups)
+    {
+        std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
+        auto iter = validPoints.begin();
+        for(r = dist(gen); r != 0; ++iter)
+        {
+            --r;
+        }
+        v = *iter;
+
+        addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::PIERCE_UPGRADE);
+    }
+
+    // spread upgrade
+    for(powerups = NUM_SPREAD_UPGRADE; powerups > 0; --powerups)
+    {
+        std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
+        auto iter = validPoints.begin();
+        for(r = dist(gen); r != 0; ++iter)
+        {
+            --r;
+        }
+        v = *iter;
+
+        addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::SPREAD_UPGRADE);
+    }
+
+    // ghost upgrade
+    for(powerups = NUM_GHOST_UPGRADE; powerups > 0; --powerups)
+    {
+        std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
+        auto iter = validPoints.begin();
+        for(r = dist(gen); r != 0; ++iter)
+        {
+            --r;
+        }
+        v = *iter;
+
+        addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::GHOST_UPGRADE);
+    }
+
+    int remaining = 100 - (maxValid - validPoints.size());
+    for(; remaining > 0; --remaining)
+    {
+        std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
+        auto iter = validPoints.begin();
+        for(r = dist(gen); r != 0; ++iter)
+        {
+            --r;
+        }
+        v = *iter;
+
+        addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE));
+    }
+}
+
+bool SplashState::validBreakableCoordinate(int x, int y)
+{
+    if((x == 0 && (y == 0 || y == 1 || y == GRID_HEIGHT - 2 || y == GRID_HEIGHT - 1)) ||
+       (x == 1 && (y == 0 || y == GRID_HEIGHT - 1)) ||
+       (x == GRID_WIDTH - 2 && (y == 0 || y == GRID_HEIGHT - 1)) ||
+       (x == GRID_WIDTH - 1 && (y == 0 || y == 1 || y == GRID_HEIGHT - 2 || y == GRID_HEIGHT - 1)) ||
+       (x % 2 == 1 && y % 2 == 1))
+        return false;
+
+    return true;
 }

@@ -19,7 +19,9 @@ set(Game_Project_SOURCES
     ec/entity.cpp
     ec/system.cpp
     seoSplasher/cPlayerControl.cpp
+    seoSplasher/nAnimated.cpp
     seoSplasher/nBalloon.cpp
+    seoSplasher/nBreakable.cpp
     seoSplasher/nDraw.cpp
     seoSplasher/nMove.cpp
     seoSplasher/nPControl.cpp

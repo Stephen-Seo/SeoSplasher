@@ -8,6 +8,7 @@
 #include "utility.hpp"
 #include "cBreakable.hpp"
 #include "cWall.hpp"
+#include "cBalloon.hpp"
 
 nMove::nMove() :
 pos(nullptr),
@@ -37,6 +38,8 @@ void nMove::update(sf::Time dt, Context context)
     if(*entityRemoved)
         return;
 
+    bool ignoreBalloons = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
+
     float prev = pos->x;
     pos->x += vel->x * dt.asSeconds();
 
@@ -47,8 +50,10 @@ void nMove::update(sf::Time dt, Context context)
     else
     {
         HitInfo info = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cWall)), *context.ecEngine);
-
-        if(!info.hit.empty())
+        bool hit = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBreakable)), *context.ecEngine);
+        if(!ignoreBalloons)
+            hit = hit || Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
+        if(!info.hit.empty() || hit)
         {
             if(info.hit.size() == 1)
             {
@@ -87,7 +92,10 @@ void nMove::update(sf::Time dt, Context context)
     else
     {
         HitInfo info = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cWall)), *context.ecEngine);
-        if(!info.hit.empty())
+        bool hit = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBreakable)), *context.ecEngine);
+        if(!ignoreBalloons)
+            hit = hit || Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
+        if(!info.hit.empty() || hit)
         {
             if(info.hit.size() == 1)
             {
