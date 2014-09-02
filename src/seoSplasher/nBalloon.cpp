@@ -53,7 +53,15 @@ void nBalloon::update(sf::Time dt, Context context)
     if(*entityRemoved)
         return;
 
-    if(control)
+    if(balloon->hit)
+    {
+        Utility::createExplosion(pos->x, pos->y, *balloon, context, true, true);
+        --(*balloon->balloonsInPlay);
+        if(balloon->super)
+            --(*balloon->sBalloonsInPlay);
+        context.ecEngine->removeEntity(ID);
+    }
+    else if(control)
     {
         if(*control->fired)
         {

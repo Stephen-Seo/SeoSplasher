@@ -11,6 +11,8 @@
 #include "cWall.hpp"
 #include "../context.hpp"
 #include "../ec/engine.hpp"
+#include "cBreakable.hpp"
+#include "cBalloon.hpp"
 
 nSplosion::nSplosion() :
 pos(nullptr),
@@ -49,28 +51,131 @@ void nSplosion::update(sf::Time dt, Context context)
     {
         damage->spawned = true;
 
-        HitInfo info, infoTwo;
+        HitInfo infoBreak, infoBalloon;
+        bool boolWall, boolWater;
         if(damage->vertical)
         {
             // check up
-            info = Utility::collideAgainstComponent(pos->x, pos->y - (float)GRID_SQUARE_SIZE, std::type_index(typeid(cWall)), *context.ecEngine);
-            infoTwo = Utility::collideAgainstComponent(pos->x, pos->y - (float)GRID_SQUARE_SIZE, std::type_index(typeid(cDamage)), *context.ecEngine);
-            if(info.hit.empty() && infoTwo.hit.empty())
+            if(damage->ghosting)
+                boolWall = false;
+            else
+                boolWall = Utility::collidesAgainstComponent(pos->x, pos->y - (float)GRID_SQUARE_SIZE, std::type_index(typeid(cWall)), *context.ecEngine);
+
+            boolWater = Utility::collidesAgainstComponent(pos->x, pos->y - (float)GRID_SQUARE_SIZE, std::type_index(typeid(cDamage)), *context.ecEngine);
+
+            infoBreak = Utility::collideAgainstComponent(pos->x, pos->y - (float)GRID_SQUARE_SIZE, std::type_index(typeid(cBreakable)), *context.ecEngine);
+
+            infoBalloon = Utility::collideAgainstComponent(pos->x, pos->y - (float)GRID_SQUARE_SIZE, std::type_index(typeid(cBalloon)), *context.ecEngine);
+
+            if(!boolWall && !boolWater && (infoBreak.hit.empty() || damage->piercing) && infoBalloon.hit.empty())
             {
-                Utility::createExplosion(pos->x, pos->y - (float)GRID_SQUARE_SIZE, *damage, context, false, true);
+                Utility::createExplosion(pos->x, pos->y - (float)GRID_SQUARE_SIZE, *damage, context, false || damage->spreading, true);
+            }
+
+            for(auto iter = infoBreak.hit.begin(); iter != infoBreak.hit.end(); ++iter)
+            {
+                cBreakable* breakable = static_cast<cBreakable*>((*iter)->getComponent(std::type_index(typeid(cBreakable))));
+                if(breakable->health > 0)
+                    --(breakable->health);
+            }
+
+            for(auto iter = infoBalloon.hit.begin(); iter != infoBalloon.hit.end(); ++iter)
+            {
+                cBalloon* balloon = static_cast<cBalloon*>((*iter)->getComponent(std::type_index(typeid(cBalloon))));
+                balloon->hit = true;
             }
 
             // check down
-            info = Utility::collideAgainstComponent(pos->x, pos->y + (float)GRID_SQUARE_SIZE, std::type_index(typeid(cWall)), *context.ecEngine);
-            infoTwo = Utility::collideAgainstComponent(pos->x, pos->y + (float)GRID_SQUARE_SIZE, std::type_index(typeid(cDamage)), *context.ecEngine);
-            if(info.hit.empty() && infoTwo.hit.empty())
+            if(damage->ghosting)
+                boolWall = false;
+            else
+                boolWall = Utility::collidesAgainstComponent(pos->x, pos->y + (float)GRID_SQUARE_SIZE, std::type_index(typeid(cWall)), *context.ecEngine);
+
+            boolWater = Utility::collidesAgainstComponent(pos->x, pos->y + (float)GRID_SQUARE_SIZE, std::type_index(typeid(cDamage)), *context.ecEngine);
+
+            infoBreak = Utility::collideAgainstComponent(pos->x, pos->y + (float)GRID_SQUARE_SIZE, std::type_index(typeid(cBreakable)), *context.ecEngine);
+
+            infoBalloon = Utility::collideAgainstComponent(pos->x, pos->y + (float)GRID_SQUARE_SIZE, std::type_index(typeid(cBalloon)), *context.ecEngine);
+
+            if(!boolWall && !boolWater && (infoBreak.hit.empty() || damage->piercing) && infoBalloon.hit.empty())
             {
-                Utility::createExplosion(pos->x, pos->y + (float)GRID_SQUARE_SIZE, *damage, context, false, true);
+                Utility::createExplosion(pos->x, pos->y + (float)GRID_SQUARE_SIZE, *damage, context, false || damage->spreading, true);
+            }
+
+            for(auto iter = infoBreak.hit.begin(); iter != infoBreak.hit.end(); ++iter)
+            {
+                cBreakable* breakable = static_cast<cBreakable*>((*iter)->getComponent(std::type_index(typeid(cBreakable))));
+                if(breakable->health > 0)
+                    --(breakable->health);
+            }
+
+            for(auto iter = infoBalloon.hit.begin(); iter != infoBalloon.hit.end(); ++iter)
+            {
+                cBalloon* balloon = static_cast<cBalloon*>((*iter)->getComponent(std::type_index(typeid(cBalloon))));
+                balloon->hit = true;
             }
         }
         if(damage->horizontal)
         {
+            // check left
+            if(damage->ghosting)
+                boolWall = false;
+            else
+                boolWall = Utility::collidesAgainstComponent(pos->x - (float)GRID_SQUARE_SIZE, pos->y, std::type_index(typeid(cWall)), *context.ecEngine);
 
+            boolWater = Utility::collidesAgainstComponent(pos->x - (float)GRID_SQUARE_SIZE, pos->y, std::type_index(typeid(cDamage)), *context.ecEngine);
+
+            infoBreak = Utility::collideAgainstComponent(pos->x - (float)GRID_SQUARE_SIZE, pos->y, std::type_index(typeid(cBreakable)), *context.ecEngine);
+
+            infoBalloon = Utility::collideAgainstComponent(pos->x - (float)GRID_SQUARE_SIZE, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
+
+            if(!boolWall && !boolWater && (infoBreak.hit.empty() || damage->piercing) && infoBalloon.hit.empty())
+            {
+                Utility::createExplosion(pos->x - (float)GRID_SQUARE_SIZE, pos->y, *damage, context, true, false || damage->spreading);
+            }
+
+            for(auto iter = infoBreak.hit.begin(); iter != infoBreak.hit.end(); ++iter)
+            {
+                cBreakable* breakable = static_cast<cBreakable*>((*iter)->getComponent(std::type_index(typeid(cBreakable))));
+                if(breakable->health > 0)
+                    --(breakable->health);
+            }
+
+            for(auto iter = infoBalloon.hit.begin(); iter != infoBalloon.hit.end(); ++iter)
+            {
+                cBalloon* balloon = static_cast<cBalloon*>((*iter)->getComponent(std::type_index(typeid(cBalloon))));
+                balloon->hit = true;
+            }
+
+            // check right
+            if(damage->ghosting)
+                boolWall = false;
+            else
+                boolWall = Utility::collidesAgainstComponent(pos->x + (float)GRID_SQUARE_SIZE, pos->y, std::type_index(typeid(cWall)), *context.ecEngine);
+
+            boolWater = Utility::collidesAgainstComponent(pos->x + (float)GRID_SQUARE_SIZE, pos->y, std::type_index(typeid(cDamage)), *context.ecEngine);
+
+            infoBreak = Utility::collideAgainstComponent(pos->x + (float)GRID_SQUARE_SIZE, pos->y, std::type_index(typeid(cBreakable)), *context.ecEngine);
+
+            infoBalloon = Utility::collideAgainstComponent(pos->x + (float)GRID_SQUARE_SIZE, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
+
+            if(!boolWall && !boolWater && (infoBreak.hit.empty() || damage->piercing) && infoBalloon.hit.empty())
+            {
+                Utility::createExplosion(pos->x + (float)GRID_SQUARE_SIZE, pos->y, *damage, context, true, false || damage->spreading);
+            }
+
+            for(auto iter = infoBreak.hit.begin(); iter != infoBreak.hit.end(); ++iter)
+            {
+                cBreakable* breakable = static_cast<cBreakable*>((*iter)->getComponent(std::type_index(typeid(cBreakable))));
+                if(breakable->health > 0)
+                    --(breakable->health);
+            }
+
+            for(auto iter = infoBalloon.hit.begin(); iter != infoBalloon.hit.end(); ++iter)
+            {
+                cBalloon* balloon = static_cast<cBalloon*>((*iter)->getComponent(std::type_index(typeid(cBalloon))));
+                balloon->hit = true;
+            }
         }
     }
 

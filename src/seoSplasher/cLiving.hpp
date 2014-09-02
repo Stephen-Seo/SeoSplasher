@@ -2,7 +2,7 @@
 #ifndef C_LIVING_HPP
 #define C_LIVING_HPP
 
-#define DEFAULT_BALLOONS 1
+#define DEFAULT_BALLOONS 3
 #define DEFAULT_RANGE 2
 #define DEFAULT_SPEED 80.0f
 #define SPEED_UP_MULT 25.0f

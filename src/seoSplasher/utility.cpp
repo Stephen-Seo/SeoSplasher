@@ -96,6 +96,27 @@ HitInfo Utility::collideAgainstComponentList(const float& x, const float& y, con
     return info;
 }
 
+bool Utility::collidesAgainstComponent(const float& x, const float& y, const std::type_index& type, Engine& engine)
+{
+    for(auto eIter = engine.getEntityIterBegin(); eIter != engine.getEntityIterEnd(); ++eIter)
+    {
+        if(eIter->second->removed ||
+           !eIter->second->hasComponent(std::type_index(typeid(cPosition))) ||
+           !eIter->second->hasComponent(type))
+        {
+            continue;
+        }
+        cPosition* pos = static_cast<cPosition*>(eIter->second->getComponent(std::type_index(typeid(cPosition))));
+
+        if(collide(x, y, pos->x, pos->y))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool Utility::collide(const float& xOne, const float& yOne, const float& xTwo, const float& yTwo)
 {
     float halfSquare = ((float)GRID_SQUARE_SIZE) / 2.0f;
@@ -130,6 +151,11 @@ bool Utility::collide(const float& xOne, const float& yOne, const float& xTwo, c
             yOne + (float)GRID_SQUARE_SIZE < yTwo + (float)GRID_SQUARE_SIZE) ||
            (xOne + (float)GRID_SQUARE_SIZE > xTwo &&
             xOne + (float)GRID_SQUARE_SIZE < xTwo + (float)GRID_SQUARE_SIZE &&
+            yOne + halfSquare > yTwo &&
+            yOne + halfSquare < yTwo + (float)GRID_SQUARE_SIZE)
+            ||
+           (xOne + halfSquare > xTwo &&
+            xOne + halfSquare < xTwo + (float)GRID_SQUARE_SIZE &&
             yOne + halfSquare > yTwo &&
             yOne + halfSquare < yTwo + (float)GRID_SQUARE_SIZE);
 }
@@ -219,7 +245,18 @@ void Utility::createExplosion(const float& x, const float& y, cBalloon& balloon,
     splosion->addComponent(std::type_index(typeid(cDamage)), std::unique_ptr<Component>(damage));
 
     cSprite* sprite = new cSprite;
-    sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_PLUS));
+    if(vertical && horizontal)
+    {
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_PLUS));
+    }
+    else if(vertical)
+    {
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_VERT));
+    }
+    else
+    {
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_HORIZ));
+    }
     splosion->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
 
     cTimer* timer = new cTimer;
@@ -250,7 +287,18 @@ void Utility::createExplosion(const float& x, const float& y, cDamage& damage, c
     splosion->addComponent(std::type_index(typeid(cDamage)), std::unique_ptr<Component>(cdamage));
 
     cSprite* sprite = new cSprite;
-    sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_PLUS));
+    if(horizontal && vertical)
+    {
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_PLUS));
+    }
+    else if(horizontal)
+    {
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_HORIZ));
+    }
+    else
+    {
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_VERT));
+    }
     splosion->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
 
     cTimer* timer = new cTimer;

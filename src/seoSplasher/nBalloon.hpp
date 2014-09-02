@@ -24,7 +24,7 @@ public:
     void getCReferencesFromEntity(Entity& entity);
     void update(sf::Time dt, Context context);
 private:
-    unsigned char ID;
+    int ID;
 };
 
 #endif
