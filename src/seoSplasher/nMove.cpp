@@ -50,12 +50,15 @@ void nMove::update(sf::Time dt, Context context)
     else
     {
         HitInfo info = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cWall)), *context.ecEngine);
-        bool hit = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBreakable)), *context.ecEngine);
-        if(!ignoreBalloons)
-            hit = hit || Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
-        if(!info.hit.empty() || hit)
+        HitInfo infoBreak = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBreakable)), *context.ecEngine);
+        bool balloonHit;
+        if(ignoreBalloons)
+            balloonHit = false;
+        else
+            balloonHit = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
+        if(!info.hit.empty() || !infoBreak.hit.empty() || balloonHit)
         {
-            if(info.hit.size() == 1)
+            if(info.hit.size() == 1 && infoBreak.hit.empty())
             {
                 cPosition* hpos = static_cast<cPosition*>(info.hit.front()->getComponent(std::type_index(typeid(cPosition))));
                 float offset = std::abs(pos->y - hpos->y);
@@ -70,9 +73,26 @@ void nMove::update(sf::Time dt, Context context)
                         pos->y = hpos->y - (float)GRID_SQUARE_SIZE;
                     }
                 }
+                else if(offset <= MOVE_SNAP_OFFSET)
+                {
+                    sf::Vector2f v = Utility::alignToGrid(pos->x, pos->y);
+                    pos->x = v.x;
+                    pos->y = v.y;
+                }
                 else
                 {
                     pos->x = prev;
+                }
+            }
+            else if(info.hit.empty() && infoBreak.hit.size() == 1)
+            {
+                cPosition* hpos = static_cast<cPosition*>(infoBreak.hit.front()->getComponent(std::type_index(typeid(cPosition))));
+                float offset = std::abs(pos->y - hpos->y);
+                if(offset <= MOVE_SNAP_OFFSET)
+                {
+                    sf::Vector2f v = Utility::alignToGrid(pos->x, pos->y);
+                    pos->x = v.x;
+                    pos->y = v.y;
                 }
             }
             else
@@ -92,12 +112,15 @@ void nMove::update(sf::Time dt, Context context)
     else
     {
         HitInfo info = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cWall)), *context.ecEngine);
-        bool hit = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBreakable)), *context.ecEngine);
-        if(!ignoreBalloons)
-            hit = hit || Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
-        if(!info.hit.empty() || hit)
+        HitInfo infoBreak = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBreakable)), *context.ecEngine);
+        bool balloonHit;
+        if(ignoreBalloons)
+            balloonHit = false;
+        else
+            balloonHit = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
+        if(!info.hit.empty() || !infoBreak.hit.empty() || balloonHit)
         {
-            if(info.hit.size() == 1)
+            if(info.hit.size() == 1 & infoBreak.hit.empty())
             {
                 cPosition* hpos = static_cast<cPosition*>(info.hit.front()->getComponent(std::type_index(typeid(cPosition))));
                 float offset = std::abs(pos->x - hpos->x);
@@ -112,9 +135,26 @@ void nMove::update(sf::Time dt, Context context)
                         pos->x = hpos->x - (float)GRID_SQUARE_SIZE;
                     }
                 }
+                else if(offset <= MOVE_SNAP_OFFSET)
+                {
+                    sf::Vector2f v = Utility::alignToGrid(pos->x, pos->y);
+                    pos->x = v.x;
+                    pos->y = v.y;
+                }
                 else
                 {
                     pos->y = prev;
+                }
+            }
+            else if(info.hit.empty() && infoBreak.hit.size() == 1)
+            {
+                cPosition* hpos = static_cast<cPosition*>(infoBreak.hit.front()->getComponent(std::type_index(typeid(cPosition))));
+                float offset = std::abs(pos->x - hpos->x);
+                if(offset <= MOVE_SNAP_OFFSET)
+                {
+                    sf::Vector2f v = Utility::alignToGrid(pos->x, pos->y);
+                    pos->x = v.x;
+                    pos->y = v.y;
                 }
             }
             else

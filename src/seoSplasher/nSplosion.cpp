@@ -13,6 +13,7 @@
 #include "../ec/engine.hpp"
 #include "cBreakable.hpp"
 #include "cBalloon.hpp"
+#include "cLiving.hpp"
 
 nSplosion::nSplosion() :
 pos(nullptr),
@@ -51,7 +52,7 @@ void nSplosion::update(sf::Time dt, Context context)
     {
         damage->spawned = true;
 
-        HitInfo infoBreak, infoBalloon;
+        HitInfo infoBreak, infoBalloon, infoLiving;
         bool boolWall, boolWater;
         if(damage->vertical)
         {
@@ -66,6 +67,8 @@ void nSplosion::update(sf::Time dt, Context context)
             infoBreak = Utility::collideAgainstComponent(pos->x, pos->y - (float)GRID_SQUARE_SIZE, std::type_index(typeid(cBreakable)), *context.ecEngine);
 
             infoBalloon = Utility::collideAgainstComponent(pos->x, pos->y - (float)GRID_SQUARE_SIZE, std::type_index(typeid(cBalloon)), *context.ecEngine);
+
+            infoLiving = Utility::collideAgainstComponent(pos->x, pos->y - (float)GRID_SQUARE_SIZE, std::type_index(typeid(cLiving)), *context.ecEngine);
 
             if(!boolWall && !boolWater && (infoBreak.hit.empty() || damage->piercing) && infoBalloon.hit.empty())
             {
@@ -85,6 +88,12 @@ void nSplosion::update(sf::Time dt, Context context)
                 balloon->hit = true;
             }
 
+            for(auto iter = infoLiving.hit.begin(); iter != infoLiving.hit.end(); ++iter)
+            {
+                cLiving* living = static_cast<cLiving*>((*iter)->getComponent(std::type_index(typeid(cLiving))));
+                living->hit = true;
+            }
+
             // check down
             if(damage->ghosting)
                 boolWall = false;
@@ -96,6 +105,8 @@ void nSplosion::update(sf::Time dt, Context context)
             infoBreak = Utility::collideAgainstComponent(pos->x, pos->y + (float)GRID_SQUARE_SIZE, std::type_index(typeid(cBreakable)), *context.ecEngine);
 
             infoBalloon = Utility::collideAgainstComponent(pos->x, pos->y + (float)GRID_SQUARE_SIZE, std::type_index(typeid(cBalloon)), *context.ecEngine);
+
+            infoLiving = Utility::collideAgainstComponent(pos->x, pos->y + (float)GRID_SQUARE_SIZE, std::type_index(typeid(cLiving)), *context.ecEngine);
 
             if(!boolWall && !boolWater && (infoBreak.hit.empty() || damage->piercing) && infoBalloon.hit.empty())
             {
@@ -114,6 +125,12 @@ void nSplosion::update(sf::Time dt, Context context)
                 cBalloon* balloon = static_cast<cBalloon*>((*iter)->getComponent(std::type_index(typeid(cBalloon))));
                 balloon->hit = true;
             }
+
+            for(auto iter = infoLiving.hit.begin(); iter != infoLiving.hit.end(); ++iter)
+            {
+                cLiving* living = static_cast<cLiving*>((*iter)->getComponent(std::type_index(typeid(cLiving))));
+                living->hit = true;
+            }
         }
         if(damage->horizontal)
         {
@@ -128,6 +145,8 @@ void nSplosion::update(sf::Time dt, Context context)
             infoBreak = Utility::collideAgainstComponent(pos->x - (float)GRID_SQUARE_SIZE, pos->y, std::type_index(typeid(cBreakable)), *context.ecEngine);
 
             infoBalloon = Utility::collideAgainstComponent(pos->x - (float)GRID_SQUARE_SIZE, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
+
+            infoLiving = Utility::collideAgainstComponent(pos->x - (float)GRID_SQUARE_SIZE, pos->y, std::type_index(typeid(cLiving)), *context.ecEngine);
 
             if(!boolWall && !boolWater && (infoBreak.hit.empty() || damage->piercing) && infoBalloon.hit.empty())
             {
@@ -147,6 +166,12 @@ void nSplosion::update(sf::Time dt, Context context)
                 balloon->hit = true;
             }
 
+            for(auto iter = infoLiving.hit.begin(); iter != infoLiving.hit.end(); ++iter)
+            {
+                cLiving* living = static_cast<cLiving*>((*iter)->getComponent(std::type_index(typeid(cLiving))));
+                living->hit = true;
+            }
+
             // check right
             if(damage->ghosting)
                 boolWall = false;
@@ -158,6 +183,8 @@ void nSplosion::update(sf::Time dt, Context context)
             infoBreak = Utility::collideAgainstComponent(pos->x + (float)GRID_SQUARE_SIZE, pos->y, std::type_index(typeid(cBreakable)), *context.ecEngine);
 
             infoBalloon = Utility::collideAgainstComponent(pos->x + (float)GRID_SQUARE_SIZE, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
+
+            infoLiving = Utility::collideAgainstComponent(pos->x + (float)GRID_SQUARE_SIZE, pos->y, std::type_index(typeid(cLiving)), *context.ecEngine);
 
             if(!boolWall && !boolWater && (infoBreak.hit.empty() || damage->piercing) && infoBalloon.hit.empty())
             {
@@ -175,6 +202,12 @@ void nSplosion::update(sf::Time dt, Context context)
             {
                 cBalloon* balloon = static_cast<cBalloon*>((*iter)->getComponent(std::type_index(typeid(cBalloon))));
                 balloon->hit = true;
+            }
+
+            for(auto iter = infoLiving.hit.begin(); iter != infoLiving.hit.end(); ++iter)
+            {
+                cLiving* living = static_cast<cLiving*>((*iter)->getComponent(std::type_index(typeid(cLiving))));
+                living->hit = true;
             }
         }
     }

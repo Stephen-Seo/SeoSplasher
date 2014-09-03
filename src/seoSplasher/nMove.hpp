@@ -3,6 +3,7 @@
 #define N_MOVE_HPP
 
 #define MAX_MOVE_OFFSET 8
+#define MOVE_SNAP_OFFSET 3.0f
 
 #include <list>
 #include <typeindex>

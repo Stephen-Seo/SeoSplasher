@@ -21,6 +21,7 @@
 #include "cBreakable.hpp"
 #include "gridInfo.hpp"
 #include "nBreakable.hpp"
+#include "nDeath.hpp"
 
 
 SplashState::SplashState(StateStack& stack, Context context) :
@@ -90,6 +91,7 @@ cFired(false)
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nSplosion));
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nAnimated));
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nBreakable));
+    context.ecEngine->addSystem(std::unique_ptr<Node>(new nDeath));
     context.ecEngine->addDrawSystem(std::unique_ptr<Node>(new nDraw));
 
     // add entities

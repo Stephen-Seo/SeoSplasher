@@ -40,6 +40,25 @@ HitInfo Utility::collideAll(const float& x, const float& y, Engine& engine)
     return info;
 }
 
+bool Utility::collidesAll(const float& x, const float& y, Engine& engine)
+{
+    for(auto eIter = engine.getEntityIterBegin(); eIter != engine.getEntityIterEnd(); ++eIter)
+    {
+        if(eIter->second->removed || !eIter->second->hasComponent(std::type_index(typeid(cPosition))))
+        {
+            continue;
+        }
+        cPosition* pos = static_cast<cPosition*>(eIter->second->getComponent(std::type_index(typeid(cPosition))));
+
+        if(collide(x, y, pos->x, pos->y))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 HitInfo Utility::collideAgainstComponent(const float& x, const float& y, const std::type_index& type, Engine& engine)
 {
     HitInfo info;
