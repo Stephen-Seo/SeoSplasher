@@ -22,7 +22,9 @@
 #include "gridInfo.hpp"
 #include "nBreakable.hpp"
 #include "nDeath.hpp"
+#include "cBalloon.hpp"
 
+#include <iostream>
 
 SplashState::SplashState(StateStack& stack, Context context) :
 State(stack, context),
@@ -38,7 +40,10 @@ aLeft(false),
 sDown(false),
 dRight(false),
 gen((unsigned int)std::time(NULL)),
-cFired(false)
+cFired(false),
+marker(sf::Vector2f((float)GRID_SQUARE_SIZE,(float)GRID_SQUARE_SIZE)),
+timer(4.0f),
+pTime(4.0f)
 {
     // resources
     tset.insert(Textures::WALL);
@@ -123,6 +128,8 @@ cFired(false)
     // other initializations
     fieldBG.setFillColor(sf::Color(127,127,127));
     fieldBG.setPosition(120.0f, 0.0f);
+
+    marker.setFillColor(sf::Color(255,0,0,127));
 }
 
 void SplashState::draw()
@@ -130,11 +137,34 @@ void SplashState::draw()
     getContext().window->draw(fieldBG);
 
     getContext().ecEngine->draw(getContext());
+
+    for(auto iter = path.begin(); iter != path.end(); ++iter)
+    {
+        marker.setPosition((float)(iter->x * GRID_SQUARE_SIZE) + 120.0f, (float)(iter->y * GRID_SQUARE_SIZE));
+        getContext().window->draw(marker);
+    }
 }
 
 bool SplashState::update(sf::Time dt)
 {
     getContext().ecEngine->update(dt, getContext());
+
+    timer -= dt.asSeconds();
+    if(timer <= 0.0f)
+    {
+        timer = pTime;
+        std::list<std::type_index> filter;
+        filter.push_back(std::type_index(typeid(cWall)));
+        filter.push_back(std::type_index(typeid(cBreakable)));
+        filter.push_back(std::type_index(typeid(cBalloon)));
+        pf.invalidateValidGrid(filter);
+        cPosition pos;
+        pos.x = 120.0f;
+        pos.y = 0.0f;
+        path = pf.getPathToDestination(pos, sf::Vector2f(8.0f * (float)GRID_SQUARE_SIZE + 120.0f, 8.0f * (float)GRID_SQUARE_SIZE), *getContext().ecEngine);
+        if(path.empty())
+            std::cout << "Got empty path\n";
+    }
 
     return false;
 }
