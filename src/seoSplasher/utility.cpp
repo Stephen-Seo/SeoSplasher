@@ -222,25 +222,51 @@ void Utility::createBalloon(const float& x, const float& y, cLiving& living, con
     balloon->addComponent(std::type_index(typeid(cBalloon)), std::unique_ptr<Component>(cballoon));
 
     cSprite* sprite = new cSprite;
-    if(isSuper)
+    if(living.rControlUpgrade == 0)
     {
-        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SUPER_BALLOON_0));
+        if(isSuper)
+        {
+            sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SUPER_BALLOON_0));
 
-        cAnimated* animated = new cAnimated;
-        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_0));
-        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_1));
-        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_2));
-        balloon->addComponent(std::type_index(typeid(cAnimated)), std::unique_ptr<Component>(animated));
+            cAnimated* animated = new cAnimated;
+            animated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_0));
+            animated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_1));
+            animated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_2));
+            balloon->addComponent(std::type_index(typeid(cAnimated)), std::unique_ptr<Component>(animated));
+        }
+        else
+        {
+            sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::BALLOON_0));
+
+            cAnimated* animated = new cAnimated;
+            animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_0));
+            animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_1));
+            animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_2));
+            balloon->addComponent(std::type_index(typeid(cAnimated)), std::unique_ptr<Component>(animated));
+        }
     }
     else
     {
-        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::BALLOON_0));
+        if(isSuper)
+        {
+            sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_0));
 
-        cAnimated* animated = new cAnimated;
-        animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_0));
-        animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_1));
-        animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_2));
-        balloon->addComponent(std::type_index(typeid(cAnimated)), std::unique_ptr<Component>(animated));
+            cAnimated* animated = new cAnimated;
+            animated->textures.push_back(&context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_0));
+            animated->textures.push_back(&context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_1));
+            animated->textures.push_back(&context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_2));
+            balloon->addComponent(std::type_index(typeid(cAnimated)), std::unique_ptr<Component>(animated));
+        }
+        else
+        {
+            sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::C_BALLOON_0));
+
+            cAnimated* animated = new cAnimated;
+            animated->textures.push_back(&context.resourceManager->getTexture(Textures::C_BALLOON_0));
+            animated->textures.push_back(&context.resourceManager->getTexture(Textures::C_BALLOON_1));
+            animated->textures.push_back(&context.resourceManager->getTexture(Textures::C_BALLOON_2));
+            balloon->addComponent(std::type_index(typeid(cAnimated)), std::unique_ptr<Component>(animated));
+        }
     }
     balloon->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
 

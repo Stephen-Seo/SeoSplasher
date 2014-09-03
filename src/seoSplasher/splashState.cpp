@@ -50,6 +50,12 @@ cFired(false)
     tset.insert(Textures::SUPER_BALLOON_0);
     tset.insert(Textures::SUPER_BALLOON_1);
     tset.insert(Textures::SUPER_BALLOON_2);
+    tset.insert(Textures::C_BALLOON_0);
+    tset.insert(Textures::C_BALLOON_1);
+    tset.insert(Textures::C_BALLOON_2);
+    tset.insert(Textures::C_SUPER_BALLOON_0);
+    tset.insert(Textures::C_SUPER_BALLOON_1);
+    tset.insert(Textures::C_SUPER_BALLOON_2);
     tset.insert(Textures::SPLOSION_PLUS);
     tset.insert(Textures::SPLOSION_VERT);
     tset.insert(Textures::SPLOSION_HORIZ);

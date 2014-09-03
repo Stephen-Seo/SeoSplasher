@@ -58,6 +58,8 @@ void nDeath::update(sf::Time dt, Context context)
             powerup.powerup = cPowerup::BALLOON_UP;
             for(int i = living->balloonUp; i > 0; --i)
             {
+                if(validPoints.empty())
+                    break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
                 for(int j = dist(gen); j > 0; --j)
@@ -72,6 +74,8 @@ void nDeath::update(sf::Time dt, Context context)
             powerup.powerup = cPowerup::RANGE_UP;
             for(int i = living->rangeUp; i > 0; --i)
             {
+                if(validPoints.empty())
+                    break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
                 for(int j = dist(gen); j > 0; --j)
@@ -86,6 +90,8 @@ void nDeath::update(sf::Time dt, Context context)
             powerup.powerup = cPowerup::SPEED_UP;
             for(int i = living->speedUp; i > 0; --i)
             {
+                if(validPoints.empty())
+                    break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
                 for(int j = dist(gen); j > 0; --j)
@@ -100,6 +106,8 @@ void nDeath::update(sf::Time dt, Context context)
             powerup.powerup = cPowerup::KICK_UPGRADE;
             for(int i = living->kickUpgrade; i > 0; --i)
             {
+                if(validPoints.empty())
+                    break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
                 for(int j = dist(gen); j > 0; --j)
@@ -114,6 +122,8 @@ void nDeath::update(sf::Time dt, Context context)
             powerup.powerup = cPowerup::RCONTROL_UPGRADE;
             for(int i = living->rControlUpgrade; i > 0; --i)
             {
+                if(validPoints.empty())
+                    break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
                 for(int j = dist(gen); j > 0; --j)
@@ -128,6 +138,8 @@ void nDeath::update(sf::Time dt, Context context)
             powerup.powerup = cPowerup::SBALLOON_UPGRADE;
             for(int i = living->sBalloonUpgrade; i > 0; --i)
             {
+                if(validPoints.empty())
+                    break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
                 for(int j = dist(gen); j > 0; --j)
@@ -142,6 +154,8 @@ void nDeath::update(sf::Time dt, Context context)
             powerup.powerup = cPowerup::PIERCE_UPGRADE;
             for(int i = living->pierceUpgrade; i > 0; --i)
             {
+                if(validPoints.empty())
+                    break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
                 for(int j = dist(gen); j > 0; --j)
@@ -156,6 +170,8 @@ void nDeath::update(sf::Time dt, Context context)
             powerup.powerup = cPowerup::SPREAD_UPGRADE;
             for(int i = living->spreadUpgrade; i > 0; --i)
             {
+                if(validPoints.empty())
+                    break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
                 for(int j = dist(gen); j > 0; --j)
@@ -170,6 +186,8 @@ void nDeath::update(sf::Time dt, Context context)
             powerup.powerup = cPowerup::GHOST_UPGRADE;
             for(int i = living->ghostUpgrade; i > 0; --i)
             {
+                if(validPoints.empty())
+                    break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
                 for(int j = dist(gen); j > 0; --j)
