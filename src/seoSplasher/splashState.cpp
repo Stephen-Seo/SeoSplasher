@@ -348,6 +348,7 @@ void SplashState::initBreakables()
             --r;
         }
         v = *iter;
+        validPoints.erase(iter);
 
         addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::BALLOON_UP);
     }
@@ -362,6 +363,7 @@ void SplashState::initBreakables()
             --r;
         }
         v = *iter;
+        validPoints.erase(iter);
 
         addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::RANGE_UP);
     }
@@ -376,6 +378,7 @@ void SplashState::initBreakables()
             --r;
         }
         v = *iter;
+        validPoints.erase(iter);
 
         addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::SPEED_UP);
     }
@@ -390,6 +393,7 @@ void SplashState::initBreakables()
             --r;
         }
         v = *iter;
+        validPoints.erase(iter);
 
         addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::KICK_UPGRADE);
     }
@@ -404,6 +408,7 @@ void SplashState::initBreakables()
             --r;
         }
         v = *iter;
+        validPoints.erase(iter);
 
         addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::RCONTROL_UPGRADE);
     }
@@ -418,6 +423,7 @@ void SplashState::initBreakables()
             --r;
         }
         v = *iter;
+        validPoints.erase(iter);
 
         addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::SBALLOON_UPGRADE);
     }
@@ -432,6 +438,7 @@ void SplashState::initBreakables()
             --r;
         }
         v = *iter;
+        validPoints.erase(iter);
 
         addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::PIERCE_UPGRADE);
     }
@@ -446,6 +453,7 @@ void SplashState::initBreakables()
             --r;
         }
         v = *iter;
+        validPoints.erase(iter);
 
         addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::SPREAD_UPGRADE);
     }
@@ -460,6 +468,7 @@ void SplashState::initBreakables()
             --r;
         }
         v = *iter;
+        validPoints.erase(iter);
 
         addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE), cPowerup::GHOST_UPGRADE);
     }
@@ -474,6 +483,7 @@ void SplashState::initBreakables()
             --r;
         }
         v = *iter;
+        validPoints.erase(iter);
 
         addBreakable(GRID_OFFSET_X + (float)(v.x * GRID_SQUARE_SIZE), GRID_OFFSET_Y + (float)(v.y * GRID_SQUARE_SIZE));
     }
