@@ -5,6 +5,7 @@
 #include "../ec/component.hpp"
 
 struct cPickup : Component
-{};
+{
+};
 
 #endif
