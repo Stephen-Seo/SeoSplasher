@@ -16,6 +16,8 @@
 #include "../resourceManager.hpp"
 #include "cDamage.hpp"
 #include "cAnimated.hpp"
+#include "cPickup.hpp"
+#include "cPowerup.hpp"
 
 HitInfo Utility::collideAll(const float& x, const float& y, Engine& engine)
 {
@@ -161,7 +163,7 @@ bool Utility::collide(const float& xOne, const float& yOne, const float& xTwo, c
             yOne + halfSquare < yTwo + (float)GRID_SQUARE_SIZE);
 }
 
-void Utility::createBalloon(const float& x, const float& y, cLiving& living, const Context& context, unsigned char ID)
+void Utility::createBalloon(const float& x, const float& y, cLiving& living, const Context& context, unsigned char ID, bool* fired)
 {
     if(living.balloonsInPlay >= DEFAULT_BALLOONS + living.balloonUp)
         return;
@@ -225,7 +227,9 @@ void Utility::createBalloon(const float& x, const float& y, cLiving& living, con
 
     if(living.rControlUpgrade > 0)
     {
-        balloon->addComponent(std::type_index(typeid(cControl)), std::unique_ptr<Component>(new cControl));
+        cControl* ccontrol = new cControl;
+        ccontrol->fired = fired;
+        balloon->addComponent(std::type_index(typeid(cControl)), std::unique_ptr<Component>(ccontrol));
     }
     else
     {
@@ -329,4 +333,92 @@ sf::Vector2f Utility::alignToGrid(const float& x, const float& y)
     v.y = (float)((int)((y - (float)GRID_OFFSET_Y) / 32.0f + 0.5f)) * 32.0f + (float)GRID_OFFSET_Y;
 
     return v;
+}
+
+void Utility::createPowerup(const float& x, const float& y, cPowerup& powerup, const Context& context)
+{
+    if(powerup.powerup == cPowerup::NONE)
+        return;
+
+    Entity* epowerup = new Entity;
+
+    cPosition* pos = new cPosition;
+    pos->x = x;
+    pos->y = y;
+    pos->rot = 0.0f;
+    epowerup->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
+
+    cPowerup* cpowerup = new cPowerup;
+    cpowerup->powerup = powerup.powerup;
+    epowerup->addComponent(std::type_index(typeid(cPowerup)), std::unique_ptr<Component>(cpowerup));
+
+    cSprite* sprite = new cSprite;
+    cAnimated* animated = new cAnimated;
+
+    animated->frameTime = 0.3f;
+    switch(powerup.powerup)
+    {
+    case cPowerup::BALLOON_UP:
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::BALLOON_UP_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_UP_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_UP_1));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_UP_2));
+        break;
+    case cPowerup::RANGE_UP:
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::RANGE_UP_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::RANGE_UP_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::RANGE_UP_1));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::RANGE_UP_2));
+        break;
+    case cPowerup::SPEED_UP:
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPEED_UP_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SPEED_UP_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SPEED_UP_1));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SPEED_UP_2));
+        break;
+    case cPowerup::KICK_UPGRADE:
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::KICK_UPGRADE_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::KICK_UPGRADE_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::KICK_UPGRADE_1));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::KICK_UPGRADE_2));
+        break;
+    case cPowerup::RCONTROL_UPGRADE:
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::RCONTROL_UPGRADE_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::RCONTROL_UPGRADE_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::RCONTROL_UPGRADE_1));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::RCONTROL_UPGRADE_2));
+        break;
+    case cPowerup::SBALLOON_UPGRADE:
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SBALLOON_UPGRADE_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SBALLOON_UPGRADE_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SBALLOON_UPGRADE_1));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SBALLOON_UPGRADE_2));
+        break;
+    case cPowerup::PIERCE_UPGRADE:
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::PIERCE_UPGRADE_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::PIERCE_UPGRADE_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::PIERCE_UPGRADE_1));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::PIERCE_UPGRADE_2));
+        break;
+    case cPowerup::SPREAD_UPGRADE:
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPREAD_UPGRADE_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SPREAD_UPGRADE_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SPREAD_UPGRADE_1));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::SPREAD_UPGRADE_2));
+        break;
+    case cPowerup::GHOST_UPGRADE:
+        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::GHOST_UPGRADE_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::GHOST_UPGRADE_0));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::GHOST_UPGRADE_1));
+        animated->textures.push_back(&context.resourceManager->getTexture(Textures::GHOST_UPGRADE_2));
+        break;
+    default:
+        break;
+    }
+    epowerup->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
+    epowerup->addComponent(std::type_index(typeid(cAnimated)), std::unique_ptr<Component>(animated));
+
+    epowerup->addComponent(std::type_index(typeid(cPickup)), std::unique_ptr<Component>(new cPickup));
+
+    context.ecEngine->addEntity(std::unique_ptr<Entity>(epowerup));
 }

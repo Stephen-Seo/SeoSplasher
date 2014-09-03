@@ -36,7 +36,8 @@ wUp(false),
 aLeft(false),
 sDown(false),
 dRight(false),
-gen((unsigned int)std::time(NULL))
+gen((unsigned int)std::time(NULL)),
+cFired(false)
 {
     // resources
     tset.insert(Textures::WALL);
@@ -152,6 +153,10 @@ bool SplashState::handleEvent(const sf::Event& event)
         dir = cPlayerControl::RIGHT;
         dRight = true;
     }
+    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::E)
+    {
+        cFired = true;
+    }
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
     {
         placeBalloon = true;
@@ -176,6 +181,10 @@ bool SplashState::handleEvent(const sf::Event& event)
     {
         dRight = false;
         checkReleasedInput();
+    }
+    else if(event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::E)
+    {
+        cFired = false;
     }
     return false;
 }
@@ -250,7 +259,7 @@ void SplashState::addCombatant(bool isPlayer)
     combatant->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
     if(isPlayer)
     {
-        combatant->addComponent(std::type_index(typeid(cPlayerControl)), std::unique_ptr<Component>(new cPlayerControl(&dir, &placeBalloon, &placeAction, &kick, &kickAction, ID)));
+        combatant->addComponent(std::type_index(typeid(cPlayerControl)), std::unique_ptr<Component>(new cPlayerControl(&dir, &placeBalloon, &placeAction, &kick, &kickAction, ID, &cFired)));
     }
     else
     {

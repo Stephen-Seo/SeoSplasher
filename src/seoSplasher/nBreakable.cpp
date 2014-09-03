@@ -8,6 +8,7 @@
 #include "cPowerup.hpp"
 #include "../context.hpp"
 #include "../ec/engine.hpp"
+#include "utility.hpp"
 
 nBreakable::nBreakable() :
 pos(nullptr),
@@ -44,6 +45,7 @@ void nBreakable::update(sf::Time dt, Context context)
 
     if(breakable->health == 0)
     {
+        Utility::createPowerup(pos->x, pos->y, *powerup, context);
         context.ecEngine->removeEntity(ID);
     }
 }

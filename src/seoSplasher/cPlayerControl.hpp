@@ -14,7 +14,7 @@ struct cPlayerControl : Component
         DOWN
     };
 
-    cPlayerControl(Direction* dir, bool* place, bool* placeAction, bool* kick, bool* kickAction, unsigned char ID);
+    cPlayerControl(Direction* dir, bool* place, bool* placeAction, bool* kick, bool* kickAction, unsigned char ID, bool* cFired);
 
     Direction* dir;
 
@@ -25,6 +25,8 @@ struct cPlayerControl : Component
 
     bool* kick;
     bool* kickAction;
+
+    bool* cFired;
 };
 
 #endif

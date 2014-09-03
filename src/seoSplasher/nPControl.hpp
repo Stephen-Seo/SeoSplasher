@@ -4,6 +4,9 @@
 
 #include "../ec/node.hpp"
 
+#include <list>
+#include <typeindex>
+
 struct cPlayerControl;
 struct cPosition;
 struct cVelocity;
@@ -11,6 +14,7 @@ struct cLiving;
 
 struct nPControl : Node
 {
+public:
     nPControl();
 
     cPlayerControl* control;
@@ -22,6 +26,8 @@ struct nPControl : Node
     std::unique_ptr<Node> getNewNode();
     void getCReferencesFromEntity(Entity& entity);
     void update(sf::Time dt, Context context);
+private:
+    static std::list<std::type_index> powerupFilter;
 };
 
 #endif

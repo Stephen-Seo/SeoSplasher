@@ -32,6 +32,8 @@ private:
 
     std::mt19937 gen;
 
+    bool cFired;
+
     void addWall(float x, float y);
     void addCombatant(bool isPlayer);
     void checkReleasedInput();

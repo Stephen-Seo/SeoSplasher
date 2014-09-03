@@ -1,21 +1,30 @@
 
 #include "nPControl.hpp"
 
-#include <typeindex>
-
 #include "../context.hpp"
 #include "cPlayerControl.hpp"
 #include "../ec/cPosition.hpp"
 #include "../ec/cVelocity.hpp"
 #include "cLiving.hpp"
 #include "utility.hpp"
+#include "cPowerup.hpp"
+#include "cPickup.hpp"
+#include "../ec/engine.hpp"
+
+std::list<std::type_index> nPControl::powerupFilter;
 
 nPControl::nPControl() :
 control(nullptr),
 pos(nullptr),
 vel(nullptr),
 living(nullptr)
-{}
+{
+    if(nPControl::powerupFilter.empty())
+    {
+        nPControl::powerupFilter.push_back(std::type_index(typeid(cPowerup)));
+        nPControl::powerupFilter.push_back(std::type_index(typeid(cPickup)));
+    }
+}
 
 bool nPControl::checkEntity(Entity& entity)
 {
@@ -73,6 +82,47 @@ void nPControl::update(sf::Time dt, Context context)
     if(*control->placeBalloon && !*control->placeAction)
     {
         *control->placeAction = true;
-        Utility::createBalloon(pos->x, pos->y, *living, context, control->ID);
+        Utility::createBalloon(pos->x, pos->y, *living, context, control->ID, control->cFired);
+    }
+
+    HitInfo powerinfo = Utility::collideAgainstComponentList(pos->x, pos->y, nPControl::powerupFilter, *context.ecEngine);
+    for(auto piter = powerinfo.hit.begin(); piter != powerinfo.hit.end(); ++piter)
+    {
+        cPowerup* powerup = static_cast<cPowerup*>((*piter)->getComponent(std::type_index(typeid(cPowerup))));
+
+        switch(powerup->powerup)
+        {
+        case cPowerup::BALLOON_UP:
+            ++(living->balloonUp);
+            break;
+        case cPowerup::RANGE_UP:
+            ++(living->rangeUp);
+            break;
+        case cPowerup::SPEED_UP:
+            ++(living->speedUp);
+            break;
+        case cPowerup::KICK_UPGRADE:
+            ++(living->kickUpgrade);
+            break;
+        case cPowerup::RCONTROL_UPGRADE:
+            ++(living->rControlUpgrade);
+            break;
+        case cPowerup::SBALLOON_UPGRADE:
+            ++(living->sBalloonUpgrade);
+            break;
+        case cPowerup::PIERCE_UPGRADE:
+            ++(living->pierceUpgrade);
+            break;
+        case cPowerup::SPREAD_UPGRADE:
+            ++(living->spreadUpgrade);
+            break;
+        case cPowerup::GHOST_UPGRADE:
+            ++(living->ghostUpgrade);
+            break;
+        default:
+            break;
+        }
+
+        context.ecEngine->removeEntity((*piter)->getID());
     }
 }
