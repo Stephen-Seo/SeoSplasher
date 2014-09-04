@@ -30,6 +30,7 @@ set(Game_Project_SOURCES
     seoSplasher/splashState.cpp
     seoSplasher/utility.cpp
     seoSplasher/AI/pathFinder.cpp
+    seoSplasher/AI/uai.cpp
     main.cpp)
 
 if(WIN32)

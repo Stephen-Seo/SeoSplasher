@@ -9,8 +9,6 @@
 #include "cPlayerControl.hpp"
 #include "cPowerup.hpp"
 
-#include "AI/pathFinder.hpp"
-
 class SplashState : public State
 {
 public:
@@ -35,12 +33,6 @@ private:
     std::mt19937 gen;
 
     bool cFired;
-
-    PathFinder pf;
-    sf::RectangleShape marker;
-    std::list<sf::Vector2i> path;
-    float timer;
-    float pTime;
 
     void addWall(float x, float y);
     void addCombatant(bool isPlayer);

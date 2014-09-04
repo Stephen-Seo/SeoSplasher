@@ -8,6 +8,11 @@
 
 #include "../../ec/cPosition.hpp"
 #include "../../ec/engine.hpp"
+#include "../cLiving.hpp"
+#include "../cBalloon.hpp"
+#include "../cBreakable.hpp"
+#include "../cPickup.hpp"
+#include "../cWall.hpp"
 
 PElement::PElement() :
 c(0),
@@ -29,17 +34,35 @@ int PF::heuristic(int xOne, int yOne, int xTwo, int yTwo)
     return std::abs(xOne - xTwo) + std::abs(yOne - yTwo);
 }
 
-int PathFinder::gridSize = GRID_WIDTH * GRID_HEIGHT;
-
 PathFinder::PathFinder() :
 dirtyFlag(true)
 {
 }
 
-std::list<sf::Vector2i> PathFinder::getValidDestinations(const cPosition& pos, Engine& engine)
+std::list<sf::Vector2i> PathFinder::getValidDestinations(const cPosition& pos, Engine& engine, std::list<std::type_index> obstacles)
 {
     if(dirtyFlag)
         revalidateGrid(engine);
+
+    unsigned char mask = 0;
+    if(obstacles.empty())
+    {
+        mask = 0xFF;
+    }
+    else
+    {
+        for(auto iter = obstacles.begin(); iter != obstacles.end(); ++iter)
+        {
+            if(*iter == std::type_index(typeid(cLiving)))
+                mask |= 0x1;
+            if(*iter == std::type_index(typeid(cBalloon)))
+                mask |= 0x2;
+            if(*iter == std::type_index(typeid(cBreakable)))
+                mask |= 0x4;
+            if(*iter == std::type_index(typeid(cWall)))
+                mask |= 0x8;
+        }
+    }
 
     std::list<sf::Vector2i> validDestinations;
 
@@ -59,23 +82,43 @@ std::list<sf::Vector2i> PathFinder::getValidDestinations(const cPosition& pos, E
         if(n != x + y * GRID_WIDTH)
             validDestinations.push_back(sf::Vector2i(n % GRID_WIDTH, n / GRID_WIDTH));
 
-        if(n + 1 < PathFinder::gridSize && n % GRID_WIDTH != GRID_WIDTH - 1 && visited.find(n + 1) != visited.end() && validGrid[n + 1])
+        if(n + 1 < GRID_TOTAL && n % GRID_WIDTH != GRID_WIDTH - 1 && visited.find(n + 1) != visited.end() && (validGrid[n + 1] & mask) == 0)
             next.push(n + 1);
-        if(n - 1 >= 0 && n % GRID_WIDTH != 0 && visited.find(n - 1) != visited.end() && validGrid[n - 1])
+        if(n - 1 >= 0 && n % GRID_WIDTH != 0 && visited.find(n - 1) != visited.end() && (validGrid[n - 1] & mask) == 0)
             next.push(n - 1);
-        if(n + GRID_WIDTH < PathFinder::gridSize && visited.find(n + GRID_WIDTH) != visited.end() && validGrid[n + GRID_WIDTH])
+        if(n + GRID_WIDTH < GRID_TOTAL && visited.find(n + GRID_WIDTH) != visited.end() && (validGrid[n + GRID_WIDTH] & mask) == 0)
             next.push(n + GRID_WIDTH);
-        if(n - GRID_WIDTH >= 0 && visited.find(n - GRID_WIDTH) != visited.end() && validGrid[n - GRID_WIDTH])
+        if(n - GRID_WIDTH >= 0 && visited.find(n - GRID_WIDTH) != visited.end() && (validGrid[n - GRID_WIDTH] & mask) == 0)
             next.push(n - GRID_WIDTH);
     }
 
     return validDestinations;
 }
 
-std::list<sf::Vector2i> PathFinder::getPathToDestination(const cPosition& pos, const sf::Vector2f& destination, Engine& engine)
+std::list<sf::Vector2i> PathFinder::getPathToDestination(const cPosition& pos, const sf::Vector2f& destination, Engine& engine, std::list<std::type_index> obstacles)
 {
     if(dirtyFlag)
         revalidateGrid(engine);
+
+    unsigned char mask = 0;
+    if(obstacles.empty())
+    {
+        mask = 0xFF;
+    }
+    else
+    {
+        for(auto iter = obstacles.begin(); iter != obstacles.end(); ++iter)
+        {
+            if(*iter == std::type_index(typeid(cLiving)))
+                mask |= 0x1;
+            if(*iter == std::type_index(typeid(cBalloon)))
+                mask |= 0x2;
+            if(*iter == std::type_index(typeid(cBreakable)))
+                mask |= 0x4;
+            if(*iter == std::type_index(typeid(cWall)))
+                mask |= 0x8;
+        }
+    }
 
     int x = (pos.x - (float)GRID_OFFSET_X + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
     int y = (pos.y - (float)GRID_OFFSET_Y + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
@@ -97,22 +140,22 @@ std::list<sf::Vector2i> PathFinder::getPathToDestination(const cPosition& pos, c
         if(n == end)
             break;
 
-        if(n + 1 < PathFinder::gridSize && n % GRID_WIDTH != GRID_WIDTH - 1 && from.find(n + 1) == from.end() && validGrid[n + 1] && n + 1 != start)
+        if(n + 1 < GRID_TOTAL && n % GRID_WIDTH != GRID_WIDTH - 1 && from.find(n + 1) == from.end() && (validGrid[n + 1] & mask) == 0 && n + 1 != start)
         {
             next.push(PElement(n + 1, PF::heuristic(destX, destY, (n + 1) % GRID_WIDTH, (n + 1) / GRID_WIDTH)));
             from[n + 1] = n;
         }
-        if(n - 1 >= 0 && n % GRID_WIDTH != 0 && from.find(n - 1) == from.end() && validGrid[n - 1] && n - 1 != start)
+        if(n - 1 >= 0 && n % GRID_WIDTH != 0 && from.find(n - 1) == from.end() && (validGrid[n - 1] & mask) == 0 && n - 1 != start)
         {
             next.push(PElement(n - 1, PF::heuristic(destX, destY, (n - 1) % GRID_WIDTH, (n - 1) / GRID_WIDTH)));
             from[n - 1] = n;
         }
-        if(n + GRID_WIDTH < PathFinder::gridSize && from.find(n + GRID_WIDTH) == from.end() && validGrid[n + GRID_WIDTH] && n + GRID_WIDTH != start)
+        if(n + GRID_WIDTH < GRID_TOTAL && from.find(n + GRID_WIDTH) == from.end() && (validGrid[n + GRID_WIDTH] & mask) == 0 && n + GRID_WIDTH != start)
         {
             next.push(PElement(n + GRID_WIDTH, PF::heuristic(destX, destY, n % GRID_WIDTH, n / GRID_WIDTH + 1)));
             from[n + GRID_WIDTH] = n;
         }
-        if(n - GRID_WIDTH >= 0 && from.find(n - GRID_WIDTH) == from.end() && validGrid[n - GRID_WIDTH] && n - GRID_WIDTH != start)
+        if(n - GRID_WIDTH >= 0 && from.find(n - GRID_WIDTH) == from.end() && (validGrid[n - GRID_WIDTH] & mask) == 0 && n - GRID_WIDTH != start)
         {
             next.push(PElement(n - GRID_WIDTH, PF::heuristic(destX, destY, n % GRID_WIDTH, n / GRID_WIDTH - 1)));
             from[n - GRID_WIDTH] = n;
@@ -133,10 +176,30 @@ std::list<sf::Vector2i> PathFinder::getPathToDestination(const cPosition& pos, c
     return pathToDestination;
 }
 
-bool PathFinder::isValidDestination(const cPosition& pos, const sf::Vector2f& destination, Engine& engine)
+bool PathFinder::isValidDestination(const cPosition& pos, const sf::Vector2f& destination, Engine& engine, std::list<std::type_index> obstacles)
 {
     if(dirtyFlag)
         revalidateGrid(engine);
+
+    unsigned char mask = 0;
+    if(obstacles.empty())
+    {
+        mask = 0xFF;
+    }
+    else
+    {
+        for(auto iter = obstacles.begin(); iter != obstacles.end(); ++iter)
+        {
+            if(*iter == std::type_index(typeid(cLiving)))
+                mask |= 0x1;
+            if(*iter == std::type_index(typeid(cBalloon)))
+                mask |= 0x2;
+            if(*iter == std::type_index(typeid(cBreakable)))
+                mask |= 0x4;
+            if(*iter == std::type_index(typeid(cWall)))
+                mask |= 0x8;
+        }
+    }
 
     int x = (pos.x - (float)GRID_OFFSET_X + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
     int y = (pos.y - (float)GRID_OFFSET_Y + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
@@ -157,22 +220,22 @@ bool PathFinder::isValidDestination(const cPosition& pos, const sf::Vector2f& de
         if(n == end)
             return true;
 
-        if(n + 1 < PathFinder::gridSize && n % GRID_WIDTH != GRID_WIDTH - 1 && from.find(n + 1) == from.end() && validGrid[n + 1] && n + 1 != start)
+        if(n + 1 < GRID_TOTAL && n % GRID_WIDTH != GRID_WIDTH - 1 && from.find(n + 1) == from.end() && (validGrid[n + 1] & mask) == 0 && n + 1 != start)
         {
             next.push(PElement(n + 1, PF::heuristic(destX, destY, (n + 1) % GRID_WIDTH, (n + 1) / GRID_WIDTH)));
             from[n + 1] = n;
         }
-        if(n - 1 >= 0 && n % GRID_WIDTH != 0 && from.find(n - 1) == from.end() && validGrid[n - 1] && n - 1 != start)
+        if(n - 1 >= 0 && n % GRID_WIDTH != 0 && from.find(n - 1) == from.end() && (validGrid[n - 1] & mask) == 0 && n - 1 != start)
         {
             next.push(PElement(n - 1, PF::heuristic(destX, destY, (n - 1) % GRID_WIDTH, (n - 1) / GRID_WIDTH)));
             from[n - 1] = n;
         }
-        if(n + GRID_WIDTH < PathFinder::gridSize && from.find(n + GRID_WIDTH) == from.end() && validGrid[n + GRID_WIDTH] && n + GRID_WIDTH != start)
+        if(n + GRID_WIDTH < GRID_TOTAL && from.find(n + GRID_WIDTH) == from.end() && (validGrid[n + GRID_WIDTH] & mask) == 0 && n + GRID_WIDTH != start)
         {
             next.push(PElement(n + GRID_WIDTH, PF::heuristic(destX, destY, n % GRID_WIDTH, n / GRID_WIDTH + 1)));
             from[n + GRID_WIDTH] = n;
         }
-        if(n - GRID_WIDTH >= 0 && from.find(n - GRID_WIDTH) == from.end() && validGrid[n - GRID_WIDTH] && n - GRID_WIDTH != start)
+        if(n - GRID_WIDTH >= 0 && from.find(n - GRID_WIDTH) == from.end() && (validGrid[n - GRID_WIDTH] & mask) == 0 && n - GRID_WIDTH != start)
         {
             next.push(PElement(n - GRID_WIDTH, PF::heuristic(destX, destY, n % GRID_WIDTH, n / GRID_WIDTH - 1)));
             from[n - GRID_WIDTH] = n;
@@ -182,10 +245,17 @@ bool PathFinder::isValidDestination(const cPosition& pos, const sf::Vector2f& de
     return false;
 }
 
-void PathFinder::invalidateValidGrid(std::list<std::type_index> filter)
+void PathFinder::invalidateValidGrid()
 {
-    this->filter = filter;
     dirtyFlag = true;
+}
+
+const unsigned char* PathFinder::getValidGrid(Engine& engine)
+{
+    if(dirtyFlag)
+        revalidateGrid(engine);
+
+    return validGrid;
 }
 
 void PathFinder::revalidateGrid(Engine& engine)
@@ -194,7 +264,7 @@ void PathFinder::revalidateGrid(Engine& engine)
 
     for(int i = 0; i < GRID_WIDTH * GRID_HEIGHT; ++i)
     {
-        validGrid[i] = true;
+        validGrid[i] = 0;
     }
 
     int x,y;
@@ -203,21 +273,6 @@ void PathFinder::revalidateGrid(Engine& engine)
         if(iter->second->removed)
             continue;
 
-        if(!filter.empty())
-        {
-            bool skip = true;
-            for(auto fiter = filter.begin(); fiter != filter.end(); ++fiter)
-            {
-                if(iter->second->hasComponent(*fiter))
-                {
-                    skip = false;
-                    break;
-                }
-            }
-            if(skip)
-                continue;
-        }
-
         cPosition* pos = static_cast<cPosition*>(iter->second->getComponent(std::type_index(typeid(cPosition))));
         if(pos->x < (float)GRID_OFFSET_X || pos->y < (float)GRID_OFFSET_Y || pos->x >= (float)(GRID_OFFSET_X + GRID_WIDTH * GRID_SQUARE_SIZE) || pos->y >= (float)(GRID_OFFSET_Y + GRID_HEIGHT * GRID_SQUARE_SIZE))
         {
@@ -225,6 +280,17 @@ void PathFinder::revalidateGrid(Engine& engine)
         }
         x = (pos->x - (float)GRID_OFFSET_X + (float)(GRID_SQUARE_SIZE / 2))/GRID_SQUARE_SIZE;
         y = (pos->y - (float)GRID_OFFSET_Y + (float)(GRID_SQUARE_SIZE / 2))/GRID_SQUARE_SIZE;
-        validGrid[x + y * GRID_WIDTH] = false;
+        unsigned char value = 0;
+        if(iter->second->hasComponent(std::type_index(typeid(cLiving))))
+            value |= 0x1;
+        else if(iter->second->hasComponent(std::type_index(typeid(cBalloon))))
+            value |= 0x2;
+        else if(iter->second->hasComponent(std::type_index(typeid(cBreakable))))
+            value |= 0x4;
+        else if(iter->second->hasComponent(std::type_index(typeid(cPickup))))
+            value |= 0x8;
+        else if(iter->second->hasComponent(std::type_index(typeid(cWall))))
+            value |= 0x10;
+        validGrid[x + y * GRID_WIDTH] |= value;
     }
 }

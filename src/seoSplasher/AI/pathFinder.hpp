@@ -34,15 +34,23 @@ class PathFinder
 public:
     PathFinder();
 
-    std::list<sf::Vector2i> getValidDestinations(const cPosition& pos, Engine& engine);
-    std::list<sf::Vector2i> getPathToDestination(const cPosition& pos, const sf::Vector2f& destination, Engine& engine);
-    bool isValidDestination(const cPosition& pos, const sf::Vector2f& destination, Engine& engine);
-    void invalidateValidGrid(std::list<std::type_index> filter = std::list<std::type_index>());
+    std::list<sf::Vector2i> getValidDestinations(const cPosition& pos, Engine& engine, std::list<std::type_index> obstacles = std::list<std::type_index>());
+    std::list<sf::Vector2i> getPathToDestination(const cPosition& pos, const sf::Vector2f& destination, Engine& engine, std::list<std::type_index> obstacles = std::list<std::type_index>());
+    bool isValidDestination(const cPosition& pos, const sf::Vector2f& destination, Engine& engine, std::list<std::type_index> obstacles = std::list<std::type_index>());
+    void invalidateValidGrid();
+    const unsigned char* getValidGrid(Engine& engine);
 private:
-    bool validGrid[GRID_WIDTH * GRID_HEIGHT];
+    /**
+     * array of bitfields.
+     * 00000 - nothing
+     * 00001 - a player
+     * 00010 - balloon
+     * 00100 - breakable
+     * 01000 - powerup
+     * 10000 - wall
+     */
+    unsigned char validGrid[GRID_TOTAL];
     bool dirtyFlag;
-    static int gridSize;
-    std::list<std::type_index> filter;
 
     void revalidateGrid(Engine& engine);
 };
