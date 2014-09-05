@@ -5,6 +5,7 @@
 #include <vector>
 #include <queue>
 #include <memory>
+#include <functional>
 
 #include "system.hpp"
 
@@ -23,11 +24,13 @@ public:
 
     void update(sf::Time dt, Context context);
     void draw(Context context);
+    void registerRemoveCall(int eID, std::function<void()> function);
 private:
     std::vector<std::unique_ptr<System> > systems;
     std::vector<std::unique_ptr<System> > drawSystems;
     std::map<int, std::unique_ptr<Entity> > entityMap;
     std::queue<int> deadQueue;
+    std::map<int, std::queue<std::function<void()> > > rfMap;
 };
 
 #endif

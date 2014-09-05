@@ -55,7 +55,6 @@ void nBalloon::update(sf::Time dt, Context context)
 
     if(balloon->hit)
     {
-        Utility::createExplosion(pos->x, pos->y, *balloon, context, true, true);
         --(*balloon->balloonsInPlay);
         if(balloon->super)
             --(*balloon->sBalloonsInPlay);
@@ -65,7 +64,6 @@ void nBalloon::update(sf::Time dt, Context context)
     {
         if(*control->fired)
         {
-            Utility::createExplosion(pos->x, pos->y, *balloon, context, true, true);
             --(*balloon->balloonsInPlay);
             if(balloon->super)
                 --(*balloon->sBalloonsInPlay);
@@ -77,7 +75,6 @@ void nBalloon::update(sf::Time dt, Context context)
         timer->time -= dt.asSeconds();
         if(timer->time <= 0.0f)
         {
-            Utility::createExplosion(pos->x, pos->y, *balloon, context, true, true);
             --(*balloon->balloonsInPlay);
             if(balloon->super)
                 --(*balloon->sBalloonsInPlay);

@@ -10,6 +10,8 @@
 #include "cPowerup.hpp"
 #include "direction.hpp"
 
+struct cPathFinder;
+
 class SplashState : public State
 {
 public:
@@ -33,8 +35,12 @@ private:
 
     bool cFired;
 
+    cPathFinder* cpf;
+
     void addWall(float x, float y);
     void addCombatant(bool isPlayer);
+    void addPathFinder();
+
     void checkReleasedInput();
     void addBreakable(float x, float y, cPowerup::Powerup powerup = cPowerup::NONE);
     void initBreakables();

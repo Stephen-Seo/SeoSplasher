@@ -7,7 +7,6 @@
 #include <map>
 #include <list>
 #include <set>
-#include <functional>
 
 #include <SFML/System.hpp>
 
@@ -27,13 +26,10 @@ public:
     std::list<Component*> getAllComponents();
     bool hasComponent(std::type_index typeIndex);
     int getID();
-    void registerDestructorFunction(std::function<void()> function);
 private:
     static int gID;
     static std::set<int> IDsInUse;
     int ID;
-
-    std::list<std::function<void()> > destructorFunctions;
 
     std::map<std::type_index, std::unique_ptr<Component> > cMap;
 };

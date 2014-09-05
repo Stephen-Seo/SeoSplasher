@@ -19,6 +19,8 @@
 #include "cPickup.hpp"
 #include "cPowerup.hpp"
 #include "cWIndicator.hpp"
+#include "cPathFinderRef.hpp"
+#include "cPathFinder.hpp"
 
 HitInfo Utility::collideAll(const float& x, const float& y, Engine& engine)
 {
@@ -183,7 +185,7 @@ bool Utility::collide(const float& xOne, const float& yOne, const float& xTwo, c
             yOne + halfSquare < yTwo + (float)GRID_SQUARE_SIZE);
 }
 
-void Utility::createBalloon(const float& x, const float& y, cLiving& living, const Context& context, unsigned char ID, bool* fired)
+void Utility::createBalloon(const float& x, const float& y, cLiving& living, const Context& context, unsigned char ID, bool* fired, cPathFinderRef& pfRef)
 {
     if(living.balloonsInPlay >= DEFAULT_BALLOONS + living.balloonUp)
         return;
@@ -201,25 +203,127 @@ void Utility::createBalloon(const float& x, const float& y, cLiving& living, con
     pos->rot = 0.0f;
     balloon->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
 
+    int distance;
     cBalloon* cballoon = new cBalloon;
     cballoon->ID = ID;
-    cballoon->piercing = living.pierceUpgrade > 0;
-    cballoon->spreading = living.spreadUpgrade > 0;
-    cballoon->ghosting = living.ghostUpgrade > 0;
     if(living.sBalloonsInPlay < living.sBalloonUpgrade)
     {
         ++living.sBalloonsInPlay;
-        cballoon->distance = SUPER_RANGE;
+        distance = SUPER_RANGE;
         isSuper = true;
         cballoon->super = true;
     }
     else
     {
-        cballoon->distance = DEFAULT_RANGE + living.rangeUp;
+        distance = DEFAULT_RANGE + living.rangeUp;
         cballoon->super = false;
     }
     cballoon->balloonsInPlay = &living.balloonsInPlay;
     cballoon->sBalloonsInPlay = &living.sBalloonsInPlay;
+    // generate WIndicators
+    {
+        int x = (v.x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE;
+        int y = (v.y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE;
+        int xy = x + y * GRID_WIDTH;
+        if(pfRef.cpf->timer != PF_UPDATE_TIME)
+        {
+            pfRef.cpf->timer = PF_UPDATE_TIME;
+            pfRef.cpf->pf.invalidateValidGrid();
+        }
+        const unsigned char* grid = pfRef.cpf->pf.getValidGrid(*context.ecEngine);
+
+        cballoon->wIndicators.push_back(createWIndicator(v.x, v.y, Direction::PLUS, context, ID));
+        if(living.spreadUpgrade > 0)
+        {
+            std::set<int> visited;
+            std::queue<int> next;
+            next.push(xy);
+            int n, i, j;
+            while(!next.empty())
+            {
+                n = next.front();
+                next.pop();
+                visited.insert(n);
+
+                i = n % GRID_WIDTH;
+                j = n / GRID_WIDTH;
+
+                if(std::abs(x - i) + std::abs(y - j) >= distance)
+                    break;
+
+                if(visited.find(n - 1) == visited.end() && n % GRID_WIDTH != 0 && (living.ghostUpgrade > 0 || (grid[n - 1] & 0x10) == 0))
+                {
+                    cballoon->wIndicators.push_back(createWIndicator((float)(((n - 1) % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)(((n - 1) / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::PLUS, context, ID));
+                    if(living.pierceUpgrade > 0 || (grid[n - 1] & 0x4) == 0)
+                        next.push(n - 1);
+                }
+                if(visited.find(n + 1) == visited.end() && n % GRID_WIDTH != GRID_WIDTH - 1 && (living.ghostUpgrade > 0 || (grid[n + 1] & 0x10) == 0))
+                {
+                    cballoon->wIndicators.push_back(createWIndicator((float)(((n + 1) % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)(((n + 1) / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::PLUS, context, ID));
+                    if(living.pierceUpgrade > 0 || (grid[n + 1] & 0x4) == 0)
+                        next.push(n + 1);
+                }
+                if(visited.find(n - GRID_WIDTH) == visited.end() && n - GRID_WIDTH >= 0 && (living.ghostUpgrade > 0 || (grid[n - GRID_WIDTH] & 0x10) == 0))
+                {
+                    cballoon->wIndicators.push_back(createWIndicator((float)((n % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)((n / GRID_WIDTH - 1) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::PLUS, context, ID));
+                    if(living.pierceUpgrade > 0 || (grid[n - GRID_WIDTH] & 0x4) == 0)
+                        next.push(n - GRID_WIDTH);
+                }
+                if(visited.find(n + GRID_WIDTH) == visited.end() && n + GRID_WIDTH < GRID_TOTAL && (living.ghostUpgrade > 0 || (grid[n + GRID_WIDTH] & 0x10) == 0))
+                {
+                    cballoon->wIndicators.push_back(createWIndicator((float)((n % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)((n / GRID_WIDTH + 1) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::PLUS, context, ID));
+                    if(living.pierceUpgrade > 0 || (grid[n + GRID_WIDTH] & 0x4) == 0)
+                        next.push(n + GRID_WIDTH);
+                }
+            }
+        }
+        else
+        {
+            bool left = true;
+            bool right = true;
+            bool up = true;
+            bool down = true;
+            // check left/right/up/down
+            for(int k = 1; k <= distance; ++k)
+            {
+                if(left && (xy - k + 1) % GRID_WIDTH != 0 && (living.ghostUpgrade > 0 || (grid[xy - k] & 0x10) == 0))
+                {
+                    cballoon->wIndicators.push_back(createWIndicator((float)(((xy - k) % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)(((xy - k) / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::HORIZONTAL, context, ID));
+                    if((xy - k + 1) % GRID_WIDTH != 0 && living.pierceUpgrade == 0 && (grid[xy - k] & 0x4) != 0)
+                        left = false;
+                }
+                else
+                    left = false;
+
+                if(right && (xy + k - 1) % GRID_WIDTH != GRID_WIDTH - 1 && (living.ghostUpgrade > 0 || (grid[xy + k] & 0x10) == 0))
+                {
+                    cballoon->wIndicators.push_back(createWIndicator((float)(((xy + k) % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)(((xy + k) / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::HORIZONTAL, context, ID));
+                    if((xy + k - 1) % GRID_WIDTH != 0 && living.pierceUpgrade == 0 && (grid[xy + k] & 0x4) != 0)
+                        right = false;
+                }
+                else
+                    right = false;
+
+                if(up && xy - k * GRID_WIDTH >= 0 && (living.ghostUpgrade > 0 || (grid[xy - k * GRID_WIDTH] & 0x10) == 0))
+                {
+                    cballoon->wIndicators.push_back(createWIndicator((float)(((xy - k * GRID_WIDTH) % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)(((xy - k * GRID_WIDTH) / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::VERTICAL, context, ID));
+                    if(xy - k * GRID_WIDTH >= 0 && living.pierceUpgrade == 0 && (grid[xy - k * GRID_WIDTH] & 0x4) != 0)
+                        up = false;
+                }
+                else
+                    up = false;
+
+                if(down && xy + k * GRID_WIDTH < GRID_TOTAL && (living.ghostUpgrade > 0 || (grid[xy + k * GRID_WIDTH] & 0x10) == 0))
+                {
+                    cballoon->wIndicators.push_back(createWIndicator((float)(((xy + k * GRID_WIDTH) % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)(((xy + k * GRID_WIDTH) / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::VERTICAL, context, ID));
+                    if(xy + k * GRID_WIDTH < GRID_TOTAL && living.pierceUpgrade == 0 && (grid[xy + k * GRID_WIDTH] & 0x4) != 0)
+                        down = false;
+                }
+                else
+                    down = false;
+            }
+        }
+    }
     balloon->addComponent(std::type_index(typeid(cBalloon)), std::unique_ptr<Component>(cballoon));
 
     cSprite* sprite = new cSprite;
@@ -284,10 +388,16 @@ void Utility::createBalloon(const float& x, const float& y, cLiving& living, con
         balloon->addComponent(std::type_index(typeid(cTimer)), std::unique_ptr<Component>(timer));
     }
 
+    context.ecEngine->registerRemoveCall(balloon->getID(), [context, cballoon] () {
+        std::for_each(cballoon->wIndicators.begin(), cballoon->wIndicators.end(), [&context](int ID) {
+            context.ecEngine->removeEntity(ID);
+        });
+    });
+
     context.ecEngine->addEntity(std::unique_ptr<Entity>(balloon));
 }
 
-void Utility::createExplosion(const float& x, const float& y, cBalloon& balloon, const Context& context, bool horizontal, bool vertical)
+void Utility::createExplosion(const float& x, const float& y, Direction::Direction dir, const Context& context, unsigned char ID)
 {
     Entity* splosion = new Entity;
 
@@ -298,69 +408,22 @@ void Utility::createExplosion(const float& x, const float& y, cBalloon& balloon,
     splosion->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
 
     cDamage* damage = new cDamage;
-    damage->ID = balloon.ID;
-    damage->piercing = balloon.piercing;
-    damage->spreading = balloon.spreading;
-    damage->ghosting = balloon.ghosting;
-    damage->distance = balloon.distance;
-    damage->vertical = vertical;
-    damage->horizontal = horizontal;
+    damage->ID = ID;
     splosion->addComponent(std::type_index(typeid(cDamage)), std::unique_ptr<Component>(damage));
 
     cSprite* sprite = new cSprite;
-    if(vertical && horizontal)
+    switch(dir)
     {
+    default:
+    case Direction::PLUS:
         sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_PLUS));
-    }
-    else if(vertical)
-    {
-        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_VERT));
-    }
-    else
-    {
+        break;
+    case Direction::HORIZONTAL:
         sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_HORIZ));
-    }
-    splosion->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
-
-    cTimer* timer = new cTimer;
-    timer->time = SPLOSION_LIFETIME;
-    splosion->addComponent(std::type_index(typeid(cTimer)), std::unique_ptr<Component>(timer));
-
-    context.ecEngine->addEntity(std::unique_ptr<Entity>(splosion));
-}
-
-void Utility::createExplosion(const float& x, const float& y, cDamage& damage, const Context& context, bool horizontal, bool vertical)
-{
-    Entity* splosion = new Entity;
-
-    cPosition* pos = new cPosition;
-    pos->x = x;
-    pos->y = y;
-    pos->rot = 0.0f;
-    splosion->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
-
-    cDamage* cdamage = new cDamage;
-    cdamage->ID = damage.ID;
-    cdamage->piercing = damage.piercing;
-    cdamage->spreading = damage.spreading;
-    cdamage->ghosting = damage.ghosting;
-    cdamage->distance = damage.distance - 1;
-    cdamage->vertical = vertical;
-    cdamage->horizontal = horizontal;
-    splosion->addComponent(std::type_index(typeid(cDamage)), std::unique_ptr<Component>(cdamage));
-
-    cSprite* sprite = new cSprite;
-    if(horizontal && vertical)
-    {
-        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_PLUS));
-    }
-    else if(horizontal)
-    {
-        sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_HORIZ));
-    }
-    else
-    {
+        break;
+    case Direction::VERTICAL:
         sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_VERT));
+        break;
     }
     splosion->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
 
@@ -469,7 +532,7 @@ void Utility::createPowerup(const float& x, const float& y, cPowerup& powerup, c
     context.ecEngine->addEntity(std::unique_ptr<Entity>(epowerup));
 }
 
-int Utility::createWIndicator(const float& x, const float& y, Direction::Direction dir, const Context& context)
+int Utility::createWIndicator(const float& x, const float& y, Direction::Direction dir, const Context& context, unsigned char ID)
 {
     Entity* indicator = new Entity;
 
@@ -484,5 +547,10 @@ int Utility::createWIndicator(const float& x, const float& y, Direction::Directi
     indicator->addComponent(std::type_index(typeid(cWIndicator)), std::unique_ptr<Component>(windicator));
 
     context.ecEngine->addEntity(std::unique_ptr<Entity>(indicator));
+
+    context.ecEngine->registerRemoveCall(indicator->getID(), [x, y, dir, context, ID] () {
+        Utility::createExplosion(x, y, dir, context, ID);
+    });
+
     return indicator->getID();
 }

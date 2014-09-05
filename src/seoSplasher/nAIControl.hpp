@@ -8,6 +8,7 @@ struct cAIControl;
 struct cLiving;
 struct cPosition;
 struct cVelocity;
+struct cPathFinderRef;
 
 struct nAIControl : Node
 {
@@ -17,6 +18,7 @@ struct nAIControl : Node
     cLiving* living;
     cPosition* pos;
     cVelocity* vel;
+    cPathFinderRef* pfref;
 
     bool checkEntity(Entity& entity);
     std::unique_ptr<Node> getNewNode();

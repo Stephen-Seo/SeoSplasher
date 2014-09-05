@@ -11,6 +11,7 @@ struct cPlayerControl;
 struct cPosition;
 struct cVelocity;
 struct cLiving;
+struct cPathFinderRef;
 
 struct nPControl : Node
 {
@@ -21,6 +22,7 @@ public:
     cPosition* pos;
     cVelocity* vel;
     cLiving* living;
+    cPathFinderRef* pfref;
 
     bool checkEntity(Entity& entity);
     std::unique_ptr<Node> getNewNode();

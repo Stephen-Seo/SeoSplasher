@@ -22,6 +22,10 @@
 #include "gridInfo.hpp"
 #include "nBreakable.hpp"
 #include "nDeath.hpp"
+#include "cPathFinder.hpp"
+#include "cPathFinderRef.hpp"
+#include "nAIControl.hpp"
+#include "nPFUpdater.hpp"
 
 SplashState::SplashState(StateStack& stack, Context context) :
 State(stack, context),
@@ -36,7 +40,8 @@ wUp(false),
 aLeft(false),
 sDown(false),
 dRight(false),
-cFired(false)
+cFired(false),
+cpf(nullptr)
 {
     // seed random generator
     {
@@ -96,15 +101,19 @@ cFired(false)
 
     // add systems
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nPControl));
+    context.ecEngine->addSystem(std::unique_ptr<Node>(new nAIControl));
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nMove));
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nBalloon));
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nSplosion));
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nAnimated));
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nBreakable));
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nDeath));
+    context.ecEngine->addSystem(std::unique_ptr<Node>(new nPFUpdater));
     context.ecEngine->addDrawSystem(std::unique_ptr<Node>(new nDraw));
 
     // add entities
+    addPathFinder();
+
     for(int i = 0; i < 15; ++i)
     {
         addWall(88.0f, 32.0f * (float)i);
@@ -280,7 +289,19 @@ void SplashState::addCombatant(bool isPlayer)
         combatant->addComponent(std::type_index(typeid(cAIControl)), std::unique_ptr<Component>(control));
     }
 
+    combatant->addComponent(std::type_index(typeid(cPathFinderRef)), std::unique_ptr<Component>(new cPathFinderRef(cpf)));
+
     getContext().ecEngine->addEntity(std::unique_ptr<Entity>(combatant));
+}
+
+void SplashState::addPathFinder()
+{
+    Entity* pfHolder = new Entity;
+
+    cpf = new cPathFinder;
+    pfHolder->addComponent(std::type_index(typeid(cPathFinder)), std::unique_ptr<Component>(cpf));
+
+    getContext().ecEngine->addEntity(std::unique_ptr<Entity>(pfHolder));
 }
 
 void SplashState::checkReleasedInput()

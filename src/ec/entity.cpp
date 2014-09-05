@@ -2,7 +2,8 @@
 #include "entity.hpp"
 
 #include <utility>
-#include <algorithm>
+
+#include <iostream>
 
 int Entity::gID = 0;
 
@@ -21,14 +22,11 @@ removed(false)
 Entity::~Entity()
 {
     Entity::IDsInUse.erase(ID);
-    std::for_each(destructorFunctions.begin(), destructorFunctions.end(),
-        [] (std::function<void()>& function) {
-            function();
-        });
 }
 
 void Entity::addComponent(std::type_index typeIndex, std::unique_ptr<Component> component)
 {
+    std::cout << "  E(" << ID << ") added " << typeIndex.name() << '\n';
     cMap.insert(std::make_pair(typeIndex, std::move(component)));
 }
 
@@ -69,7 +67,3 @@ int Entity::getID()
     return ID;
 }
 
-void Entity::registerDestructorFunction(std::function<void()> function)
-{
-    destructorFunctions.push_back(function);
-}

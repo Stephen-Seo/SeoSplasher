@@ -16,6 +16,7 @@ struct Context;
 struct cBalloon;
 struct cDamage;
 struct cPowerup;
+struct cPathFinderRef;
 
 struct HitInfo
 {
@@ -31,11 +32,10 @@ namespace Utility
     bool collidesAgainstComponent(const float& x, const float& y, const std::type_index& type, Engine& engine);
     bool collide(const float& xOne, const float& yOne, const float& xTwo, const float& yTwo);
 
-    void createBalloon(const float& x, const float& y, cLiving& living, const Context& context, unsigned char ID, bool* fired);
-    void createExplosion(const float& x, const float& y, cBalloon& balloon, const Context& context, bool horizontal, bool vertical);
-    void createExplosion(const float& x, const float& y, cDamage& damage, const Context& context, bool horizontal, bool vertical);
+    void createBalloon(const float& x, const float& y, cLiving& living, const Context& context, unsigned char ID, bool* fired, cPathFinderRef& pfRef);
+    void createExplosion(const float& x, const float& y, Direction::Direction dir, const Context& context, unsigned char ID);
     void createPowerup(const float& x, const float& y, cPowerup& powerup, const Context& context);
-    int createWIndicator(const float& x, const float& y, Direction::Direction dir, const Context& context);
+    int createWIndicator(const float& x, const float& y, Direction::Direction dir, const Context& context, unsigned char ID);
 
     sf::Vector2f alignToGrid(const float& x, const float& y);
 };

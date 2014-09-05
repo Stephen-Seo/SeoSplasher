@@ -10,12 +10,14 @@
 #include "AI/pathFinder.hpp"
 #include "../context.hpp"
 #include "utility.hpp"
+#include "cPathFinderRef.hpp"
 
 nAIControl::nAIControl() :
 control(nullptr),
 living(nullptr),
 pos(nullptr),
-vel(nullptr)
+vel(nullptr),
+pfref(nullptr)
 {}
 
 bool nAIControl::checkEntity(Entity& entity)
@@ -23,7 +25,8 @@ bool nAIControl::checkEntity(Entity& entity)
     return entity.hasComponent(std::type_index(typeid(cAIControl))) &&
            entity.hasComponent(std::type_index(typeid(cLiving))) &&
            entity.hasComponent(std::type_index(typeid(cPosition))) &&
-           entity.hasComponent(std::type_index(typeid(cVelocity)));
+           entity.hasComponent(std::type_index(typeid(cVelocity))) &&
+           entity.hasComponent(std::type_index(typeid(cPathFinderRef)));
 }
 
 std::unique_ptr<Node> nAIControl::getNewNode()
@@ -37,6 +40,7 @@ void nAIControl::getCReferencesFromEntity(Entity& entity)
     living = static_cast<cLiving*>(entity.getComponent(std::type_index(typeid(cLiving))));
     pos = static_cast<cPosition*>(entity.getComponent(std::type_index(typeid(cPosition))));
     vel = static_cast<cVelocity*>(entity.getComponent(std::type_index(typeid(cVelocity))));
+    pfref = static_cast<cPathFinderRef*>(entity.getComponent(std::type_index(typeid(cPathFinderRef))));
     entityRemoved = &entity.removed;
 }
 
@@ -55,7 +59,7 @@ void nAIControl::update(sf::Time dt, Context context)
     switch(control->currentAction)
     {
     case AI::PLACE_BALLOON:
-        Utility::createBalloon(pos->x, pos->y, *living, context, control->ID, &control->fired);
+        Utility::createBalloon(pos->x, pos->y, *living, context, control->ID, &control->fired, *pfref);
         break;
     case AI::GET_POWERUP:
         break;

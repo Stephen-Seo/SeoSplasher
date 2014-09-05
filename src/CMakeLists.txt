@@ -18,6 +18,7 @@ set(Game_Project_SOURCES
     ec/engine.cpp
     ec/entity.cpp
     ec/system.cpp
+    seoSplasher/cPathFinderRef.cpp
     seoSplasher/cPlayerControl.cpp
     seoSplasher/nAIControl.cpp
     seoSplasher/nAnimated.cpp
@@ -27,6 +28,7 @@ set(Game_Project_SOURCES
     seoSplasher/nDraw.cpp
     seoSplasher/nMove.cpp
     seoSplasher/nPControl.cpp
+    seoSplasher/nPFUpdater.cpp
     seoSplasher/nSplosion.cpp
     seoSplasher/splashState.cpp
     seoSplasher/utility.cpp

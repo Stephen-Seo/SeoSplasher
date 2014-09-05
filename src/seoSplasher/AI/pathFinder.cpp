@@ -270,7 +270,7 @@ void PathFinder::revalidateGrid(Engine& engine)
     int x,y,xy;
     for(auto iter = engine.getEntityIterBegin(); iter != engine.getEntityIterEnd(); ++iter)
     {
-        if(iter->second->removed)
+        if(iter->second->removed || !iter->second->hasComponent(std::type_index(typeid(cPosition))))
             continue;
 
         cPosition* pos = static_cast<cPosition*>(iter->second->getComponent(std::type_index(typeid(cPosition))));

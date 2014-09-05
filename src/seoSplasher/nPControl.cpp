@@ -10,6 +10,7 @@
 #include "cPowerup.hpp"
 #include "cPickup.hpp"
 #include "../ec/engine.hpp"
+#include "cPathFinderRef.hpp"
 
 std::list<std::type_index> nPControl::powerupFilter;
 
@@ -17,7 +18,8 @@ nPControl::nPControl() :
 control(nullptr),
 pos(nullptr),
 vel(nullptr),
-living(nullptr)
+living(nullptr),
+pfref(nullptr)
 {
     if(nPControl::powerupFilter.empty())
     {
@@ -31,7 +33,8 @@ bool nPControl::checkEntity(Entity& entity)
     return entity.hasComponent(std::type_index(typeid(cPlayerControl))) &&
            entity.hasComponent(std::type_index(typeid(cPosition))) &&
            entity.hasComponent(std::type_index(typeid(cVelocity))) &&
-           entity.hasComponent(std::type_index(typeid(cLiving)));
+           entity.hasComponent(std::type_index(typeid(cLiving))) &&
+           entity.hasComponent(std::type_index(typeid(cPathFinderRef)));
 }
 
 std::unique_ptr<Node> nPControl::getNewNode()
@@ -45,6 +48,7 @@ void nPControl::getCReferencesFromEntity(Entity& entity)
     pos = static_cast<cPosition*>(entity.getComponent(std::type_index(typeid(cPosition))));
     vel = static_cast<cVelocity*>(entity.getComponent(std::type_index(typeid(cVelocity))));
     living = static_cast<cLiving*>(entity.getComponent(std::type_index(typeid(cLiving))));
+    pfref = static_cast<cPathFinderRef*>(entity.getComponent(std::type_index(typeid(cPathFinderRef))));
 
     entityRemoved = &entity.removed;
 }
@@ -82,7 +86,7 @@ void nPControl::update(sf::Time dt, Context context)
     if(*control->placeBalloon && !*control->placeAction)
     {
         *control->placeAction = true;
-        Utility::createBalloon(pos->x, pos->y, *living, context, control->ID, control->cFired);
+        Utility::createBalloon(pos->x, pos->y, *living, context, control->ID, control->cFired, *pfref);
     }
 
     HitInfo powerinfo = Utility::collideAgainstComponentList(pos->x, pos->y, nPControl::powerupFilter, *context.ecEngine);

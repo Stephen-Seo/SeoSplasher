@@ -9,6 +9,8 @@
 struct cWIndicator : Component
 {
     Direction::Direction dir;
+
+    unsigned char ID;
 };
 
 #endif

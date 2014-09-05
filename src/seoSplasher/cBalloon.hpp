@@ -9,10 +9,6 @@
 struct cBalloon : Component
 {
     unsigned char ID;
-    bool piercing = false;
-    bool spreading = false;
-    bool ghosting = false;
-    unsigned char distance;
     bool super = false;
     bool hit = false;
 
