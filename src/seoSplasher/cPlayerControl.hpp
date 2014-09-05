@@ -4,19 +4,13 @@
 
 #include "../ec/component.hpp"
 
+#include "direction.hpp"
+
 struct cPlayerControl : Component
 {
-    enum Direction {
-        NONE,
-        RIGHT,
-        LEFT,
-        UP,
-        DOWN
-    };
+    cPlayerControl(Direction::Direction* dir, bool* place, bool* placeAction, bool* kick, bool* kickAction, unsigned char ID, bool* cFired);
 
-    cPlayerControl(Direction* dir, bool* place, bool* placeAction, bool* kick, bool* kickAction, unsigned char ID, bool* cFired);
-
-    Direction* dir;
+    Direction::Direction* dir;
 
     unsigned char ID;
 

@@ -262,12 +262,12 @@ void PathFinder::revalidateGrid(Engine& engine)
 {
     dirtyFlag = false;
 
-    for(int i = 0; i < GRID_WIDTH * GRID_HEIGHT; ++i)
+    for(int i = 0; i <= GRID_TOTAL; ++i)
     {
         validGrid[i] = 0;
     }
 
-    int x,y;
+    int x,y,xy;
     for(auto iter = engine.getEntityIterBegin(); iter != engine.getEntityIterEnd(); ++iter)
     {
         if(iter->second->removed)
@@ -280,17 +280,25 @@ void PathFinder::revalidateGrid(Engine& engine)
         }
         x = (pos->x - (float)GRID_OFFSET_X + (float)(GRID_SQUARE_SIZE / 2))/GRID_SQUARE_SIZE;
         y = (pos->y - (float)GRID_OFFSET_Y + (float)(GRID_SQUARE_SIZE / 2))/GRID_SQUARE_SIZE;
-        unsigned char value = 0;
+        xy = x + y * GRID_WIDTH;
         if(iter->second->hasComponent(std::type_index(typeid(cLiving))))
-            value |= 0x1;
+        {
+            validGrid[xy] |= 0x1;
+            validGrid[GRID_TOTAL] |= 0x1;
+        }
         else if(iter->second->hasComponent(std::type_index(typeid(cBalloon))))
-            value |= 0x2;
+            validGrid[xy] |= 0x2;
         else if(iter->second->hasComponent(std::type_index(typeid(cBreakable))))
-            value |= 0x4;
+        {
+            validGrid[xy] |= 0x4;
+            validGrid[GRID_TOTAL] |= 0x2;
+        }
         else if(iter->second->hasComponent(std::type_index(typeid(cPickup))))
-            value |= 0x8;
+        {
+            validGrid[xy] |= 0x8;
+            validGrid[GRID_TOTAL] |= 0x4;
+        }
         else if(iter->second->hasComponent(std::type_index(typeid(cWall))))
-            value |= 0x10;
-        validGrid[x + y * GRID_WIDTH] |= value;
+            validGrid[xy] |= 0x10;
     }
 }

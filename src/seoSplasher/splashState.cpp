@@ -27,7 +27,7 @@ SplashState::SplashState(StateStack& stack, Context context) :
 State(stack, context),
 fieldBG(sf::Vector2f(480.0f,480.0f)),
 IDcounter(0),
-dir(cPlayerControl::NONE),
+dir(Direction::NONE),
 placeBalloon(false),
 placeAction(false),
 kick(false),
@@ -36,9 +36,14 @@ wUp(false),
 aLeft(false),
 sDown(false),
 dRight(false),
-gen((unsigned int)std::time(NULL)),
 cFired(false)
 {
+    // seed random generator
+    {
+        std::seed_seq seq{std::random_device()(),(unsigned int)std::time(NULL)};
+        context.rGen->seed(seq);
+    }
+
     // resources
     tset.insert(Textures::WALL);
     tset.insert(Textures::BREAKABLE);
@@ -142,22 +147,22 @@ bool SplashState::handleEvent(const sf::Event& event)
 {
     if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::W)
     {
-        dir = cPlayerControl::UP;
+        dir = Direction::UP;
         wUp = true;
     }
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::A)
     {
-        dir = cPlayerControl::LEFT;
+        dir = Direction::LEFT;
         aLeft = true;
     }
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S)
     {
-        dir = cPlayerControl::DOWN;
+        dir = Direction::DOWN;
         sDown = true;
     }
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::D)
     {
-        dir = cPlayerControl::RIGHT;
+        dir = Direction::RIGHT;
         dRight = true;
     }
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::E)
@@ -284,24 +289,24 @@ void SplashState::checkReleasedInput()
     {
         if(wUp)
         {
-            dir = cPlayerControl::UP;
+            dir = Direction::UP;
         }
         else if(aLeft)
         {
-            dir = cPlayerControl::LEFT;
+            dir = Direction::LEFT;
         }
         else if(sDown)
         {
-            dir = cPlayerControl::DOWN;
+            dir = Direction::DOWN;
         }
         else if(dRight)
         {
-            dir = cPlayerControl::RIGHT;
+            dir = Direction::RIGHT;
         }
     }
     else
     {
-        dir = cPlayerControl::NONE;
+        dir = Direction::NONE;
     }
 }
 
@@ -350,7 +355,7 @@ void SplashState::initBreakables()
     {
         std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
         auto iter = validPoints.begin();
-        for(r = dist(gen); r != 0; ++iter)
+        for(r = dist(*getContext().rGen); r != 0; ++iter)
         {
             --r;
         }
@@ -365,7 +370,7 @@ void SplashState::initBreakables()
     {
         std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
         auto iter = validPoints.begin();
-        for(r = dist(gen); r != 0; ++iter)
+        for(r = dist(*getContext().rGen); r != 0; ++iter)
         {
             --r;
         }
@@ -380,7 +385,7 @@ void SplashState::initBreakables()
     {
         std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
         auto iter = validPoints.begin();
-        for(r = dist(gen); r != 0; ++iter)
+        for(r = dist(*getContext().rGen); r != 0; ++iter)
         {
             --r;
         }
@@ -395,7 +400,7 @@ void SplashState::initBreakables()
     {
         std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
         auto iter = validPoints.begin();
-        for(r = dist(gen); r != 0; ++iter)
+        for(r = dist(*getContext().rGen); r != 0; ++iter)
         {
             --r;
         }
@@ -410,7 +415,7 @@ void SplashState::initBreakables()
     {
         std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
         auto iter = validPoints.begin();
-        for(r = dist(gen); r != 0; ++iter)
+        for(r = dist(*getContext().rGen); r != 0; ++iter)
         {
             --r;
         }
@@ -425,7 +430,7 @@ void SplashState::initBreakables()
     {
         std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
         auto iter = validPoints.begin();
-        for(r = dist(gen); r != 0; ++iter)
+        for(r = dist(*getContext().rGen); r != 0; ++iter)
         {
             --r;
         }
@@ -440,7 +445,7 @@ void SplashState::initBreakables()
     {
         std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
         auto iter = validPoints.begin();
-        for(r = dist(gen); r != 0; ++iter)
+        for(r = dist(*getContext().rGen); r != 0; ++iter)
         {
             --r;
         }
@@ -455,7 +460,7 @@ void SplashState::initBreakables()
     {
         std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
         auto iter = validPoints.begin();
-        for(r = dist(gen); r != 0; ++iter)
+        for(r = dist(*getContext().rGen); r != 0; ++iter)
         {
             --r;
         }
@@ -470,7 +475,7 @@ void SplashState::initBreakables()
     {
         std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
         auto iter = validPoints.begin();
-        for(r = dist(gen); r != 0; ++iter)
+        for(r = dist(*getContext().rGen); r != 0; ++iter)
         {
             --r;
         }
@@ -485,7 +490,7 @@ void SplashState::initBreakables()
     {
         std::uniform_int_distribution<> dist(0,validPoints.size() - 1);
         auto iter = validPoints.begin();
-        for(r = dist(gen); r != 0; ++iter)
+        for(r = dist(*getContext().rGen); r != 0; ++iter)
         {
             --r;
         }

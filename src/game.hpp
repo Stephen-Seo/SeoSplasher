@@ -2,6 +2,8 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
+#include <random>
+
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
@@ -40,6 +42,8 @@ private:
     bool isQuitting;
 
     Engine ecEngine;
+
+    std::mt19937 rGen;
 };
 
 #endif

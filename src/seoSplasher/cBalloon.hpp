@@ -18,6 +18,8 @@ struct cBalloon : Component
 
     unsigned char* balloonsInPlay = nullptr;
     unsigned char* sBalloonsInPlay = nullptr;
+
+    std::list<int> wIndicators;
 };
 
 #endif

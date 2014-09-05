@@ -18,6 +18,7 @@
 #include "cAnimated.hpp"
 #include "cPickup.hpp"
 #include "cPowerup.hpp"
+#include "cWIndicator.hpp"
 
 HitInfo Utility::collideAll(const float& x, const float& y, Engine& engine)
 {
@@ -466,4 +467,22 @@ void Utility::createPowerup(const float& x, const float& y, cPowerup& powerup, c
     epowerup->addComponent(std::type_index(typeid(cPickup)), std::unique_ptr<Component>(new cPickup));
 
     context.ecEngine->addEntity(std::unique_ptr<Entity>(epowerup));
+}
+
+int Utility::createWIndicator(const float& x, const float& y, Direction::Direction dir, const Context& context)
+{
+    Entity* indicator = new Entity;
+
+    cPosition* pos = new cPosition;
+    pos->x = x;
+    pos->y = y;
+    pos->rot = 0.0f;
+    indicator->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
+
+    cWIndicator* windicator = new cWIndicator;
+    windicator->dir = dir;
+    indicator->addComponent(std::type_index(typeid(cWIndicator)), std::unique_ptr<Component>(windicator));
+
+    context.ecEngine->addEntity(std::unique_ptr<Entity>(indicator));
+    return indicator->getID();
 }

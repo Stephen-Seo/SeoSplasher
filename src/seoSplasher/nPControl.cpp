@@ -57,19 +57,19 @@ void nPControl::update(sf::Time dt, Context context)
     float speed = DEFAULT_SPEED + SPEED_UP_MULT * (float)living->speedUp;
     switch(*control->dir)
     {
-    case cPlayerControl::RIGHT:
+    case Direction::RIGHT:
         vel->x = speed;
         vel->y = 0.0f;
         break;
-    case cPlayerControl::LEFT:
+    case Direction::LEFT:
         vel->x = -speed;
         vel->y = 0.0f;
         break;
-    case cPlayerControl::UP:
+    case Direction::UP:
         vel->x = 0.0f;
         vel->y = -speed;
         break;
-    case cPlayerControl::DOWN:
+    case Direction::DOWN:
         vel->x = 0.0f;
         vel->y = speed;
         break;

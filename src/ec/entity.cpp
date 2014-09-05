@@ -2,12 +2,30 @@
 #include "entity.hpp"
 
 #include <utility>
+#include <algorithm>
 
 int Entity::gID = 0;
 
+std::set<int> Entity::IDsInUse;
+
 Entity::Entity() :
 removed(false)
-{}
+{
+    ID = Entity::gID++;
+    while(!Entity::IDsInUse.insert(ID).second)
+    {
+        ID = Entity::gID++;
+    }
+}
+
+Entity::~Entity()
+{
+    Entity::IDsInUse.erase(ID);
+    std::for_each(destructorFunctions.begin(), destructorFunctions.end(),
+        [] (std::function<void()>& function) {
+            function();
+        });
+}
 
 void Entity::addComponent(std::type_index typeIndex, std::unique_ptr<Component> component)
 {
@@ -49,4 +67,9 @@ bool Entity::hasComponent(std::type_index typeIndex)
 int Entity::getID()
 {
     return ID;
+}
+
+void Entity::registerDestructorFunction(std::function<void()> function)
+{
+    destructorFunctions.push_back(function);
 }

@@ -46,8 +46,12 @@ AI::Action UAI::determineAction(const cPosition& pos, const cLiving& living, Pat
 
     if(wildness > 1)
     {
-        std::uniform_int_distribution<> dist(0,wildness-1);
-        return picked[dist(gen)];
+        std::normal_distribution<> dist(0,wildness / 2);
+        int i = (int)(dist(gen) + 0.5);
+        if(i >= wildness)
+            return picked[wildness - 1];
+        else if(i >= 0)
+            return picked[i];
     }
 
     return picked[0];
@@ -72,19 +76,19 @@ int UAI::utility(AI::Action action, const cPosition& pos, const cLiving& living,
     switch(action)
     {
     case AI::PLACE_BALLOON:
-        return ((info & 0x4) != 0 ? 5 : 0) + ((info & 0x1) != 0 ? 7 : 0) - ((info & 0x8) != 0 ? 5 : 0) - ((info & 0x2) != 0 && !isRisky ? 5 : 0) - ((info & 0x10) != 0 ? 15 : 0);
+        return ((info & 0x4) != 0 ? 5 : 0) + ((info & 0x1) != 0 ? 7 : 0) - ((info & 0x8) != 0 ? 5 : 0) - ((info & 0x2) != 0 && !isRisky ? 5 : 0) - ((info & 0x80) != 0 ? 15 : 0);
     case AI::GET_POWERUP:
-        return ((info & 0x8) != 0 ? 10 : 0) - ((info & 0x2) != 0 ? 5 : 0) - ((info & 0x10) != 0 ? 5 : 0);
+        return ((info & 0x8) != 0 ? 10 : 0) - ((info & 0x2) != 0 ? 5 : 0) - ((info & 0x80) != 0 ? 5 : 0) + ((info & 0x40) != 0 ? 4 : 0);
     case AI::MOVE_TO_ENEMY:
-        return ((info & 0x1) != 0 ? -10 : 0) + ((info & 0x8) == 0 ? 5 : 0) - ((info & 0x2) != 0 ? 5 : 0) + (isRisky ? 7 : 0) - ((info & 0x40) == 0 ? 15 : 0);
+        return ((info & 0x1) != 0 ? -10 : 0) + ((info & 0x8) == 0 ? 5 : 0) - ((info & 0x2) != 0 ? 5 : 0) + (isRisky ? 7 : 0) - ((info & 0x10) == 0 ? 15 : 0);
     case AI::MOVE_TO_BREAKABLE:
-        return ((info & 0x4) != 0 ? 5 : 0) - ((info & 0x8) != 0 ? 5 : 0) - ((info & 0x2) != 0 ? 5 : 0) - ((info & 0x10) != 0 ? 5 : 0) + ((info & 0x20) != 0 ? 8 : 0);
+        return ((info & 0x4) != 0 ? 5 : 0) - ((info & 0x8) != 0 ? 5 : 0) - ((info & 0x2) != 0 ? 5 : 0) - ((info & 0x80) != 0 ? 5 : 0) + ((info & 0x20) != 0 ? 8 : 0);
     case AI::MOVE_TO_SAFETY:
-        return ((info & 0x2) != 0 ? 10 : 0) - (isRisky ? 4 : 0) + ((info & 0x10) != 0 ? 10 : 0);
+        return ((info & 0x2) != 0 ? 10 : 0) - (isRisky ? 4 : 0) + ((info & 0x80) != 0 ? 10 : 0);
     case AI::KICK_BALLOON:
         return ((info & 0x2) != 0 ? 7 : 0) + (isRisky ? 7 : 0) - (living.kickUpgrade == 0 ? 7 : -2);
     case AI::PANIC:
-        break;
+        return 1;
     default:
         break;
     }
@@ -99,7 +103,7 @@ unsigned char UAI::nearbyInfo(const cPosition& pos, PathFinder& pf, Engine& engi
     unsigned char info = 0;
 
     if((grid[xy] & 0x2) != 0)
-        info = 0x10;
+        info = 0x80;
 
     // check up
     for(int c = xy - GRID_WIDTH; c >= 0; c -= GRID_WIDTH)
@@ -153,39 +157,9 @@ unsigned char UAI::nearbyInfo(const cPosition& pos, PathFinder& pf, Engine& engi
         info |= (grid[c] & 0x8);
     }
 
-    if((info & 0x1) == 0)
-    {
-        // check if players exist
-        for(int i = 0; i < GRID_TOTAL; ++i)
-        {
-            if((grid[i] & 0x1) != 0)
-            {
-                info |= 0x40;
-                break;
-            }
-        }
-    }
-    else
-    {
-        info |= 0x40;
-    }
-
-    if((info & 0x4) == 0)
-    {
-        // check if breakables exist
-        for(int i = 0; i < GRID_TOTAL; ++i)
-        {
-            if((grid[i] & 0x4) != 0)
-            {
-                info |= 0x20;
-                break;
-            }
-        }
-    }
-    else
-    {
-        info |= 0x20;
-    }
+    info |= (grid[GRID_TOTAL] & 0x1) << 4;
+    info |= (grid[GRID_TOTAL] & 0x2) << 4;
+    info |= (grid[GRID_TOTAL] & 0x4) << 4;
 
     return info;
 }

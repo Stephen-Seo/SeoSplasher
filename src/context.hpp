@@ -2,6 +2,8 @@
 #ifndef CONTEXT_HPP
 #define CONTEXT_HPP
 
+#include <random>
+
 #include <SFML/Graphics.hpp>
 
 #include "resourceIdentifiers.hpp"
@@ -19,6 +21,7 @@ struct Context
             MusicPlayer& mPlayer,
             SoundPlayer& sPlayer,
             Engine& ecEngine,
+            std::mt19937& rGen,
             bool& isQuitting);
 
     sf::RenderWindow* window;
@@ -26,6 +29,7 @@ struct Context
     MusicPlayer* mPlayer;
     SoundPlayer* sPlayer;
     Engine* ecEngine;
+    std::mt19937* rGen;
     bool* isQuitting;
 };
 

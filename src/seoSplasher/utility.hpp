@@ -7,6 +7,8 @@
 
 #include <SFML/System.hpp>
 
+#include "direction.hpp"
+
 class Entity;
 class Engine;
 struct cLiving;
@@ -33,6 +35,7 @@ namespace Utility
     void createExplosion(const float& x, const float& y, cBalloon& balloon, const Context& context, bool horizontal, bool vertical);
     void createExplosion(const float& x, const float& y, cDamage& damage, const Context& context, bool horizontal, bool vertical);
     void createPowerup(const float& x, const float& y, cPowerup& powerup, const Context& context);
+    int createWIndicator(const float& x, const float& y, Direction::Direction dir, const Context& context);
 
     sf::Vector2f alignToGrid(const float& x, const float& y);
 };

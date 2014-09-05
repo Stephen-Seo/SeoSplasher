@@ -21,7 +21,8 @@ namespace AI
         MOVE_TO_SAFETY,
         KICK_BALLOON,
         PANIC,
-        SIZE
+        SIZE,
+        NONE
     };
 }
 
@@ -56,9 +57,10 @@ private:
      * 0000 0010 - a balloon in sight
      * 0000 0100 - a breakable in sight
      * 0000 1000 - a powerup in sight
-     * 0001 0000 - on balloon
-     * 0010 0000 - breakables exist
-     * 0100 0000 - players exist
+     * 0001 0000 - player exists
+     * 0010 0000 - breakable exists
+     * 0100 0000 - powerup exists
+     * 1000 0000 - on balloon
      */
     unsigned char nearbyInfo(const cPosition& pos, PathFinder& pf, Engine& engine);
 };

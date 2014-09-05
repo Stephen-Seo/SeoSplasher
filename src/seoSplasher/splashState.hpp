@@ -8,6 +8,7 @@
 
 #include "cPlayerControl.hpp"
 #include "cPowerup.hpp"
+#include "direction.hpp"
 
 class SplashState : public State
 {
@@ -22,15 +23,13 @@ private:
 
     unsigned char IDcounter;
 
-    cPlayerControl::Direction dir;
+    Direction::Direction dir;
     bool placeBalloon;
     bool placeAction;
     bool kick;
     bool kickAction;
 
     bool wUp, aLeft, sDown, dRight;
-
-    std::mt19937 gen;
 
     bool cFired;
 

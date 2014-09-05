@@ -42,14 +42,19 @@ public:
 private:
     /**
      * array of bitfields.
-     * 00000 - nothing
-     * 00001 - a player
-     * 00010 - balloon
-     * 00100 - breakable
-     * 01000 - powerup
-     * 10000 - wall
+     * 0000 0000 - nothing
+     * 0000 0001 - a player
+     * 0000 0010 - balloon
+     * 0000 0100 - breakable
+     * 0000 1000 - powerup
+     * 0001 0000 - wall
+     * At validGrid[GRID_TOTAL]:
+     * 0000 0000 - nothing
+     * 0000 0001 - player exists
+     * 0000 0010 - breakable exists
+     * 0000 0100 - powerup exists
      */
-    unsigned char validGrid[GRID_TOTAL];
+    unsigned char validGrid[GRID_TOTAL + 1];
     bool dirtyFlag;
 
     void revalidateGrid(Engine& engine);
