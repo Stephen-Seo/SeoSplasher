@@ -4,6 +4,8 @@
 
 #include "../ec/node.hpp"
 
+#include <map>
+
 struct cAIControl;
 struct cLiving;
 struct cPosition;
@@ -18,7 +20,8 @@ struct nAIControl : Node
     cLiving* living;
     cPosition* pos;
     cVelocity* vel;
-    cPathFinderRef* pfref;
+
+    std::map<int, int> paths;
 
     bool checkEntity(Entity& entity);
     std::unique_ptr<Node> getNewNode();

@@ -39,32 +39,10 @@ dirtyFlag(true)
 {
 }
 
-std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine& engine, std::list<std::type_index> obstacles)
+std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine& engine, unsigned char obstacles)
 {
     if(dirtyFlag)
         revalidateGrid(engine);
-
-    unsigned char mask = 0;
-    if(obstacles.empty())
-    {
-        mask = 0xFF;
-    }
-    else
-    {
-        for(auto iter = obstacles.begin(); iter != obstacles.end(); ++iter)
-        {
-            if(*iter == std::type_index(typeid(cLiving)))
-                mask |= 0x1;
-            if(*iter == std::type_index(typeid(cBalloon)))
-                mask |= 0x2;
-            if(*iter == std::type_index(typeid(cBreakable)))
-                mask |= 0x4;
-            if(*iter == std::type_index(typeid(cWall)))
-                mask |= 0x10;
-            if(*iter == std::type_index(typeid(cWIndicator)))
-                mask |= 0x20;
-        }
-    }
 
     int x = (pos.x - (float)GRID_OFFSET_X + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
     int y = (pos.y - (float)GRID_OFFSET_Y + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
@@ -79,22 +57,22 @@ std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine
         n = next.front();
         next.pop();
 
-        if(n % GRID_WIDTH != GRID_WIDTH - 1 && paths.find(n + 1) == paths.end() && (validGrid[n + 1] & mask) == 0)
+        if(n % GRID_WIDTH != GRID_WIDTH - 1 && paths.find(n + 1) == paths.end() && (validGrid[n + 1] & obstacles) == 0)
         {
             next.push(n + 1);
             paths.insert(std::make_pair(n + 1, n));
         }
-        if(n % GRID_WIDTH != 0 && paths.find(n - 1) == paths.end() && (validGrid[n - 1] & mask) == 0)
+        if(n % GRID_WIDTH != 0 && paths.find(n - 1) == paths.end() && (validGrid[n - 1] & obstacles) == 0)
         {
             next.push(n - 1);
             paths.insert(std::make_pair(n - 1, n));
         }
-        if(n + GRID_WIDTH < GRID_TOTAL && paths.find(n + GRID_WIDTH) == paths.end() && (validGrid[n + GRID_WIDTH] & mask) == 0)
+        if(n + GRID_WIDTH < GRID_TOTAL && paths.find(n + GRID_WIDTH) == paths.end() && (validGrid[n + GRID_WIDTH] & obstacles) == 0)
         {
             next.push(n + GRID_WIDTH);
             paths.insert(std::make_pair(n + GRID_WIDTH, n));
         }
-        if(n - GRID_WIDTH >= 0 && paths.find(n - GRID_WIDTH) == paths.end() && (validGrid[n - GRID_WIDTH] & mask) == 0)
+        if(n - GRID_WIDTH >= 0 && paths.find(n - GRID_WIDTH) == paths.end() && (validGrid[n - GRID_WIDTH] & obstacles) == 0)
         {
             next.push(n - GRID_WIDTH);
             paths.insert(std::make_pair(n - GRID_WIDTH, n));
@@ -106,73 +84,53 @@ std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine
     return paths;
 }
 
-bool PathFinder::isValidDestination(const cPosition& pos, const sf::Vector2f& destination, Engine& engine, std::list<std::type_index> obstacles)
+std::map<int, int> PathFinder::getBestPath(const cPosition& pos, const sf::Vector2f& goal, Engine& engine, unsigned char obstacles)
 {
-    if(dirtyFlag)
-        revalidateGrid(engine);
+    int x = (pos->x + (float)(-GRID_OFFSET_X + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
+    int y = (pos->y + (float)(-GRID_OFFSET_Y + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
+    int xy = x + y * GRID_WIDTH;
 
-    unsigned char mask = 0;
-    if(obstacles.empty())
-    {
-        mask = 0xFF;
-    }
-    else
-    {
-        for(auto iter = obstacles.begin(); iter != obstacles.end(); ++iter)
-        {
-            if(*iter == std::type_index(typeid(cLiving)))
-                mask |= 0x1;
-            if(*iter == std::type_index(typeid(cBalloon)))
-                mask |= 0x2;
-            if(*iter == std::type_index(typeid(cBreakable)))
-                mask |= 0x4;
-            if(*iter == std::type_index(typeid(cWall)))
-                mask |= 0x8;
-        }
-    }
+    int endx = (goal.x + (float)(-GRID_OFFSET_X + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
+    int endy = (goal.y + (float)(-GRID_OFFSET_Y + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
+    int end = endx + endy * GRID_WIDTH;
 
-    int x = (pos.x - (float)GRID_OFFSET_X + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
-    int y = (pos.y - (float)GRID_OFFSET_Y + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
-    int start = x + y * GRID_WIDTH;
-    int destX = (destination.x - (float)GRID_OFFSET_X + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
-    int destY = (destination.y - (float)GRID_OFFSET_Y + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
-    int end = destX + destY * GRID_WIDTH;
-
-    std::map<int, int> from;
-    std::priority_queue<PElement> next;
-    next.push(PElement(start, 0));
+    std::map<int, int> paths;
+    std::map<int, int> costs;
+    std::priority_queue<int> next;
+    next.push(PElement(xy,0));
+    paths.insert(std::make_pair(xy, xy));
+    costs.insert(std::make_pair(xy, 0));
     int n;
+    int cost;
     while(!next.empty())
     {
-        n = next.top().c;
+        n = next.front().c;
         next.pop();
 
         if(n == end)
-            return true;
+            break;
 
-        if(n + 1 < GRID_TOTAL && n % GRID_WIDTH != GRID_WIDTH - 1 && from.find(n + 1) == from.end() && (validGrid[n + 1] & mask) == 0 && n + 1 != start)
+        if(n % GRID_WIDTH != 0 && (validGrid[n - 1] & obstacles) == 0)
         {
-            next.push(PElement(n + 1, PF::heuristic(destX, destY, (n + 1) % GRID_WIDTH, (n + 1) / GRID_WIDTH)));
-            from[n + 1] = n;
+            cost = costs[n] + 1;
+            if(costs.find(n - 1) == costs.end() || cost < costs[n - 1])
+            {
+                costs.insert(std::make_pair(n - 1, cost));
+                next.insert(PElement(n - 1, cost + PF::heuristic((n - 1) % GRID_WIDTH, (n - 1) / GRID_WIDTH, endx, endy)));
+                paths.insert(std::make_pair(n - 1, n));
+            }
         }
-        if(n - 1 >= 0 && n % GRID_WIDTH != 0 && from.find(n - 1) == from.end() && (validGrid[n - 1] & mask) == 0 && n - 1 != start)
+        if(n % GRID_WIDTH != GRID_WIDTH - 1 && (validGrid[n + 1] & obstacles) == 0)
         {
-            next.push(PElement(n - 1, PF::heuristic(destX, destY, (n - 1) % GRID_WIDTH, (n - 1) / GRID_WIDTH)));
-            from[n - 1] = n;
-        }
-        if(n + GRID_WIDTH < GRID_TOTAL && from.find(n + GRID_WIDTH) == from.end() && (validGrid[n + GRID_WIDTH] & mask) == 0 && n + GRID_WIDTH != start)
-        {
-            next.push(PElement(n + GRID_WIDTH, PF::heuristic(destX, destY, n % GRID_WIDTH, n / GRID_WIDTH + 1)));
-            from[n + GRID_WIDTH] = n;
-        }
-        if(n - GRID_WIDTH >= 0 && from.find(n - GRID_WIDTH) == from.end() && (validGrid[n - GRID_WIDTH] & mask) == 0 && n - GRID_WIDTH != start)
-        {
-            next.push(PElement(n - GRID_WIDTH, PF::heuristic(destX, destY, n % GRID_WIDTH, n / GRID_WIDTH - 1)));
-            from[n - GRID_WIDTH] = n;
+            cost = costs[n] + 1;
+            if(costs.find(n + 1) == costs.end() || cost < costs[n + 1])
+            {
+                costs.insert(std::make_pair(n + 1, cost));
+                next.insert(PElement(n + 1, cost + PF::heuristic((n + 1) % GRID_WIDTH, (n - 1) / GRID_WIDTH, endx, endy)));
+                paths.insert(std::make_pair(n + 1, n));
+            }
         }
     }
-
-    return false;
 }
 
 void PathFinder::invalidateValidGrid()

@@ -35,8 +35,8 @@ class PathFinder
 public:
     PathFinder();
 
-    std::map<int, int> getValidDestinations(const cPosition& pos, Engine& engine, std::list<std::type_index> obstacles = std::list<std::type_index>());
-    bool isValidDestination(const cPosition& pos, const sf::Vector2f& destination, Engine& engine, std::list<std::type_index> obstacles = std::list<std::type_index>());
+    std::map<int, int> getValidDestinations(const cPosition& pos, Engine& engine, unsigned char obstacles);
+    std::map<int, int> getBestPath(const cPosition& pos, const sf::Vector2f& goal, Engine& engine, unsigned char obstacles);
     void invalidateValidGrid();
     const unsigned char* getValidGrid(Engine& engine);
     bool isDirty();
