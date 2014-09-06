@@ -4,6 +4,7 @@
 
 #include <list>
 #include <queue>
+#include <map>
 #include <typeindex>
 
 #include <SFML/System.hpp>
@@ -34,11 +35,11 @@ class PathFinder
 public:
     PathFinder();
 
-    std::list<sf::Vector2i> getValidDestinations(const cPosition& pos, Engine& engine, std::list<std::type_index> obstacles = std::list<std::type_index>());
-    std::list<sf::Vector2i> getPathToDestination(const cPosition& pos, const sf::Vector2f& destination, Engine& engine, std::list<std::type_index> obstacles = std::list<std::type_index>());
+    std::map<int, int> getValidDestinations(const cPosition& pos, Engine& engine, std::list<std::type_index> obstacles = std::list<std::type_index>());
     bool isValidDestination(const cPosition& pos, const sf::Vector2f& destination, Engine& engine, std::list<std::type_index> obstacles = std::list<std::type_index>());
     void invalidateValidGrid();
     const unsigned char* getValidGrid(Engine& engine);
+    bool isDirty();
 private:
     /**
      * array of bitfields.
@@ -48,6 +49,7 @@ private:
      * 0000 0100 - breakable
      * 0000 1000 - powerup
      * 0001 0000 - wall
+     * 0010 0000 - wIndicator
      * At validGrid[GRID_TOTAL]:
      * 0000 0000 - nothing
      * 0000 0001 - player exists

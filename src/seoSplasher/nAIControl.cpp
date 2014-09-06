@@ -60,6 +60,7 @@ void nAIControl::update(sf::Time dt, Context context)
     {
     case AI::PLACE_BALLOON:
         Utility::createBalloon(pos->x, pos->y, *living, context, control->ID, &control->fired, *pfref);
+        control->timer = 0.0f;
         break;
     case AI::GET_POWERUP:
         break;

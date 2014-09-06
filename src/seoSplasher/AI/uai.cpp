@@ -102,8 +102,8 @@ unsigned char UAI::nearbyInfo(const cPosition& pos, PathFinder& pf, Engine& engi
 
     unsigned char info = 0;
 
-    if((grid[xy] & 0x2) != 0)
-        info = 0x80;
+    info |= (grid[xy] & 0x2) << 6;
+    info |= (grid[xy] & 0x20) >> 4;
 
     // check up
     for(int c = xy - GRID_WIDTH; c >= 0; c -= GRID_WIDTH)
@@ -113,7 +113,6 @@ unsigned char UAI::nearbyInfo(const cPosition& pos, PathFinder& pf, Engine& engi
         else if((grid[c] & 0x10) != 0)
             break;
         info |= (grid[c] & 0x1);
-        info |= (grid[c] & 0x2);
         info |= (grid[c] & 0x4);
         info |= (grid[c] & 0x8);
     }
@@ -126,7 +125,6 @@ unsigned char UAI::nearbyInfo(const cPosition& pos, PathFinder& pf, Engine& engi
         else if((grid[c] & 0x10) != 0)
             break;
         info |= (grid[c] & 0x1);
-        info |= (grid[c] & 0x2);
         info |= (grid[c] & 0x4);
         info |= (grid[c] & 0x8);
     }
@@ -139,7 +137,6 @@ unsigned char UAI::nearbyInfo(const cPosition& pos, PathFinder& pf, Engine& engi
         else if((grid[c] & 0x10) != 0)
             break;
         info |= (grid[c] & 0x1);
-        info |= (grid[c] & 0x2);
         info |= (grid[c] & 0x4);
         info |= (grid[c] & 0x8);
     }
@@ -152,7 +149,6 @@ unsigned char UAI::nearbyInfo(const cPosition& pos, PathFinder& pf, Engine& engi
         else if((grid[c] & 0x10) != 0)
             break;
         info |= (grid[c] & 0x1);
-        info |= (grid[c] & 0x2);
         info |= (grid[c] & 0x4);
         info |= (grid[c] & 0x8);
     }

@@ -54,7 +54,7 @@ private:
      * returns bitfield
      * 0000 0000 - nothing near
      * 0000 0001 - a player in sight
-     * 0000 0010 - a balloon in sight
+     * 0000 0010 - in WIndicator
      * 0000 0100 - a breakable in sight
      * 0000 1000 - a powerup in sight
      * 0001 0000 - player exists
