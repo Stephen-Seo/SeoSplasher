@@ -38,6 +38,7 @@ namespace Utility
     int createWIndicator(const float& x, const float& y, Direction::Direction dir, const Context& context, unsigned char ID);
 
     sf::Vector2f alignToGrid(const float& x, const float& y);
+    bool isAligned(const float& x, const float& y);
 };
 
 #endif

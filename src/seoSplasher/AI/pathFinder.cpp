@@ -14,6 +14,8 @@
 #include "../cWall.hpp"
 #include "../cWIndicator.hpp"
 
+#include <iostream>
+
 PElement::PElement() :
 c(0),
 priority(0)
@@ -79,24 +81,33 @@ std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine
         }
     }
 
-    paths.erase(x + y * GRID_WIDTH);
+    n = x + y * GRID_WIDTH;
+    paths.erase(n);
+    paths.insert(std::make_pair(n, n));
 
     return paths;
 }
 
 std::map<int, int> PathFinder::getBestPath(const cPosition& pos, const sf::Vector2f& goal, Engine& engine, unsigned char obstacles)
 {
-    int x = (pos->x + (float)(-GRID_OFFSET_X + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
-    int y = (pos->y + (float)(-GRID_OFFSET_Y + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
+    return getBestPath(pos, (int)((goal.x + (float)(-GRID_OFFSET_X + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE) + (int)((goal.y + (float)(-GRID_OFFSET_Y + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE) * GRID_WIDTH, engine, obstacles);
+}
+
+std::map<int, int> PathFinder::getBestPath(const cPosition& pos, int goal, Engine& engine, unsigned char obstacles)
+{
+    if(dirtyFlag)
+        revalidateGrid(engine);
+
+    int x = (pos.x + (float)(-GRID_OFFSET_X + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
+    int y = (pos.y + (float)(-GRID_OFFSET_Y + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
     int xy = x + y * GRID_WIDTH;
 
-    int endx = (goal.x + (float)(-GRID_OFFSET_X + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
-    int endy = (goal.y + (float)(-GRID_OFFSET_Y + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
-    int end = endx + endy * GRID_WIDTH;
+    int endx = (float)(goal % GRID_WIDTH * GRID_SQUARE_SIZE + GRID_OFFSET_X);
+    int endy = (float)(goal / GRID_WIDTH * GRID_SQUARE_SIZE + GRID_OFFSET_Y);
 
     std::map<int, int> paths;
     std::map<int, int> costs;
-    std::priority_queue<int> next;
+    std::priority_queue<PElement> next;
     next.push(PElement(xy,0));
     paths.insert(std::make_pair(xy, xy));
     costs.insert(std::make_pair(xy, 0));
@@ -104,10 +115,10 @@ std::map<int, int> PathFinder::getBestPath(const cPosition& pos, const sf::Vecto
     int cost;
     while(!next.empty())
     {
-        n = next.front().c;
+        n = next.top().c;
         next.pop();
 
-        if(n == end)
+        if(n == goal)
             break;
 
         if(n % GRID_WIDTH != 0 && (validGrid[n - 1] & obstacles) == 0)
@@ -116,7 +127,7 @@ std::map<int, int> PathFinder::getBestPath(const cPosition& pos, const sf::Vecto
             if(costs.find(n - 1) == costs.end() || cost < costs[n - 1])
             {
                 costs.insert(std::make_pair(n - 1, cost));
-                next.insert(PElement(n - 1, cost + PF::heuristic((n - 1) % GRID_WIDTH, (n - 1) / GRID_WIDTH, endx, endy)));
+                next.push(PElement(n - 1, cost + PF::heuristic((n - 1) % GRID_WIDTH, (n - 1) / GRID_WIDTH, endx, endy)));
                 paths.insert(std::make_pair(n - 1, n));
             }
         }
@@ -126,11 +137,35 @@ std::map<int, int> PathFinder::getBestPath(const cPosition& pos, const sf::Vecto
             if(costs.find(n + 1) == costs.end() || cost < costs[n + 1])
             {
                 costs.insert(std::make_pair(n + 1, cost));
-                next.insert(PElement(n + 1, cost + PF::heuristic((n + 1) % GRID_WIDTH, (n - 1) / GRID_WIDTH, endx, endy)));
+                next.push(PElement(n + 1, cost + PF::heuristic((n + 1) % GRID_WIDTH, (n + 1) / GRID_WIDTH, endx, endy)));
                 paths.insert(std::make_pair(n + 1, n));
             }
         }
+        if(n - GRID_WIDTH >= 0 && (validGrid[n - GRID_WIDTH] & obstacles) == 0)
+        {
+            cost = costs[n - GRID_WIDTH] + 1;
+            if(costs.find(n - GRID_WIDTH) == costs.end() || cost < costs[n - GRID_WIDTH])
+            {
+                costs.insert(std::make_pair(n - GRID_WIDTH, cost));
+                next.push(PElement(n - GRID_WIDTH, cost + PF::heuristic(n % GRID_WIDTH, n / GRID_WIDTH - 1, endx, endy)));
+                paths.insert(std::make_pair(n - GRID_WIDTH, n));
+            }
+        }
+        if(n + GRID_WIDTH < GRID_TOTAL && (validGrid[n + GRID_WIDTH] & obstacles) == 0)
+        {
+            cost = costs[n + GRID_WIDTH] + 1;
+            if(costs.find(n + GRID_WIDTH) == costs.end() || cost < costs[n + GRID_WIDTH])
+            {
+                costs.insert(std::make_pair(n + GRID_WIDTH, cost));
+                next.push(PElement(n + GRID_WIDTH, cost + PF::heuristic(n % GRID_WIDTH, n / GRID_WIDTH + 1, endx, endy)));
+                paths.insert(std::make_pair(n + GRID_WIDTH, n));
+            }
+        }
     }
+
+    paths.erase(xy);
+
+    return paths;
 }
 
 void PathFinder::invalidateValidGrid()
@@ -196,4 +231,5 @@ void PathFinder::revalidateGrid(Engine& engine)
         else if(iter->second->hasComponent(std::type_index(typeid(cWIndicator))))
             validGrid[xy] |= 0x20;
     }
+    std::clog << std::hex << std::showbase << (unsigned int)validGrid[0] << std::dec << std::noshowbase << '\n';
 }

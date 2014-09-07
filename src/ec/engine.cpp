@@ -1,8 +1,8 @@
 
 #include "engine.hpp"
 
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 
 #include "../context.hpp"
 
@@ -36,8 +36,6 @@ void Engine::addEntity(std::unique_ptr<Entity> entity)
     }
     if(!nodeAdded)
         std::clog << "WARNING: Entity (" << entity->getID() << ") added without any paired nodes!\n";
-    else
-        std::clog << "ENGINE: added E(" << entity->getID() << ")\n";
     entityMap.insert(std::make_pair(entity->getID(), std::move(entity)));
 }
 
@@ -79,7 +77,6 @@ void Engine::update(sf::Time dt, Context context)
     while(!deadQueue.empty())
     {
         int eID = deadQueue.front();
-        std::clog << "REMOVING: entity (" << eID << ")\n";
         deadQueue.pop();
 
         for(auto iter = systems.begin(); iter != systems.end(); ++iter)

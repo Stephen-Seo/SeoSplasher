@@ -3,8 +3,6 @@
 
 #include <utility>
 
-#include <iostream>
-
 int Entity::gID = 0;
 
 std::set<int> Entity::IDsInUse;
@@ -26,7 +24,6 @@ Entity::~Entity()
 
 void Entity::addComponent(std::type_index typeIndex, std::unique_ptr<Component> component)
 {
-    std::cout << "  E(" << ID << ") added " << typeIndex.name() << '\n';
     cMap.insert(std::make_pair(typeIndex, std::move(component)));
 }
 

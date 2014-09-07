@@ -129,7 +129,10 @@ cpf(nullptr)
         }
     }
 
-    addCombatant(true);
+    addCombatant(false);
+    addCombatant(false);
+    addCombatant(false);
+    addCombatant(false);
 
     initBreakables();
 
@@ -281,7 +284,6 @@ void SplashState::addCombatant(bool isPlayer)
     if(isPlayer)
     {
         combatant->addComponent(std::type_index(typeid(cPlayerControl)), std::unique_ptr<Component>(new cPlayerControl(&dir, &placeBalloon, &placeAction, &kick, &kickAction, ID, &cFired)));
-        combatant->addComponent(std::type_index(typeid(cPathFinderRef)), std::unique_ptr<Component>(new cPathFinderRef(cpf)));
     }
     else
     {
@@ -290,6 +292,8 @@ void SplashState::addCombatant(bool isPlayer)
         control->pf = &cpf->pf;
         combatant->addComponent(std::type_index(typeid(cAIControl)), std::unique_ptr<Component>(control));
     }
+
+    combatant->addComponent(std::type_index(typeid(cPathFinderRef)), std::unique_ptr<Component>(new cPathFinderRef(cpf)));
 
     getContext().ecEngine->addEntity(std::unique_ptr<Entity>(combatant));
 }

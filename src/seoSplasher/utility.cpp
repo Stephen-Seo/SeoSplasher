@@ -2,6 +2,7 @@
 #include "utility.hpp"
 
 #include <memory>
+#include <cmath>
 
 #include "../ec/entity.hpp"
 #include "../ec/engine.hpp"
@@ -21,6 +22,7 @@
 #include "cWIndicator.hpp"
 #include "cPathFinderRef.hpp"
 #include "cPathFinder.hpp"
+#include "nMove.hpp"
 
 HitInfo Utility::collideAll(const float& x, const float& y, Engine& engine)
 {
@@ -298,7 +300,7 @@ void Utility::createBalloon(const float& x, const float& y, cLiving& living, con
                 if(right && (xy + k - 1) % GRID_WIDTH != GRID_WIDTH - 1 && (living.ghostUpgrade > 0 || (grid[xy + k] & 0x10) == 0))
                 {
                     cballoon->wIndicators.push_back(createWIndicator((float)(((xy + k) % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)(((xy + k) / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::HORIZONTAL, context, ID));
-                    if((xy + k - 1) % GRID_WIDTH != 0 && living.pierceUpgrade == 0 && (grid[xy + k] & 0x4) != 0)
+                    if((xy + k - 1) % GRID_WIDTH != GRID_WIDTH - 1 && living.pierceUpgrade == 0 && (grid[xy + k] & 0x4) != 0)
                         right = false;
                 }
                 else
@@ -434,16 +436,6 @@ void Utility::createExplosion(const float& x, const float& y, Direction::Directi
     context.ecEngine->addEntity(std::unique_ptr<Entity>(splosion));
 }
 
-sf::Vector2f Utility::alignToGrid(const float& x, const float& y)
-{
-    sf::Vector2f v;
-
-    v.x = (float)((int)((x - (float)GRID_OFFSET_X) / 32.0f + 0.5f)) * 32.0f + (float)GRID_OFFSET_X;
-    v.y = (float)((int)((y - (float)GRID_OFFSET_Y) / 32.0f + 0.5f)) * 32.0f + (float)GRID_OFFSET_Y;
-
-    return v;
-}
-
 void Utility::createPowerup(const float& x, const float& y, cPowerup& powerup, const Context& context)
 {
     if(powerup.powerup == cPowerup::NONE)
@@ -553,4 +545,24 @@ int Utility::createWIndicator(const float& x, const float& y, Direction::Directi
     });
 
     return indicator->getID();
+}
+
+sf::Vector2f Utility::alignToGrid(const float& x, const float& y)
+{
+    sf::Vector2f v;
+
+    v.x = (float)((int)((x - (float)GRID_OFFSET_X) / 32.0f + 0.5f)) * 32.0f + (float)GRID_OFFSET_X;
+    v.y = (float)((int)((y - (float)GRID_OFFSET_Y) / 32.0f + 0.5f)) * 32.0f + (float)GRID_OFFSET_Y;
+
+    return v;
+}
+
+bool Utility::isAligned(const float& x, const float& y)
+{
+    sf::Vector2f v = alignToGrid(x, y);
+    int diffx = std::abs(x - v.x);
+    int diffy = std::abs(y - v.y);
+    if(diffx <= MAX_MOVE_OFFSET && diffy <= MAX_MOVE_OFFSET)
+        return true;
+    return false;
 }
