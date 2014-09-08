@@ -64,10 +64,20 @@ void nAIControl::update(sf::Time dt, Context context)
     {
         control->timer = control->aiTickTime;
         control->currentAction = control->ai.determineAction(*pos, *living, *control->pf, *context.ecEngine, *context.rGen);
-        if(living->kickUpgrade == 0)
-            paths = control->pf->getValidDestinations(*pos, *context.ecEngine, 0x16);
+        if(Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cWIndicator)), *context.ecEngine))
+        {
+            if(living->kickUpgrade == 0)
+                paths = control->pf->getValidDestinations(*pos, *context.ecEngine, 0x16);
+            else
+                paths = control->pf->getValidDestinations(*pos, *context.ecEngine, 0x14);
+        }
         else
-            paths = control->pf->getValidDestinations(*pos, *context.ecEngine, 0x14);
+        {
+            if(living->kickUpgrade == 0)
+                paths = control->pf->getValidDestinations(*pos, *context.ecEngine, 0x36);
+            else
+                paths = control->pf->getValidDestinations(*pos, *context.ecEngine, 0x34);
+        }
 
         const unsigned char* grid = control->pf->getValidGrid(*context.ecEngine);
 
@@ -91,6 +101,23 @@ void nAIControl::update(sf::Time dt, Context context)
                 control->pf->invalidateValidGrid();
                 break;
             case AI::GET_POWERUP:
+                destination = -1;
+                for(auto iter = paths.begin(); iter != paths.end(); ++iter)
+                {
+                    if((grid[iter->first] & 0x8) != 0)
+                    {
+                        destination = iter->first;
+                        if(r <= 0)
+                            break;
+                    }
+                    --r;
+                }
+                if(destination == -1)
+                {
+                    std::clog << "WARNING: failed to find valid powerup path\n";
+                    control->timer = 0.0f;
+                    break;
+                }
                 break;
             case AI::MOVE_TO_ENEMY:
                 break;
@@ -159,6 +186,8 @@ void nAIControl::update(sf::Time dt, Context context)
                 prevDest = destination;
                 while(destination != xy)
                 {
+                    if(paths.find(destination) == paths.end())
+                        break;
                     rpaths.insert(std::make_pair(paths[destination], destination));
                     destination = paths[destination];
                 }
