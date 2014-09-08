@@ -19,12 +19,14 @@
 #include "../ec/engine.hpp"
 #include "direction.hpp"
 #include "cWIndicator.hpp"
+#include "cBalloon.hpp"
 
 nAIControl::nAIControl() :
 control(nullptr),
 living(nullptr),
 pos(nullptr),
-vel(nullptr)
+vel(nullptr),
+prevDest(-1)
 {}
 
 bool nAIControl::checkEntity(Entity& entity)
@@ -56,21 +58,17 @@ void nAIControl::update(sf::Time dt, Context context)
     if(*entityRemoved)
         return;
 
+    bool justPlacedBalloon = false;
     control->timer -= dt.asSeconds();
     if(control->timer <= 0.0f || control->currentAction == AI::NONE)
     {
-        inAction = false;
         control->timer = control->aiTickTime;
         control->currentAction = control->ai.determineAction(*pos, *living, *control->pf, *context.ecEngine, *context.rGen);
         if(living->kickUpgrade == 0)
             paths = control->pf->getValidDestinations(*pos, *context.ecEngine, 0x16);
         else
             paths = control->pf->getValidDestinations(*pos, *context.ecEngine, 0x14);
-    }
 
-    bool justPlacedBalloon = false;
-    if(!inAction)
-    {
         const unsigned char* grid = control->pf->getValidGrid(*context.ecEngine);
 
         int xy = (int)((pos->x + (float)(-GRID_OFFSET_X + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE) + (int)((pos->y + (float)(-GRID_OFFSET_Y + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE) * GRID_WIDTH;
@@ -82,75 +80,83 @@ void nAIControl::update(sf::Time dt, Context context)
         vel->x = 0.0f;
         vel->y = 0.0f;
 
-        inAction = true;
-        switch(control->currentAction)
+        if(prevDest == -1)
         {
-        case AI::PLACE_BALLOON:
-            justPlacedBalloon = true;
-            Utility::createBalloon(pos->x, pos->y, *living, context, control->ID, &control->fired, *pfref);
-            control->timer = 0.0f;
-            control->pf->invalidateValidGrid();
-            break;
-        case AI::GET_POWERUP:
-            break;
-        case AI::MOVE_TO_ENEMY:
-            break;
-        case AI::MOVE_TO_BREAKABLE:
-            destination = -1;
-            for(auto iter = paths.begin(); iter != paths.end(); ++iter)
+            switch(control->currentAction)
             {
-                if((iter->first % GRID_WIDTH != 0 && (grid[iter->first - 1] & 0x4) != 0) ||
-                   (iter->first % GRID_WIDTH != GRID_WIDTH - 1 && (grid[iter->first + 1] & 0x4) != 0) ||
-                   (iter->first - GRID_WIDTH >= 0 && (grid[iter->first - GRID_WIDTH] & 0x4) != 0) ||
-                   (iter->first + GRID_WIDTH < GRID_TOTAL && (grid[iter->first + GRID_WIDTH] & 0x4) != 0))
-                {
-                    destination = iter->first;
-                    if(r <= 0)
-                        break;
-                }
-                --r;
-            }
-            if(destination == -1)
-            {
-                std::clog << "WARNING: failed to find adjacent breakable\n";
+            case AI::PLACE_BALLOON:
+                justPlacedBalloon = true;
+                Utility::createBalloon(pos->x, pos->y, *living, context, control->ID, &control->fired, *pfref);
                 control->timer = 0.0f;
+                control->pf->invalidateValidGrid();
+                break;
+            case AI::GET_POWERUP:
+                break;
+            case AI::MOVE_TO_ENEMY:
+                break;
+            case AI::MOVE_TO_BREAKABLE:
+                destination = -1;
+                for(auto iter = paths.begin(); iter != paths.end(); ++iter)
+                {
+                    if((iter->first % GRID_WIDTH != 0 && (grid[iter->first - 1] & 0x4) != 0) ||
+                       (iter->first % GRID_WIDTH != GRID_WIDTH - 1 && (grid[iter->first + 1] & 0x4) != 0) ||
+                       (iter->first - GRID_WIDTH >= 0 && (grid[iter->first - GRID_WIDTH] & 0x4) != 0) ||
+                       (iter->first + GRID_WIDTH < GRID_TOTAL && (grid[iter->first + GRID_WIDTH] & 0x4) != 0))
+                    {
+                        destination = iter->first;
+                        if(r <= 0)
+                            break;
+                    }
+                    --r;
+                }
+                if(destination == -1)
+                {
+                    std::clog << "WARNING: failed to find adjacent breakable\n";
+                    control->timer = 0.0f;
+                    break;
+                }
+                break;
+            case AI::MOVE_TO_SAFETY:
+                destination = -1;
+                for(auto iter = paths.begin(); iter != paths.end(); ++iter)
+                {
+                    if((grid[iter->first] & 0x36) == 0)
+                    {
+                        destination = iter->first;
+                        if(r <= 0)
+                            break;
+                    }
+                    --r;
+                }
+                if(destination == -1)
+                {
+                    std::clog << "WARNING: failed to find safe spot\n";
+                    control->timer = 0.0f;
+                    break;
+                }
+                break;
+            case AI::KICK_BALLOON:
+                break;
+            case AI::PANIC:
+                break;
+            case AI::WAIT:
+                control->timer = BALLOON_ALIVE_TIME;
+                break;
+            default:
                 break;
             }
-            break;
-        case AI::MOVE_TO_SAFETY:
-            destination = -1;
-            for(auto iter = paths.begin(); iter != paths.end(); ++iter)
-            {
-                if((grid[iter->first] & 0x36) == 0)
-                {
-                    destination = iter->first;
-                    if(r <= 0)
-                        break;
-                }
-                --r;
-            }
-            if(destination == -1)
-            {
-                std::clog << "WARNING: failed to find safe spot\n";
-                control->timer = 0.0f;
-                break;
-            }
-            break;
-        case AI::KICK_BALLOON:
-            break;
-        case AI::PANIC:
-            break;
-        default:
-            break;
         }
-        if(destination != -1)
+        if(destination != -1 || prevDest != -1)
         {
+            if(prevDest != -1)
+                destination = prevDest;
             Direction::Direction prevDir = Direction::NONE;
             Direction::Direction destDir = Direction::NONE;
             if(destination != xy && Utility::isAligned(pos->x, pos->y))
             {
                 std::map<int,int> rpaths;
                 int dest = destination;
+                prevDest = destination;
                 while(destination != xy)
                 {
                     rpaths.insert(std::make_pair(paths[destination], destination));
@@ -183,6 +189,8 @@ void nAIControl::update(sf::Time dt, Context context)
                 }
                 if(prevDir == Direction::NONE)
                     prevDir = destDir;
+                if(destination == prevDest)
+                    prevDest = -1;
             }
             else
                 prevDir = Direction::PLUS;
@@ -231,7 +239,7 @@ void nAIControl::update(sf::Time dt, Context context)
                 float y = xy / GRID_WIDTH;
                 if(offsetx < x)
                 {
-                    vel->x = -DEFAULT_SPEED + SPEED_UP_MULT * (float)living->speedUp;
+                    vel->x = -DEFAULT_SPEED - SPEED_UP_MULT * (float)living->speedUp;
                     vel->y = 0.0f;
                     control->timer = (pos->x - offsetx) / -vel->x;
                 }
@@ -244,7 +252,7 @@ void nAIControl::update(sf::Time dt, Context context)
                 else if(offsety < y)
                 {
                     vel->x = 0.0f;
-                    vel->y = -DEFAULT_SPEED + SPEED_UP_MULT * (float)living->speedUp;
+                    vel->y = -DEFAULT_SPEED - SPEED_UP_MULT * (float)living->speedUp;
                     control->timer = (pos->y - offsety) / -vel->y;
                 }
                 else if(offsety >= y)

@@ -101,6 +101,9 @@ int UAI::utility(AI::Action action, const cPosition& pos, const cLiving& living,
         return ((info & 0x2) != 0 ? 7 : 0) + (isRisky ? 7 : 0) - (living.kickUpgrade == 0 ? 7 : -2);
     case AI::PANIC:
         return 1;
+    case AI::WAIT:
+        collidingWithWIndicator = Utility::collidesAgainstComponent(pos.x, pos.y, std::type_index(typeid(cWIndicator)), engine);
+        return (collidingWithWIndicator ? -10 : 2) + (adjacentToWIndicator ? 10 : 0);
     default:
         break;
     }

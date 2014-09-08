@@ -21,6 +21,7 @@ namespace AI
         MOVE_TO_SAFETY,
         KICK_BALLOON,
         PANIC,
+        WAIT,
         SIZE,
         NONE
     };

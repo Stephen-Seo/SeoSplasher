@@ -23,8 +23,7 @@ struct nAIControl : Node
     cPathFinderRef* pfref;
 
     std::map<int, int> paths;
-
-    bool inAction = false;
+    int prevDest;
 
     bool checkEntity(Entity& entity);
     std::unique_ptr<Node> getNewNode();
