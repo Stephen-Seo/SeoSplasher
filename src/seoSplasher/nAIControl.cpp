@@ -120,6 +120,23 @@ void nAIControl::update(sf::Time dt, Context context)
                 }
                 break;
             case AI::MOVE_TO_ENEMY:
+                destination = -1;
+                for(auto iter = paths.begin(); iter != paths.end(); ++iter)
+                {
+                    if((grid[iter->first] & 0x1) != 0)
+                    {
+                        destination = iter->first;
+                        if(r <= 0)
+                            break;
+                    }
+                    --r;
+                }
+                if(destination == -1)
+                {
+                    std::clog << "WARNING: failed to find valid path to enemy\n";
+                    control->timer = 0.0f;
+                    break;
+                }
                 break;
             case AI::MOVE_TO_BREAKABLE:
                 destination = -1;
@@ -197,6 +214,8 @@ void nAIControl::update(sf::Time dt, Context context)
                 prev = destination;
                 while(destination != dest)
                 {
+                    if(rpaths.find(destination) == rpaths.end())
+                        break;
                     destination = rpaths[destination];
                     if(destination % GRID_WIDTH == prev % GRID_WIDTH)
                     {

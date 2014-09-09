@@ -10,8 +10,9 @@
 
 #include "../ec/node.hpp"
 
-#include "../ec/cPosition.hpp"
-#include "../ec/cVelocity.hpp"
+struct cPosition;
+struct cVelocity;
+struct cLiving;
 
 struct nMove : Node
 {
@@ -19,6 +20,9 @@ struct nMove : Node
 
     cPosition* pos;
     cVelocity* vel;
+    cLiving* living;
+
+    bool isBalloon;
 
     bool checkEntity(Entity& entity);
     std::unique_ptr<Node> getNewNode();

@@ -11,6 +11,7 @@
 #include "../ec/engine.hpp"
 #include "../ec/entity.hpp"
 #include "../ec/cPosition.hpp"
+#include "../ec/cVelocity.hpp"
 #include "cSprite.hpp"
 #include "cWall.hpp"
 #include "cLiving.hpp"

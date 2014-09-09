@@ -7,6 +7,7 @@
 #include "../ec/entity.hpp"
 #include "../ec/engine.hpp"
 #include "../ec/cPosition.hpp"
+#include "../ec/cVelocity.hpp"
 #include "gridInfo.hpp"
 #include "cLiving.hpp"
 #include "../context.hpp"
@@ -204,6 +205,12 @@ void Utility::createBalloon(const float& x, const float& y, cLiving& living, con
     pos->y = v.y;
     pos->rot = 0.0f;
     balloon->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
+
+    cVelocity* vel = new cVelocity;
+    vel->x = 0.0;
+    vel->y = 0.0;
+    vel->rot = 0.0f;
+    balloon->addComponent(std::type_index(typeid(cVelocity)), std::unique_ptr<Component>(vel));
 
     int distance;
     cBalloon* cballoon = new cBalloon;

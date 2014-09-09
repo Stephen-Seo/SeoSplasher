@@ -3,16 +3,20 @@
 
 #include <cmath>
 
+#include "../ec/cPosition.hpp"
+#include "../ec/cVelocity.hpp"
 #include "../context.hpp"
 #include "gridInfo.hpp"
 #include "utility.hpp"
 #include "cBreakable.hpp"
 #include "cWall.hpp"
 #include "cBalloon.hpp"
+#include "cLiving.hpp"
 
 nMove::nMove() :
 pos(nullptr),
-vel(nullptr)
+vel(nullptr),
+living(nullptr)
 {}
 
 bool nMove::checkEntity(Entity& entity)
@@ -31,6 +35,11 @@ void nMove::getCReferencesFromEntity(Entity& entity)
     pos = static_cast<cPosition*>(entity.getComponent(std::type_index(typeid(cPosition))));
     vel = static_cast<cVelocity*>(entity.getComponent(std::type_index(typeid(cVelocity))));
     entityRemoved = &entity.removed;
+    isBalloon = entity.hasComponent(std::type_index(typeid(cBalloon)));
+    if(entity.hasComponent(std::type_index(typeid(cLiving))))
+    {
+        living = static_cast<cLiving*>(entity.getComponent(std::type_index(typeid(cLiving))));
+    }
 }
 
 void nMove::update(sf::Time dt, Context context)
@@ -51,13 +60,15 @@ void nMove::update(sf::Time dt, Context context)
     {
         HitInfo info = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cWall)), *context.ecEngine);
         HitInfo infoBreak = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBreakable)), *context.ecEngine);
-        bool balloonHit;
-        if(ignoreBalloons)
-            balloonHit = false;
-        else
-            balloonHit = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
-        if(!info.hit.empty() || !infoBreak.hit.empty() || balloonHit)
+        HitInfo infoBalloon;
+        if(!ignoreBalloons)
+            infoBalloon = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
+        if(!info.hit.empty() || !infoBreak.hit.empty() || !infoBalloon.hit.empty())
         {
+            if(isBalloon)
+            {
+                vel->x = 0.0f;
+            }
             if(info.hit.size() == 1 && infoBreak.hit.empty())
             {
                 cPosition* hpos = static_cast<cPosition*>(info.hit.front()->getComponent(std::type_index(typeid(cPosition))));
@@ -97,6 +108,17 @@ void nMove::update(sf::Time dt, Context context)
             }
             else
             {
+                if(!isBalloon && living && living->kickUpgrade > 0 && infoBalloon.hit.size() == 1)
+                {
+                    if(prev < pos->x)
+                    {
+                        static_cast<cVelocity*>(infoBalloon.hit.front()->getComponent(std::type_index(typeid(cVelocity))))->x = BALLOON_KICK_SPEED;
+                    }
+                    else
+                    {
+                        static_cast<cVelocity*>(infoBalloon.hit.front()->getComponent(std::type_index(typeid(cVelocity))))->x = -BALLOON_KICK_SPEED;
+                    }
+                }
                 pos->x = prev;
             }
         }
@@ -113,14 +135,16 @@ void nMove::update(sf::Time dt, Context context)
     {
         HitInfo info = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cWall)), *context.ecEngine);
         HitInfo infoBreak = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBreakable)), *context.ecEngine);
-        bool balloonHit;
-        if(ignoreBalloons)
-            balloonHit = false;
-        else
-            balloonHit = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
-        if(!info.hit.empty() || !infoBreak.hit.empty() || balloonHit)
+        HitInfo infoBalloon;
+        if(!ignoreBalloons)
+            infoBalloon = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
+        if(!info.hit.empty() || !infoBreak.hit.empty() || !infoBalloon.hit.empty())
         {
-            if(info.hit.size() == 1 & infoBreak.hit.empty())
+            if(isBalloon)
+            {
+                vel->y = 0.0f;
+            }
+            if(info.hit.size() == 1 && infoBreak.hit.empty())
             {
                 cPosition* hpos = static_cast<cPosition*>(info.hit.front()->getComponent(std::type_index(typeid(cPosition))));
                 float offset = std::abs(pos->x - hpos->x);
@@ -159,6 +183,17 @@ void nMove::update(sf::Time dt, Context context)
             }
             else
             {
+                if(!isBalloon && living && living->kickUpgrade > 0 && infoBalloon.hit.size() == 1)
+                {
+                    if(prev < pos->y)
+                    {
+                        static_cast<cVelocity*>(infoBalloon.hit.front()->getComponent(std::type_index(typeid(cVelocity))))->y = BALLOON_KICK_SPEED;
+                    }
+                    else
+                    {
+                        static_cast<cVelocity*>(infoBalloon.hit.front()->getComponent(std::type_index(typeid(cVelocity))))->y = -BALLOON_KICK_SPEED;
+                    }
+                }
                 pos->y = prev;
             }
         }
