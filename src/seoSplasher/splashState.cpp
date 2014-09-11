@@ -54,6 +54,13 @@ cpf(nullptr)
     tset.insert(Textures::WALL);
     tset.insert(Textures::BREAKABLE);
     tset.insert(Textures::PLAYER_ONE);
+    tset.insert(Textures::PLAYER_TWO);
+    tset.insert(Textures::PLAYER_THREE);
+    tset.insert(Textures::PLAYER_FOUR);
+    tset.insert(Textures::C_PLAYER_ONE);
+    tset.insert(Textures::C_PLAYER_TWO);
+    tset.insert(Textures::C_PLAYER_THREE);
+    tset.insert(Textures::C_PLAYER_FOUR);
     tset.insert(Textures::BALLOON_0);
     tset.insert(Textures::BALLOON_1);
     tset.insert(Textures::BALLOON_2);
@@ -131,6 +138,8 @@ cpf(nullptr)
     }
 
     addCombatant(true);
+    addCombatant(false);
+    addCombatant(false);
     addCombatant(false);
 
     initBreakables();
@@ -238,34 +247,53 @@ void SplashState::addCombatant(bool isPlayer)
     Entity* combatant = new Entity;
 
     cPosition* pos = new cPosition;
+    cSprite* sprite = new cSprite;
     switch(ID)
     {
     case 0:
         pos->x = 120.0f;
         pos->y = 0.0f;
         pos->rot = 0.0f;
+        if(isPlayer)
+            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::PLAYER_ONE));
+        else
+            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::C_PLAYER_ONE));
         break;
     case 1:
         pos->x = 568.0f;
         pos->y = 0.0f;
         pos->rot = 0.0f;
+        if(isPlayer)
+            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::PLAYER_TWO));
+        else
+            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::C_PLAYER_TWO));
         break;
     case 2:
         pos->x = 120.0f;
         pos->y = 448.0f;
         pos->rot = 0.0f;
+        if(isPlayer)
+            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::PLAYER_THREE));
+        else
+            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::C_PLAYER_THREE));
         break;
     case 3:
         pos->x = 568.0f;
         pos->y = 448.0f;
         pos->rot = 0.0f;
+        if(isPlayer)
+            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::PLAYER_FOUR));
+        else
+            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::C_PLAYER_FOUR));
         break;
     default:
         delete pos;
+        delete sprite;
         delete combatant;
         return;
     }
     combatant->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
+    combatant->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
 
     cVelocity* vel = new cVelocity;
     vel->x = 0.0f;
@@ -277,9 +305,6 @@ void SplashState::addCombatant(bool isPlayer)
     living->ID = ID;
     combatant->addComponent(std::type_index(typeid(cLiving)), std::unique_ptr<Component>(living));
 
-    cSprite* sprite = new cSprite;
-    sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::PLAYER_ONE));
-    combatant->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
     if(isPlayer)
     {
         combatant->addComponent(std::type_index(typeid(cPlayerControl)), std::unique_ptr<Component>(new cPlayerControl(&dir, &placeBalloon, &placeAction, &kick, &kickAction, ID, &cFired)));

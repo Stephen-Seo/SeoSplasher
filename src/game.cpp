@@ -100,7 +100,14 @@ void Game::registerResources()
     resourceManager.registerTexture(Textures::C_SUPER_BALLOON_0, "controlledSuperBalloon00.png");
     resourceManager.registerTexture(Textures::C_SUPER_BALLOON_1, "controlledSuperBalloon01.png");
     resourceManager.registerTexture(Textures::C_SUPER_BALLOON_2, "controlledSuperBalloon02.png");
-    resourceManager.registerTexture(Textures::PLAYER_ONE, "debugPlayer.png");
+    resourceManager.registerTexture(Textures::PLAYER_ONE, "player1.png");
+    resourceManager.registerTexture(Textures::PLAYER_TWO, "player2.png");
+    resourceManager.registerTexture(Textures::PLAYER_THREE, "player3.png");
+    resourceManager.registerTexture(Textures::PLAYER_FOUR, "player4.png");
+    resourceManager.registerTexture(Textures::C_PLAYER_ONE, "computer1.png");
+    resourceManager.registerTexture(Textures::C_PLAYER_TWO, "computer2.png");
+    resourceManager.registerTexture(Textures::C_PLAYER_THREE, "computer3.png");
+    resourceManager.registerTexture(Textures::C_PLAYER_FOUR, "computer4.png");
     resourceManager.registerTexture(Textures::SPLOSION_PLUS, "splosionPLUS.png");
     resourceManager.registerTexture(Textures::SPLOSION_VERT, "splosionVERT.png");
     resourceManager.registerTexture(Textures::SPLOSION_HORIZ, "splosionHORIZ.png");
