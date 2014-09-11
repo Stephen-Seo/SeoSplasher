@@ -36,6 +36,7 @@ public:
     PathFinder();
 
     std::map<int, int> getValidDestinations(const cPosition& pos, Engine& engine, unsigned char obstacles);
+    std::map<int, int> getValidDestinations(const cPosition& pos, Engine& engine, unsigned char obstacles, const unsigned char* validGrid);
     std::map<int, int> getBestPath(const cPosition& pos, const sf::Vector2f& goal, Engine& engine, unsigned char obstacles);
     std::map<int, int> getBestPath(const cPosition& pos, int goal, Engine& engine, unsigned char obstacles);
     void invalidateValidGrid();

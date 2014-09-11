@@ -51,7 +51,6 @@ void nDeath::update(sf::Time dt, Context context)
                     }
                 }
             }
-            std::mt19937 gen(std::time(NULL));
 
             cPowerup powerup;
             // ballon up
@@ -62,7 +61,7 @@ void nDeath::update(sf::Time dt, Context context)
                     break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
-                for(int j = dist(gen); j > 0; --j)
+                for(int j = dist(*context.rGen); j > 0; --j)
                 {
                     ++iter;
                 }
@@ -78,7 +77,7 @@ void nDeath::update(sf::Time dt, Context context)
                     break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
-                for(int j = dist(gen); j > 0; --j)
+                for(int j = dist(*context.rGen); j > 0; --j)
                 {
                     ++iter;
                 }
@@ -94,7 +93,7 @@ void nDeath::update(sf::Time dt, Context context)
                     break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
-                for(int j = dist(gen); j > 0; --j)
+                for(int j = dist(*context.rGen); j > 0; --j)
                 {
                     ++iter;
                 }
@@ -110,7 +109,7 @@ void nDeath::update(sf::Time dt, Context context)
                     break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
-                for(int j = dist(gen); j > 0; --j)
+                for(int j = dist(*context.rGen); j > 0; --j)
                 {
                     ++iter;
                 }
@@ -126,7 +125,7 @@ void nDeath::update(sf::Time dt, Context context)
                     break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
-                for(int j = dist(gen); j > 0; --j)
+                for(int j = dist(*context.rGen); j > 0; --j)
                 {
                     ++iter;
                 }
@@ -142,7 +141,7 @@ void nDeath::update(sf::Time dt, Context context)
                     break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
-                for(int j = dist(gen); j > 0; --j)
+                for(int j = dist(*context.rGen); j > 0; --j)
                 {
                     ++iter;
                 }
@@ -158,7 +157,7 @@ void nDeath::update(sf::Time dt, Context context)
                     break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
-                for(int j = dist(gen); j > 0; --j)
+                for(int j = dist(*context.rGen); j > 0; --j)
                 {
                     ++iter;
                 }
@@ -174,7 +173,7 @@ void nDeath::update(sf::Time dt, Context context)
                     break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
-                for(int j = dist(gen); j > 0; --j)
+                for(int j = dist(*context.rGen); j > 0; --j)
                 {
                     ++iter;
                 }
@@ -190,7 +189,7 @@ void nDeath::update(sf::Time dt, Context context)
                     break;
                 std::uniform_int_distribution<> dist(0, validPoints.size() - 1);
                 auto iter = validPoints.begin();
-                for(int j = dist(gen); j > 0; --j)
+                for(int j = dist(*context.rGen); j > 0; --j)
                 {
                     ++iter;
                 }

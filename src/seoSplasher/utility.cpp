@@ -188,10 +188,10 @@ bool Utility::collide(const float& xOne, const float& yOne, const float& xTwo, c
             yOne + halfSquare < yTwo + (float)GRID_SQUARE_SIZE);
 }
 
-void Utility::createBalloon(const float& x, const float& y, cLiving& living, const Context& context, unsigned char ID, bool* fired, cPathFinderRef& pfRef)
+bool Utility::createBalloon(const float& x, const float& y, cLiving& living, const Context& context, unsigned char ID, bool* fired, cPathFinderRef& pfRef)
 {
     if(living.balloonsInPlay >= DEFAULT_BALLOONS + living.balloonUp)
-        return;
+        return false;
 
     ++living.balloonsInPlay;
 
@@ -404,6 +404,7 @@ void Utility::createBalloon(const float& x, const float& y, cLiving& living, con
     });
 
     context.ecEngine->addEntity(std::unique_ptr<Entity>(balloon));
+    return true;
 }
 
 void Utility::createExplosion(const float& x, const float& y, Direction::Direction dir, const Context& context, unsigned char ID)

@@ -4,6 +4,7 @@
 
 #define DEFAULT_AI_WILDNESS 2
 
+#include <map>
 #include <random>
 
 struct cPosition;
@@ -27,13 +28,26 @@ namespace AI
     };
 }
 
+struct PAMapping
+{
+    PAMapping();
+    PAMapping(float priority, std::map<int, int> paths, int destination);
+
+    union {
+        float priority;
+        AI::Action action;
+    };
+    std::map<int, int> paths;
+    int destination;
+};
+
 struct ActionElement
 {
     ActionElement();
-    ActionElement(AI::Action action, int priority);
+    ActionElement(AI::Action action, PAMapping pm);
 
     AI::Action action;
-    int priority;
+    PAMapping pm;
 
     bool operator< (const ActionElement& other) const;
 };
@@ -43,27 +57,30 @@ class UAI
 public:
     UAI();
 
-    AI::Action determineAction(const cPosition& pos, const cLiving& living, PathFinder& pf, Engine& engine, std::mt19937& gen);
+    PAMapping determineAction(const cPosition& pos, const cLiving& living, PathFinder& pf, Engine& engine, std::mt19937& gen);
     void setWildness(unsigned char wildness);
     void setRisky(bool isRisky);
 private:
     unsigned char wildness;
     bool isRisky;
 
-    int utility(AI::Action action, const cPosition& pos, const cLiving& living, PathFinder& pf, Engine& engine);
+    PAMapping utility(AI::Action action, const cPosition& pos, const cLiving& living, PathFinder& pf, Engine& engine);
     /**
      * returns bitfield
-     * 0000 0000 - nothing near
-     * 0000 0001 - a player in sight
-     * 0000 0010 - in WIndicator
-     * 0000 0100 - a breakable in sight
-     * 0000 1000 - a powerup in sight
-     * 0001 0000 - player exists
-     * 0010 0000 - breakable exists
-     * 0100 0000 - powerup exists
-     * 1000 0000 - on balloon
+     * 0000 0000 0000 - nothing near
+     * 0000 0000 0001 - a player in sight
+     * 0000 0000 0010 - in WIndicator
+     * 0000 0000 0100 - a breakable in sight
+     * 0000 0000 1000 - a powerup in sight
+     * 0000 0001 0000 - player exists
+     * 0000 0010 0000 - breakable exists
+     * 0000 0100 0000 - powerup exists
+     * 0000 1000 0000 - on balloon
+     * 0001 0000 0000 - adjacent to breakable
+     * 0010 0000 0000 - adjacent to WIndicator
+     * 0100 0000 0000 - surrounded
      */
-    unsigned char nearbyInfo(const cPosition& pos, PathFinder& pf, Engine& engine);
+    unsigned short nearbyInfo(const cPosition& pos, const unsigned char* grid, Engine& engine);
 };
 
 #endif

@@ -46,6 +46,11 @@ std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine
     if(dirtyFlag)
         revalidateGrid(engine);
 
+    return getValidDestinations(pos, engine, obstacles, validGrid);
+}
+
+std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine& engine, unsigned char obstacles, const unsigned char* validGrid)
+{
     int x = (pos.x - (float)GRID_OFFSET_X + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
     int y = (pos.y - (float)GRID_OFFSET_Y + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
 

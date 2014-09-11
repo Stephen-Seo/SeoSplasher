@@ -2,9 +2,14 @@
 #ifndef N_AI_CONTROL_HPP
 #define N_AI_CONTROL_HPP
 
+#define TICK_TO_ALIGN 30
+#define RCONTROL_TIME 1.5f
+
 #include "../ec/node.hpp"
 
 #include <map>
+
+#include "AI/uai.hpp"
 
 struct cAIControl;
 struct cLiving;
@@ -22,8 +27,17 @@ struct nAIControl : Node
     cVelocity* vel;
     cPathFinderRef* pfref;
 
-    std::map<int, int> paths;
-    int prevDest;
+    PAMapping pam;
+
+    std::map<int, int> rpaths;
+
+    bool alignAction;
+
+    int tick;
+
+    float controlFireTime;
+
+    sf::Vector2f prevPos;
 
     bool checkEntity(Entity& entity);
     std::unique_ptr<Node> getNewNode();
