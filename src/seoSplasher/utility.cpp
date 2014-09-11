@@ -212,7 +212,7 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
     vel->rot = 0.0f;
     balloon->addComponent(std::type_index(typeid(cVelocity)), std::unique_ptr<Component>(vel));
 
-    int distance;
+    unsigned char distance;
     cBalloon* cballoon = new cBalloon;
     cballoon->ID = ID;
     if(living.sBalloonsInPlay < living.sBalloonUpgrade)
@@ -229,111 +229,12 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
     }
     cballoon->balloonsInPlay = &living.balloonsInPlay;
     cballoon->sBalloonsInPlay = &living.sBalloonsInPlay;
-    // generate WIndicators
-    {
-        int x = (v.x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE;
-        int y = (v.y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE;
-        int xy = x + y * GRID_WIDTH;
-        if(pfRef.cpf->timer != PF_UPDATE_TIME)
-        {
-            pfRef.cpf->timer = PF_UPDATE_TIME;
-            pfRef.cpf->pf.invalidateValidGrid();
-        }
-        const unsigned char* grid = pfRef.cpf->pf.getValidGrid(*context.ecEngine);
-
-        cballoon->wIndicators.push_back(createWIndicator(v.x, v.y, Direction::PLUS, context, ID));
-        if(living.spreadUpgrade > 0)
-        {
-            std::set<int> visited;
-            std::queue<int> next;
-            next.push(xy);
-            int n, i, j;
-            while(!next.empty())
-            {
-                n = next.front();
-                next.pop();
-                visited.insert(n);
-
-                i = n % GRID_WIDTH;
-                j = n / GRID_WIDTH;
-
-                if(std::abs(x - i) + std::abs(y - j) >= distance)
-                    break;
-
-                if(visited.find(n - 1) == visited.end() && n % GRID_WIDTH != 0 && (living.ghostUpgrade > 0 || (grid[n - 1] & 0x10) == 0))
-                {
-                    cballoon->wIndicators.push_back(createWIndicator((float)(((n - 1) % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)(((n - 1) / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::PLUS, context, ID));
-                    if(living.pierceUpgrade > 0 || (grid[n - 1] & 0x4) == 0)
-                        next.push(n - 1);
-                }
-                if(visited.find(n + 1) == visited.end() && n % GRID_WIDTH != GRID_WIDTH - 1 && (living.ghostUpgrade > 0 || (grid[n + 1] & 0x10) == 0))
-                {
-                    cballoon->wIndicators.push_back(createWIndicator((float)(((n + 1) % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)(((n + 1) / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::PLUS, context, ID));
-                    if(living.pierceUpgrade > 0 || (grid[n + 1] & 0x4) == 0)
-                        next.push(n + 1);
-                }
-                if(visited.find(n - GRID_WIDTH) == visited.end() && n - GRID_WIDTH >= 0 && (living.ghostUpgrade > 0 || (grid[n - GRID_WIDTH] & 0x10) == 0))
-                {
-                    cballoon->wIndicators.push_back(createWIndicator((float)((n % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)((n / GRID_WIDTH - 1) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::PLUS, context, ID));
-                    if(living.pierceUpgrade > 0 || (grid[n - GRID_WIDTH] & 0x4) == 0)
-                        next.push(n - GRID_WIDTH);
-                }
-                if(visited.find(n + GRID_WIDTH) == visited.end() && n + GRID_WIDTH < GRID_TOTAL && (living.ghostUpgrade > 0 || (grid[n + GRID_WIDTH] & 0x10) == 0))
-                {
-                    cballoon->wIndicators.push_back(createWIndicator((float)((n % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)((n / GRID_WIDTH + 1) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::PLUS, context, ID));
-                    if(living.pierceUpgrade > 0 || (grid[n + GRID_WIDTH] & 0x4) == 0)
-                        next.push(n + GRID_WIDTH);
-                }
-            }
-        }
-        else
-        {
-            bool left = true;
-            bool right = true;
-            bool up = true;
-            bool down = true;
-            // check left/right/up/down
-            for(int k = 1; k <= distance; ++k)
-            {
-                if(left && (xy - k + 1) % GRID_WIDTH != 0 && (living.ghostUpgrade > 0 || (grid[xy - k] & 0x10) == 0))
-                {
-                    cballoon->wIndicators.push_back(createWIndicator((float)(((xy - k) % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)(((xy - k) / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::HORIZONTAL, context, ID));
-                    if((xy - k + 1) % GRID_WIDTH != 0 && living.pierceUpgrade == 0 && (grid[xy - k] & 0x4) != 0)
-                        left = false;
-                }
-                else
-                    left = false;
-
-                if(right && (xy + k - 1) % GRID_WIDTH != GRID_WIDTH - 1 && (living.ghostUpgrade > 0 || (grid[xy + k] & 0x10) == 0))
-                {
-                    cballoon->wIndicators.push_back(createWIndicator((float)(((xy + k) % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)(((xy + k) / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::HORIZONTAL, context, ID));
-                    if((xy + k - 1) % GRID_WIDTH != GRID_WIDTH - 1 && living.pierceUpgrade == 0 && (grid[xy + k] & 0x4) != 0)
-                        right = false;
-                }
-                else
-                    right = false;
-
-                if(up && xy - k * GRID_WIDTH >= 0 && (living.ghostUpgrade > 0 || (grid[xy - k * GRID_WIDTH] & 0x10) == 0))
-                {
-                    cballoon->wIndicators.push_back(createWIndicator((float)(((xy - k * GRID_WIDTH) % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)(((xy - k * GRID_WIDTH) / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::VERTICAL, context, ID));
-                    if(xy - k * GRID_WIDTH >= 0 && living.pierceUpgrade == 0 && (grid[xy - k * GRID_WIDTH] & 0x4) != 0)
-                        up = false;
-                }
-                else
-                    up = false;
-
-                if(down && xy + k * GRID_WIDTH < GRID_TOTAL && (living.ghostUpgrade > 0 || (grid[xy + k * GRID_WIDTH] & 0x10) == 0))
-                {
-                    cballoon->wIndicators.push_back(createWIndicator((float)(((xy + k * GRID_WIDTH) % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X), (float)(((xy + k * GRID_WIDTH) / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y), Direction::VERTICAL, context, ID));
-                    if(xy + k * GRID_WIDTH < GRID_TOTAL && living.pierceUpgrade == 0 && (grid[xy + k * GRID_WIDTH] & 0x4) != 0)
-                        down = false;
-                }
-                else
-                    down = false;
-            }
-        }
-    }
+    cballoon->range = distance;
+    cballoon->piercing = living.pierceUpgrade > 0;
+    cballoon->ghosting = living.ghostUpgrade > 0;
     balloon->addComponent(std::type_index(typeid(cBalloon)), std::unique_ptr<Component>(cballoon));
+
+    balloon->addComponent(std::type_index(typeid(cPathFinderRef)), std::unique_ptr<Component>(new cPathFinderRef(pfRef.cpf)));
 
     cSprite* sprite = new cSprite;
     if(living.rControlUpgrade == 0)
@@ -396,12 +297,6 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
         timer->time = BALLOON_ALIVE_TIME;
         balloon->addComponent(std::type_index(typeid(cTimer)), std::unique_ptr<Component>(timer));
     }
-
-    context.ecEngine->registerRemoveCall(balloon->getID(), [context, cballoon] () {
-        std::for_each(cballoon->wIndicators.begin(), cballoon->wIndicators.end(), [&context](int ID) {
-            context.ecEngine->removeEntity(ID);
-        });
-    });
 
     context.ecEngine->addEntity(std::unique_ptr<Entity>(balloon));
     return true;

@@ -8,6 +8,7 @@ struct cPosition;
 struct cBalloon;
 struct cControl;
 struct cTimer;
+struct cPathFinderRef;
 
 struct nBalloon : Node
 {
@@ -18,6 +19,7 @@ public:
     cBalloon* balloon;
     cControl* control;
     cTimer* timer;
+    cPathFinderRef* pfRef;
 
     bool checkEntity(Entity& entity);
     std::unique_ptr<Node> getNewNode();
@@ -25,6 +27,8 @@ public:
     void update(sf::Time dt, Context context);
 private:
     int ID;
+
+    void generateExplosions(Context context);
 };
 
 #endif

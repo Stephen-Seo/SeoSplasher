@@ -44,6 +44,8 @@ private:
     Engine ecEngine;
 
     std::mt19937 rGen;
+
+    unsigned char mode;
 };
 
 #endif

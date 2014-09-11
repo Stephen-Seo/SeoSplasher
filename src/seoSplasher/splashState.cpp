@@ -130,9 +130,7 @@ cpf(nullptr)
         }
     }
 
-    addCombatant(false);
-    addCombatant(false);
-    addCombatant(false);
+    addCombatant(true);
     addCombatant(false);
 
     initBreakables();

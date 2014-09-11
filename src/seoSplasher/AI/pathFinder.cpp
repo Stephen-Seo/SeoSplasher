@@ -201,6 +201,8 @@ void PathFinder::revalidateGrid(Engine& engine)
     }
 
     int x,y,xy;
+    std::list<std::pair<int, cBalloon*> > balloons;
+
     for(auto iter = engine.getEntityIterBegin(); iter != engine.getEntityIterEnd(); ++iter)
     {
         if(iter->second->removed || !iter->second->hasComponent(std::type_index(typeid(cPosition))))
@@ -214,13 +216,17 @@ void PathFinder::revalidateGrid(Engine& engine)
         x = (pos->x - (float)GRID_OFFSET_X + (float)(GRID_SQUARE_SIZE / 2))/GRID_SQUARE_SIZE;
         y = (pos->y - (float)GRID_OFFSET_Y + (float)(GRID_SQUARE_SIZE / 2))/GRID_SQUARE_SIZE;
         xy = x + y * GRID_WIDTH;
+
         if(iter->second->hasComponent(std::type_index(typeid(cLiving))))
         {
             validGrid[xy] |= 0x1;
             validGrid[GRID_TOTAL] |= 0x1;
         }
         else if(iter->second->hasComponent(std::type_index(typeid(cBalloon))))
-            validGrid[xy] |= 0x2;
+        {
+            validGrid[xy] |= 0x22;
+            balloons.push_back(std::make_pair(xy, static_cast<cBalloon*>(iter->second->getComponent(std::type_index(typeid(cBalloon))))));
+        }
         else if(iter->second->hasComponent(std::type_index(typeid(cBreakable))))
         {
             validGrid[xy] |= 0x4;
@@ -233,8 +239,50 @@ void PathFinder::revalidateGrid(Engine& engine)
         }
         else if(iter->second->hasComponent(std::type_index(typeid(cWall))))
             validGrid[xy] |= 0x10;
-        else if(iter->second->hasComponent(std::type_index(typeid(cWIndicator))))
-            validGrid[xy] |= 0x20;
     }
-    std::clog << std::hex << std::showbase << (unsigned int)validGrid[0] << std::dec << std::noshowbase << '\n';
+
+    int distance;
+    for(auto iter = balloons.begin(); iter != balloons.end(); ++iter)
+    {
+        distance = iter->second->range;
+        for(int i = iter->first - 1; (i + 1) % GRID_WIDTH != 0; --i)
+        {
+            if(!iter->second->ghosting && (validGrid[i] & 0x10) != 0)
+                break;
+            validGrid[i] |= 0x20;
+            if(--distance == 0 || (!iter->second->piercing && (validGrid[i] & 0x4) != 0))
+                break;
+        }
+
+        distance = iter->second->range;
+        for(int i = iter->first + 1; (i - 1) % GRID_WIDTH != GRID_WIDTH - 1; ++i)
+        {
+            if(!iter->second->ghosting && (validGrid[i] & 0x10) != 0)
+                break;
+            validGrid[i] |= 0x20;
+            if(--distance == 0 || (!iter->second->piercing && (validGrid[i] & 0x4) != 0))
+                break;
+        }
+
+        distance = iter->second->range;
+        for(int i = iter->first - GRID_WIDTH; i >= 0; i -= GRID_WIDTH)
+        {
+            if(!iter->second->ghosting && (validGrid[i] & 0x10) != 0)
+                break;
+            validGrid[i] |= 0x20;
+            if(--distance == 0 || (!iter->second->piercing && (validGrid[i] & 0x4) != 0))
+                break;
+        }
+
+        distance = iter->second->range;
+        for(int i = iter->first + GRID_WIDTH; i < GRID_TOTAL; i += GRID_WIDTH)
+        {
+            if(!iter->second->ghosting && (validGrid[i] & 0x10) != 0)
+                break;
+            validGrid[i] |= 0x20;
+            if(--distance == 0 || (!iter->second->piercing && (validGrid[i] & 0x4) != 0))
+                break;
+        }
+    }
+    std::clog << std::hex << std::showbase << (unsigned int)validGrid[GRID_TOTAL] << std::dec << std::noshowbase << '\n';
 }
