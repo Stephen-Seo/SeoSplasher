@@ -14,8 +14,6 @@
 #include "../cWall.hpp"
 #include "../cWIndicator.hpp"
 
-#include <iostream>
-
 PElement::PElement() :
 c(0),
 priority(0)
@@ -284,5 +282,4 @@ void PathFinder::revalidateGrid(Engine& engine)
                 break;
         }
     }
-    std::clog << std::hex << std::showbase << (unsigned int)validGrid[GRID_TOTAL] << std::dec << std::noshowbase << '\n';
 }

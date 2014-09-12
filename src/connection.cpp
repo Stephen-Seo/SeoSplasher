@@ -2,6 +2,7 @@
 #include "connection.hpp"
 
 Connection::Connection() :
+acceptNewConnections(true),
 mode(SERVER)
 {
     socket.bind(GAME_PORT);
@@ -9,6 +10,7 @@ mode(SERVER)
 }
 
 Connection::Connection(Mode mode) :
+acceptNewConnections(true),
 mode(mode)
 {
     socket.bind(GAME_PORT);
@@ -90,7 +92,7 @@ void Connection::update(sf::Time dt)
             if(!(packet >> ID) || !(packet >> sequence) || !(packet >> ack) || !(packet >> ackBitfield))
                 return;
 
-            if(ID == network::CONNECT)
+            if(ID == network::CONNECT && acceptNewConnections)
             {
                 if(IDMap.find(address.toInteger()) == IDMap.end())
                 {
@@ -331,7 +333,7 @@ void Connection::update(sf::Time dt)
             }
         }
         // connection not yet established
-        else
+        else if(acceptNewConnections)
         {
             // receive
             sf::Packet packet;
@@ -407,6 +409,12 @@ void Connection::sendPacket(sf::Packet& packet, sf::Uint32 sequenceID, sf::IpAdd
 void Connection::receivedPacket(sf::Packet packet)
 {}
 
+void Connection::connectionMade(sf::Uint32 address)
+{}
+
+void Connection::connectionLost(sf::Uint32 address)
+{}
+
 void Connection::registerConnection(sf::Uint32 address, sf::Uint32 ID)
 {
     heartbeatTimeMap.insert(std::make_pair(address, sf::Time()));
@@ -430,6 +438,8 @@ void Connection::registerConnection(sf::Uint32 address, sf::Uint32 ID)
     sentPackets.insert(std::make_pair(address, std::list<PacketInfo>()));
 
     rttMap.insert(std::make_pair(address, sf::Time()));
+
+    connectionMade(address);
 }
 
 void Connection::unregisterConnection(sf::Uint32 address)
@@ -447,6 +457,8 @@ void Connection::unregisterConnection(sf::Uint32 address)
     sentPackets.erase(address);
 
     rttMap.erase(address);
+
+    connectionLost(address);
 }
 
 void Connection::shiftBitfield(sf::IpAddress address, sf::Uint32 diff)

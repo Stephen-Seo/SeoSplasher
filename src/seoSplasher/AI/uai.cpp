@@ -2,7 +2,6 @@
 #include "uai.hpp"
 
 #include <queue>
-#include <iostream>
 
 #include "pathFinder.hpp"
 #include "../../ec/cPosition.hpp"
@@ -56,7 +55,6 @@ PAMapping UAI::determineAction(const cPosition& pos, const cLiving& living, Path
     for(unsigned char i = 0; i < wildness; ++i)
     {
         picked[i] = levels.top();
-        std::clog << "Action " << picked[i].action << " of priority " << picked[i].pm.priority << '\n';
 
         picked[i].pm.action = picked[i].action;
 

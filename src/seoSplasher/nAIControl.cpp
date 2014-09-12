@@ -3,7 +3,9 @@
 
 #include <typeindex>
 #include <algorithm>
+#ifndef NDEBUG
 #include <iostream>
+#endif
 #include <random>
 
 #include "cAIControl.hpp"
@@ -99,7 +101,9 @@ void nAIControl::update(sf::Time dt, Context context)
             r = dist(*context.rGen);
         }
 
+#ifndef NDEBUG
         std::clog << "STATE: " << control->currentAction << '\n';
+#endif
         vel->x = 0.0f;
         vel->y = 0.0f;
 
@@ -117,7 +121,9 @@ void nAIControl::update(sf::Time dt, Context context)
             case AI::GET_POWERUP:
                 if(pam.destination == -1)
                 {
+#ifndef NDEBUG
                     std::clog << "WARNING: failed to find valid powerup path\n";
+#endif
                     control->timer = 0.0f;
                     break;
                 }
@@ -125,7 +131,9 @@ void nAIControl::update(sf::Time dt, Context context)
             case AI::MOVE_TO_ENEMY:
                 if(pam.destination == -1)
                 {
+#ifndef NDEBUG
                     std::clog << "WARNING: failed to find valid path to enemy\n";
+#endif
                     control->timer = 0.0f;
                     break;
                 }
@@ -133,7 +141,9 @@ void nAIControl::update(sf::Time dt, Context context)
             case AI::MOVE_TO_BREAKABLE:
                 if(pam.destination == -1)
                 {
+#ifndef NDEBUG
                     std::clog << "WARNING: failed to find adjacent breakable\n";
+#endif
                     control->timer = 0.0f;
                     break;
                 }
@@ -141,7 +151,9 @@ void nAIControl::update(sf::Time dt, Context context)
             case AI::MOVE_TO_SAFETY:
                 if(pam.destination == -1)
                 {
+#ifndef NDEBUG
                     std::clog << "WARNING: failed to find safe spot\n";
+#endif
                     control->timer = 0.0f;
                     break;
                 }
@@ -184,7 +196,9 @@ void nAIControl::update(sf::Time dt, Context context)
                 {
                     if(rpaths.find(dest) == rpaths.end())
                     {
+#ifndef NDEBUG
                         std::clog << "WARNING: dest not in rpaths\n";
+#endif
                         break;
                     }
                     dest = rpaths[dest];
@@ -256,8 +270,9 @@ void nAIControl::update(sf::Time dt, Context context)
             {
                 if(prevDir == Direction::NONE)
                 {
+#ifndef NDEBUG
                     std::cerr << "ERROR: Failed to validate next tile on move, aligning to grid\n";
-                    std::clog << "prev is " << prev << '\n';
+#endif
                     rpaths.clear();
                 }
                 float offsetx = (pos->x - (float)GRID_OFFSET_X) / (float)GRID_SQUARE_SIZE;
