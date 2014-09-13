@@ -367,6 +367,8 @@ void Connection::update(sf::Time dt)
 
 void Connection::connectToServer(sf::IpAddress address)
 {
+    if(mode != CLIENT)
+        return;
 #ifndef NDEBUG
     std::cout << "CLIENT: sending connection request to server at " << address.toString() << '\n';
 #endif

@@ -2,14 +2,21 @@
 #ifndef SPLASH_NETWORK_IDENTIFIERS_HPP
 #define SPLASH_NETWORK_IDENTIFIERS_HPP
 
-#define PACKET_INIT 0
-#define PACKET_PJOINED 1
-#define PACKET_PLAYER 2
-#define PACKET_BALLOON 3
-#define PACKET_BRDESTROYED 4
-#define PACKET_PDESTROYED 5
-#define PACKET_BDESTROYED 6
-#define PACKET_PDEAD 7
+namespace SS
+{
+    enum Packet
+    {
+        PACKET_INIT,
+        PACKET_PJOINED,
+        PACKET_PLAYER,
+        PACKET_BALLOON,
+        PACKET_BRDESTROYED,
+        PACKET_PDESTROYED,
+        PACKET_BDESTROYED,
+        PACKET_PDEAD,
+        PACKET_GAME_STATE
+    };
+}
 
 /*
 PACKET_INIT
@@ -25,8 +32,11 @@ PACKET_PJOINED
         Contains the player ID of a new player that joined.
         TODO add info for custom names.
     From Client:
-        Client does not send PJOINED packets; Server automatically registers
-        newly connected clients.
+        Client sends custom name information as a PJOINED packet. This is
+        optional but will be sent as a list of characters followed by null
+        terminating character. Will only be accepted by server during setup
+        time.
+        //TODO check if null terminating character is the correct name for \0
 PACKET_PLAYER
     From Server:
         Contains type, pos, vel, and time left for movement information per

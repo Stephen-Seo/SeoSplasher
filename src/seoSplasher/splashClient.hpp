@@ -2,6 +2,7 @@
 #ifndef SPLASH_CLIENT_HPP
 #define SPLASH_CLIENT_HPP
 
+#include <string>
 #include <SFML/System.hpp>
 
 #include "../connection.hpp"
@@ -15,8 +16,9 @@ public:
 
     void update(sf::Time dt);
 
-    void remoteToggled(bool pressed);
+    void sendCustomName(std::string name);
     void balloonCreated(BalloonInfo info);
+    void remoteToggled(bool pressed);
 private:
     Context context;
 

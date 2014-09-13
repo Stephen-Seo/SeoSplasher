@@ -29,7 +29,7 @@ void SplashServer::notifyBalloonInfo(BalloonInfo info)
         sf::Packet packet;
         sf::Uint32 sequenceID;
         preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
-        packet << (sf::Uint8) PACKET_BALLOON;
+        packet << (sf::Uint8) SS::PACKET_BALLOON;
 
         packet << info.xy << info.type << info.range << info.timer;
 
@@ -47,7 +47,7 @@ void SplashServer::notifyBalloonDestroyed(BalloonInfo info)
         sf::Packet packet;
         sf::Uint32 sequenceID;
         preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
-        packet << (sf::Uint8) PACKET_BDESTROYED;
+        packet << (sf::Uint8) SS::PACKET_BDESTROYED;
 
         packet << info.xy << info.type << info.range << info.timer;
 
@@ -65,7 +65,7 @@ void SplashServer::notifyBreakableDestroyed(BDestroyedInfo info)
         sf::Packet packet;
         sf::Uint32 sequenceID;
         preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
-        packet << (sf::Uint8) PACKET_BRDESTROYED;
+        packet << (sf::Uint8) SS::PACKET_BRDESTROYED;
 
         packet << info.xy << info.ptype;
 
@@ -83,7 +83,7 @@ void SplashServer::notifyPowerupDestroyed(sf::Uint8 xy)
         sf::Packet packet;
         sf::Uint32 sequenceID;
         preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
-        packet << (sf::Uint8) PACKET_PDESTROYED;
+        packet << (sf::Uint8) SS::PACKET_PDESTROYED;
 
         packet << xy;
 
@@ -101,7 +101,7 @@ void SplashServer::notifyPlayerDead(sf::Uint8 ID)
         sf::Packet packet;
         sf::Uint32 sequenceID;
         preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
-        packet << (sf::Uint8) PACKET_PDEAD;
+        packet << (sf::Uint8) SS::PACKET_PDEAD;
 
         packet << ID;
 
@@ -121,7 +121,7 @@ void SplashServer::notifyFinalSetup()
 
         preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
 
-        packet << (sf::Uint8) PACKET_INIT;
+        packet << (sf::Uint8) SS::PACKET_INIT;
 
         // Get and send position of every breakable
         for(sf::Uint8 j = 0; j < GRID_TOTAL; ++j)
@@ -162,7 +162,7 @@ void SplashServer::notifyPlayerJoined(sf::Uint8 ID)
         sf::Uint32 sequenceID;
         preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
 
-        packet << (sf::Uint8) PACKET_PJOINED;
+        packet << (sf::Uint8) SS::PACKET_PJOINED;
 
         packet << ID;
 
@@ -178,7 +178,7 @@ void SplashServer::notifyPlayerJoined(sf::Uint8 ID)
         sf::Uint32 sequenceID;
         preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[ID]));
 
-        packet << (sf::Uint8) PACKET_PJOINED;
+        packet << (sf::Uint8) SS::PACKET_PJOINED;
 
         packet << (sf::Uint8) i;
 
@@ -197,7 +197,7 @@ void SplashServer::sendPlayerInfo(PlayerInfo info1, PlayerInfo info2, PlayerInfo
         sf::Uint32 sequenceID;
         preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
 
-        packet << (sf::Uint8) PACKET_PLAYER;
+        packet << (sf::Uint8) SS::PACKET_PLAYER;
 
         packet << info1.type;
         packet << info1.posx;
@@ -237,23 +237,23 @@ void SplashServer::receivedPacket(sf::Packet packet)
     if(!(packet >> packetID))
         return;
 
-    switch(packetID)
+    switch(packetID) //TODO
     {
-    case PACKET_INIT:
+    case SS::PACKET_INIT:
         break;
-    case PACKET_PJOINED:
+    case SS::PACKET_PJOINED:
         break;
-    case PACKET_PLAYER:
+    case SS::PACKET_PLAYER:
         break;
-    case PACKET_BALLOON:
+    case SS::PACKET_BALLOON:
         break;
-    case PACKET_BRDESTROYED:
+    case SS::PACKET_BRDESTROYED:
         break;
-    case PACKET_PDESTROYED:
+    case SS::PACKET_PDESTROYED:
         break;
-    case PACKET_BDESTROYED:
+    case SS::PACKET_BDESTROYED:
         break;
-    case PACKET_PDEAD:
+    case SS::PACKET_PDEAD:
         break;
     default:
         return;
