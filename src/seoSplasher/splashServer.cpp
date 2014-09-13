@@ -151,11 +151,12 @@ void SplashServer::notifyFinalSetup()
     }
 }
 
-void SplashServer::notifyPlayerJoined(sf::Uint8 ID)
+void SplashServer::notifyPlayerJoined(PlayerJoinInfo info)
 {
+    // Notify existing players of new player
     for(int i = 0; i < 4; ++i)
     {
-        if(!playerConnected[i] || ID == i)
+        if(!playerConnected[i] || info.ID == i)
             continue;
 
         sf::Packet packet;
@@ -164,25 +165,26 @@ void SplashServer::notifyPlayerJoined(sf::Uint8 ID)
 
         packet << (sf::Uint8) SS::PACKET_PJOINED;
 
-        packet << ID;
+        packet << info.ID << info.name;
 
         sendPacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
     }
 
+    // Notify new player of existing players
     for(int i = 0; i < 4; ++i)
     {
-        if(!playerConnected[i] || ID == i)
+        if(!playerConnected[i] || info.ID == i)
             continue;
 
         sf::Packet packet;
         sf::Uint32 sequenceID;
-        preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[ID]));
+        preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[info.ID]));
 
         packet << (sf::Uint8) SS::PACKET_PJOINED;
 
         packet << (sf::Uint8) i;
 
-        sendPacket(packet, sequenceID, sf::IpAddress(playerAddresses[ID]));
+        sendPacket(packet, sequenceID, sf::IpAddress(playerAddresses[info.ID]));
     }
 }
 
@@ -273,7 +275,10 @@ void SplashServer::connectionMade(sf::Uint32 address)
     if(playerConnected[0] && playerConnected[1] && playerConnected[2] && playerConnected[3])
         acceptNewConnections = false;
 
-    notifyPlayerJoined(i);
+    PlayerJoinInfo info;
+    info.ID = i;
+    info.name = "Player " + std::to_string(i);
+    notifyPlayerJoined(info);
 }
 
 void SplashServer::connectionLost(sf::Uint32 address)

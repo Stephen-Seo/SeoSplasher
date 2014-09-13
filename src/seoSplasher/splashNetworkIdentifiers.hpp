@@ -33,10 +33,9 @@ PACKET_PJOINED
         TODO add info for custom names.
     From Client:
         Client sends custom name information as a PJOINED packet. This is
-        optional but will be sent as a list of characters followed by null
-        terminating character. Will only be accepted by server during setup
+        optional but will be sent as a string. Will only be accepted by server
+        during setup.
         time.
-        //TODO check if null terminating character is the correct name for \0
 PACKET_PLAYER
     From Server:
         Contains type, pos, vel, and time left for movement information per
@@ -81,6 +80,12 @@ PACKET_PDEAD
         Client does not send PDEAD packets; server notifies all players when
         a player dies.
 */
+
+struct PlayerJoinInfo
+{
+    sf::Uint8 ID;
+    std::string name;
+};
 
 // 21 bytes
 struct PlayerInfo

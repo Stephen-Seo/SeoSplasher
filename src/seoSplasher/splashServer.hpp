@@ -41,7 +41,7 @@ private:
     std::queue<sf::Uint8> deadPlayers;
 
     void notifyFinalSetup();
-    void notifyPlayerJoined(sf::Uint8 ID);
+    void notifyPlayerJoined(PlayerJoinInfo info);
     void sendPlayerInfo(PlayerInfo info1, PlayerInfo info2, PlayerInfo info3, PlayerInfo info4);
 
     void receivedPacket(sf::Packet packet);
