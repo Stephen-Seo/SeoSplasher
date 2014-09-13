@@ -19,6 +19,96 @@ void SplashServer::gridUpdate(const unsigned char* grid)
         this->grid[i] = grid[i];
 }
 
+void SplashServer::notifyBalloonInfo(BalloonInfo info)
+{
+    for(int i = 0; i < GRID_TOTAL; ++i)
+    {
+        if(!playerConnected[i])
+            continue;
+
+        sf::Packet packet;
+        sf::Uint32 sequenceID;
+        preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
+        packet << (sf::Uint8) PACKET_BALLOON;
+
+        packet << info.xy << info.type << info.range << info.timer;
+
+        sendPacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
+    }
+}
+
+void SplashServer::notifyBalloonDestroyed(BalloonInfo info)
+{
+    for(int i = 0; i < GRID_TOTAL; ++i)
+    {
+        if(!playerConnected[i])
+            continue;
+
+        sf::Packet packet;
+        sf::Uint32 sequenceID;
+        preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
+        packet << (sf::Uint8) PACKET_BDESTROYED;
+
+        packet << info.xy << info.type << info.range << info.timer;
+
+        sendPacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
+    }
+}
+
+void SplashServer::notifyBreakableDestroyed(BDestroyedInfo info)
+{
+    for(int i = 0; i < GRID_TOTAL; ++i)
+    {
+        if(!playerConnected[i])
+            continue;
+
+        sf::Packet packet;
+        sf::Uint32 sequenceID;
+        preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
+        packet << (sf::Uint8) PACKET_BRDESTROYED;
+
+        packet << info.xy << info.ptype;
+
+        sendPacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
+    }
+}
+
+void SplashServer::notifyPowerupDestroyed(sf::Uint8 xy)
+{
+    for(int i = 0; i < GRID_TOTAL; ++i)
+    {
+        if(!playerConnected[i])
+            continue;
+
+        sf::Packet packet;
+        sf::Uint32 sequenceID;
+        preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
+        packet << (sf::Uint8) PACKET_PDESTROYED;
+
+        packet << xy;
+
+        sendPacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
+    }
+}
+
+void SplashServer::notifyPlayerDead(sf::Uint8 ID)
+{
+    for(int i = 0; i < GRID_TOTAL; ++i)
+    {
+        if(!playerConnected[i])
+            continue;
+
+        sf::Packet packet;
+        sf::Uint32 sequenceID;
+        preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
+        packet << (sf::Uint8) PACKET_PDEAD;
+
+        packet << ID;
+
+        sendPacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
+    }
+}
+
 void SplashServer::notifyFinalSetup()
 {
     for(int i = 0; i < 4; ++i)
@@ -162,8 +252,6 @@ void SplashServer::receivedPacket(sf::Packet packet)
     case PACKET_PDESTROYED:
         break;
     case PACKET_BDESTROYED:
-        break;
-    case PACKET_PICKUP:
         break;
     case PACKET_PDEAD:
         break;

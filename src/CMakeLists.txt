@@ -30,6 +30,7 @@ set(Game_Project_SOURCES
     seoSplasher/nPControl.cpp
     seoSplasher/nPFUpdater.cpp
     seoSplasher/nSplosion.cpp
+    seoSplasher/splashClient.cpp
     seoSplasher/splashServer.cpp
     seoSplasher/splashState.cpp
     seoSplasher/utility.cpp
