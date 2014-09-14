@@ -21,7 +21,7 @@ void SplashServer::gridUpdate(const unsigned char* grid)
 
 void SplashServer::notifyBalloonInfo(BalloonInfo info)
 {
-    for(int i = 0; i < GRID_TOTAL; ++i)
+    for(int i = 0; i < 4; ++i)
     {
         if(!playerConnected[i])
             continue;
@@ -39,7 +39,7 @@ void SplashServer::notifyBalloonInfo(BalloonInfo info)
 
 void SplashServer::notifyBalloonDestroyed(BalloonInfo info)
 {
-    for(int i = 0; i < GRID_TOTAL; ++i)
+    for(int i = 0; i < 4; ++i)
     {
         if(!playerConnected[i])
             continue;
@@ -49,15 +49,15 @@ void SplashServer::notifyBalloonDestroyed(BalloonInfo info)
         preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
         packet << (sf::Uint8) SS::PACKET_BDESTROYED;
 
-        packet << info.xy << info.type << info.range << info.timer;
+        packet << info.xy << info.type << info.range;
 
         sendPacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
     }
 }
 
-void SplashServer::notifyBreakableDestroyed(BDestroyedInfo info)
+void SplashServer::notifyBreakableDestroyed(BrDestroyedInfo info)
 {
-    for(int i = 0; i < GRID_TOTAL; ++i)
+    for(int i = 0; i < 4; ++i)
     {
         if(!playerConnected[i])
             continue;
@@ -75,7 +75,7 @@ void SplashServer::notifyBreakableDestroyed(BDestroyedInfo info)
 
 void SplashServer::notifyPowerupDestroyed(sf::Uint8 xy)
 {
-    for(int i = 0; i < GRID_TOTAL; ++i)
+    for(int i = 0; i < 4; ++i)
     {
         if(!playerConnected[i])
             continue;
@@ -93,7 +93,7 @@ void SplashServer::notifyPowerupDestroyed(sf::Uint8 xy)
 
 void SplashServer::notifyPlayerDead(sf::Uint8 ID)
 {
-    for(int i = 0; i < GRID_TOTAL; ++i)
+    for(int i = 0; i < 4; ++i)
     {
         if(!playerConnected[i])
             continue;
@@ -104,6 +104,24 @@ void SplashServer::notifyPlayerDead(sf::Uint8 ID)
         packet << (sf::Uint8) SS::PACKET_PDEAD;
 
         packet << ID;
+
+        sendPacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
+    }
+}
+
+void SplashServer::notifyGameState(SS::GameState state)
+{
+    for(int i = 0; i < 4; ++i)
+    {
+        if(!playerConnected[i])
+            continue;
+
+        sf::Packet packet;
+        sf::Uint32 sequenceID;
+        preparePacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
+        packet << (sf::Uint8) SS::PACKET_GAME_STATE;
+
+        packet << (sf::Uint8) state;
 
         sendPacket(packet, sequenceID, sf::IpAddress(playerAddresses[i]));
     }

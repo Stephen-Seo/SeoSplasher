@@ -122,7 +122,7 @@ struct BalloonInfo
 };
 
 // 2 bytes
-struct BDestroyedInfo
+struct BrDestroyedInfo
 {
     sf::Uint8 xy;
     sf::Uint8 ptype;
@@ -142,7 +142,7 @@ struct BDestroyedInfo
 
 namespace SS
 {
-    enum GameStatus
+    enum GameState
     {
         WAITING,
         STARTED,

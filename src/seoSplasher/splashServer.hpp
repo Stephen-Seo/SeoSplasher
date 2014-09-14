@@ -21,9 +21,10 @@ public:
     void gridUpdate(const unsigned char* grid);
     void notifyBalloonInfo(BalloonInfo info);
     void notifyBalloonDestroyed(BalloonInfo info);
-    void notifyBreakableDestroyed(BDestroyedInfo info);
+    void notifyBreakableDestroyed(BrDestroyedInfo info);
     void notifyPowerupDestroyed(sf::Uint8 xy);
     void notifyPlayerDead(sf::Uint8 ID);
+    void notifyGameState(SS::GameState state);
 
 private:
     Context context;
@@ -36,7 +37,7 @@ private:
     sf::Uint32 playerAddresses[4];
 
     std::queue<BalloonInfo> newBalloons;
-    std::queue<BDestroyedInfo> destBreakables;
+    std::queue<BrDestroyedInfo> destBreakables;
     std::queue<sf::Uint8> destPowerups;
     std::queue<sf::Uint8> deadPlayers;
 

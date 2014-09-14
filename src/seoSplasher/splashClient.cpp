@@ -112,16 +112,58 @@ void SplashClient::receivedPacket(sf::Packet packet)
     }
         break;
     case SS::PACKET_BALLOON:
+    {
+        BalloonInfo info;
+        if(!(packet >> info.xy) || !(packet >> info.type) || !(packet >> info.range) || !(packet >> info.timer))
+            return;
+
+        //TODO update local info
+    }
         break;
     case SS::PACKET_BRDESTROYED:
+    {
+        BrDestroyedInfo info;
+        if(!(packet >> info.xy) || !(packet >> info.ptype))
+            return;
+
+        //TODO update local info
+    }
         break;
     case SS::PACKET_PDESTROYED:
+    {
+        sf::Uint8 xy;
+        if(!(packet >> xy))
+            return;
+
+        //TODO update local info
+    }
         break;
     case SS::PACKET_BDESTROYED:
+    {
+        BalloonInfo info;
+        if(!(packet >> info.xy) || !(packet >> info.type) || !(packet >> info.range))
+            return;
+
+        //TODO update local info
+    }
         break;
     case SS::PACKET_PDEAD:
+    {
+        sf::Uint8 ID;
+        if(!(packet >> ID))
+            return;
+
+        //TODO update local info
+    }
         break;
     case SS::PACKET_GAME_STATE:
+    {
+        sf::Uint8 state;
+        if(!(packet >> state))
+            return;
+
+        //TODO update local info
+    }
         break;
     default:
         break;
