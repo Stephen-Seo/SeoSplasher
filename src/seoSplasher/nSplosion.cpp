@@ -82,7 +82,8 @@ void nSplosion::update(sf::Time dt, Context context)
 
         for(auto iter = infoPowerup.hit.begin(); iter != infoPowerup.hit.end(); ++iter)
         {
-            context.ecEngine->removeEntity((*iter)->getID());
+            cPickup* pickup = static_cast<cPickup*>((*iter)->getComponent(std::type_index(typeid(cPickup))));
+            pickup->hit = true;
         }
     }
 

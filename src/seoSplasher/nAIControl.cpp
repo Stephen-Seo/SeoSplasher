@@ -313,6 +313,10 @@ void nAIControl::update(sf::Time dt, Context context)
     HitInfo powerinfo = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cPickup)), *context.ecEngine);
     for(auto piter = powerinfo.hit.begin(); piter != powerinfo.hit.end(); ++piter)
     {
+        cPickup* pickup = static_cast<cPickup*>((*piter)->getComponent(std::type_index(typeid(cPickup))));
+        if(pickup->hit)
+            continue;
+
         cPowerup* powerup = static_cast<cPowerup*>((*piter)->getComponent(std::type_index(typeid(cPowerup))));
 
         switch(powerup->powerup)
@@ -348,10 +352,10 @@ void nAIControl::update(sf::Time dt, Context context)
             break;
         }
 
-        context.ecEngine->removeEntity((*piter)->getID());
+        pickup->hit = true;
     }
 
-    if(living->rControlUpgrade > 0)
+    if(living->rControlUpgrade > 0) //TODO fix inDanger detection
     {
         bool inDanger = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cWIndicator)), *context.ecEngine);
         if(justPlacedBalloon || inDanger)

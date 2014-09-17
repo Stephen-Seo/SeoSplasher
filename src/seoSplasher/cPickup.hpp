@@ -6,6 +6,7 @@
 
 struct cPickup : Component
 {
+    bool hit = false;
 };
 
 #endif

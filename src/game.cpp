@@ -2,6 +2,7 @@
 #include "game.hpp"
 
 #include "seoSplasher/splashState.hpp"
+#include "seoSplasher/splashMenu.hpp"
 
 // set packfile name/filepath if one is being used
 #define PACKFILE_NAME "seoSplasherResources.dat"
@@ -31,7 +32,7 @@ mPlayer(),
 sPlayer(),
 stateStack(Context(window, resourceManager, mPlayer, sPlayer, ecEngine, rGen, isQuitting, mode)),
 isQuitting(false),
-mode(1)
+mode(0)
 {
     registerResources();
     registerStates();
@@ -138,6 +139,8 @@ void Game::registerResources()
     resourceManager.registerTexture(Textures::GHOST_UPGRADE_0, "ghostUp00.png");
     resourceManager.registerTexture(Textures::GHOST_UPGRADE_1, "ghostUp01.png");
     resourceManager.registerTexture(Textures::GHOST_UPGRADE_2, "ghostUp02.png");
+
+    resourceManager.registerFont(Fonts::CLEAR_SANS, "ClearSans-Regular.ttf");
 }
 
 // register states via stateStack
@@ -145,6 +148,7 @@ void Game::registerResources()
 void Game::registerStates()
 {
     stateStack.registerState<SplashState>(States::SPLASH);
+    stateStack.registerState<SplashMenu>(States::MENU);
 
-    stateStack.pushState(States::SPLASH);
+    stateStack.pushState(States::MENU);
 }

@@ -5,10 +5,14 @@
 #include "../state.hpp"
 
 #include <random>
+#include <memory>
 
 #include "cPlayerControl.hpp"
 #include "cPowerup.hpp"
 #include "direction.hpp"
+
+class SplashServer;
+class SplashClient;
 
 struct cPathFinder;
 
@@ -37,8 +41,13 @@ private:
 
     cPathFinder* cpf;
 
+    std::unique_ptr<SplashServer> server;
+    std::unique_ptr<SplashClient> client;
+
+    std::map<int, int> playerIDToEntityID;
+
     void addWall(float x, float y);
-    void addCombatant(bool isPlayer);
+    void addCombatant(bool isPlayer, bool isPlayerLocallyControlled, int forceID = -1);
     void addPathFinder();
 
     void checkReleasedInput();

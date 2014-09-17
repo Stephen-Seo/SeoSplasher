@@ -7,7 +7,8 @@ namespace States
     {
         None,
         Quit,
-        SPLASH
+        SPLASH,
+        MENU
     };
 }
 

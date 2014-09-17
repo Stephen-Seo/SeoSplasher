@@ -27,6 +27,9 @@
 #include "cPathFinderRef.hpp"
 #include "nAIControl.hpp"
 #include "nPFUpdater.hpp"
+#include "splashServer.hpp"
+#include "splashClient.hpp"
+#include "nPickupHit.hpp"
 
 SplashState::SplashState(StateStack& stack, Context context) :
 State(stack, context),
@@ -44,6 +47,21 @@ dRight(false),
 cFired(false),
 cpf(nullptr)
 {
+    // set servers based on mode
+
+    if(*context.mode == 2) // is server
+    {
+        server = std::unique_ptr<SplashServer>(new SplashServer(context, false));
+    }
+    else if(*context.mode == 3 || *context.mode == 4) // is dedicated server
+    {
+        server = std::unique_ptr<SplashServer>(new SplashServer(context, true));
+    }
+    else if(*context.mode == 1) // is client
+    {
+        client = std::unique_ptr<SplashClient>(new SplashClient(context));
+    }
+
     // seed random generator
     {
         std::seed_seq seq{std::random_device()(),(unsigned int)std::time(NULL)};
@@ -51,98 +69,114 @@ cpf(nullptr)
     }
 
     // resources
-    tset.insert(Textures::WALL);
-    tset.insert(Textures::BREAKABLE);
-    tset.insert(Textures::PLAYER_ONE);
-    tset.insert(Textures::PLAYER_TWO);
-    tset.insert(Textures::PLAYER_THREE);
-    tset.insert(Textures::PLAYER_FOUR);
-    tset.insert(Textures::C_PLAYER_ONE);
-    tset.insert(Textures::C_PLAYER_TWO);
-    tset.insert(Textures::C_PLAYER_THREE);
-    tset.insert(Textures::C_PLAYER_FOUR);
-    tset.insert(Textures::BALLOON_0);
-    tset.insert(Textures::BALLOON_1);
-    tset.insert(Textures::BALLOON_2);
-    tset.insert(Textures::SUPER_BALLOON_0);
-    tset.insert(Textures::SUPER_BALLOON_1);
-    tset.insert(Textures::SUPER_BALLOON_2);
-    tset.insert(Textures::C_BALLOON_0);
-    tset.insert(Textures::C_BALLOON_1);
-    tset.insert(Textures::C_BALLOON_2);
-    tset.insert(Textures::C_SUPER_BALLOON_0);
-    tset.insert(Textures::C_SUPER_BALLOON_1);
-    tset.insert(Textures::C_SUPER_BALLOON_2);
-    tset.insert(Textures::SPLOSION_PLUS);
-    tset.insert(Textures::SPLOSION_VERT);
-    tset.insert(Textures::SPLOSION_HORIZ);
-    tset.insert(Textures::BALLOON_UP_0);
-    tset.insert(Textures::BALLOON_UP_1);
-    tset.insert(Textures::BALLOON_UP_2);
-    tset.insert(Textures::RANGE_UP_0);
-    tset.insert(Textures::RANGE_UP_1);
-    tset.insert(Textures::RANGE_UP_2);
-    tset.insert(Textures::SPEED_UP_0);
-    tset.insert(Textures::SPEED_UP_1);
-    tset.insert(Textures::SPEED_UP_2);
-    tset.insert(Textures::KICK_UPGRADE_0);
-    tset.insert(Textures::KICK_UPGRADE_1);
-    tset.insert(Textures::KICK_UPGRADE_2);
-    tset.insert(Textures::RCONTROL_UPGRADE_0);
-    tset.insert(Textures::RCONTROL_UPGRADE_1);
-    tset.insert(Textures::RCONTROL_UPGRADE_2);
-    tset.insert(Textures::SBALLOON_UPGRADE_0);
-    tset.insert(Textures::SBALLOON_UPGRADE_1);
-    tset.insert(Textures::SBALLOON_UPGRADE_2);
-    tset.insert(Textures::PIERCE_UPGRADE_0);
-    tset.insert(Textures::PIERCE_UPGRADE_1);
-    tset.insert(Textures::PIERCE_UPGRADE_2);
-    tset.insert(Textures::SPREAD_UPGRADE_0);
-    tset.insert(Textures::SPREAD_UPGRADE_1);
-    tset.insert(Textures::SPREAD_UPGRADE_2);
-    tset.insert(Textures::GHOST_UPGRADE_0);
-    tset.insert(Textures::GHOST_UPGRADE_1);
-    tset.insert(Textures::GHOST_UPGRADE_2);
+    if(*context.mode != 4) // not no-draw mode
+    {
+        tset.insert(Textures::WALL);
+        tset.insert(Textures::BREAKABLE);
+        tset.insert(Textures::PLAYER_ONE);
+        tset.insert(Textures::PLAYER_TWO);
+        tset.insert(Textures::PLAYER_THREE);
+        tset.insert(Textures::PLAYER_FOUR);
+        tset.insert(Textures::C_PLAYER_ONE);
+        tset.insert(Textures::C_PLAYER_TWO);
+        tset.insert(Textures::C_PLAYER_THREE);
+        tset.insert(Textures::C_PLAYER_FOUR);
+        tset.insert(Textures::BALLOON_0);
+        tset.insert(Textures::BALLOON_1);
+        tset.insert(Textures::BALLOON_2);
+        tset.insert(Textures::SUPER_BALLOON_0);
+        tset.insert(Textures::SUPER_BALLOON_1);
+        tset.insert(Textures::SUPER_BALLOON_2);
+        tset.insert(Textures::C_BALLOON_0);
+        tset.insert(Textures::C_BALLOON_1);
+        tset.insert(Textures::C_BALLOON_2);
+        tset.insert(Textures::C_SUPER_BALLOON_0);
+        tset.insert(Textures::C_SUPER_BALLOON_1);
+        tset.insert(Textures::C_SUPER_BALLOON_2);
+        tset.insert(Textures::SPLOSION_PLUS);
+        tset.insert(Textures::SPLOSION_VERT);
+        tset.insert(Textures::SPLOSION_HORIZ);
+        tset.insert(Textures::BALLOON_UP_0);
+        tset.insert(Textures::BALLOON_UP_1);
+        tset.insert(Textures::BALLOON_UP_2);
+        tset.insert(Textures::RANGE_UP_0);
+        tset.insert(Textures::RANGE_UP_1);
+        tset.insert(Textures::RANGE_UP_2);
+        tset.insert(Textures::SPEED_UP_0);
+        tset.insert(Textures::SPEED_UP_1);
+        tset.insert(Textures::SPEED_UP_2);
+        tset.insert(Textures::KICK_UPGRADE_0);
+        tset.insert(Textures::KICK_UPGRADE_1);
+        tset.insert(Textures::KICK_UPGRADE_2);
+        tset.insert(Textures::RCONTROL_UPGRADE_0);
+        tset.insert(Textures::RCONTROL_UPGRADE_1);
+        tset.insert(Textures::RCONTROL_UPGRADE_2);
+        tset.insert(Textures::SBALLOON_UPGRADE_0);
+        tset.insert(Textures::SBALLOON_UPGRADE_1);
+        tset.insert(Textures::SBALLOON_UPGRADE_2);
+        tset.insert(Textures::PIERCE_UPGRADE_0);
+        tset.insert(Textures::PIERCE_UPGRADE_1);
+        tset.insert(Textures::PIERCE_UPGRADE_2);
+        tset.insert(Textures::SPREAD_UPGRADE_0);
+        tset.insert(Textures::SPREAD_UPGRADE_1);
+        tset.insert(Textures::SPREAD_UPGRADE_2);
+        tset.insert(Textures::GHOST_UPGRADE_0);
+        tset.insert(Textures::GHOST_UPGRADE_1);
+        tset.insert(Textures::GHOST_UPGRADE_2);
 
-    context.resourceManager->loadResources(getNeededResources());
-
+        context.resourceManager->loadResources(getNeededResources());
+    }
 
     // add systems
+
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nPControl));
-    context.ecEngine->addSystem(std::unique_ptr<Node>(new nAIControl));
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nMove));
-    context.ecEngine->addSystem(std::unique_ptr<Node>(new nBalloon));
-    context.ecEngine->addSystem(std::unique_ptr<Node>(new nSplosion));
-    context.ecEngine->addSystem(std::unique_ptr<Node>(new nAnimated));
-    context.ecEngine->addSystem(std::unique_ptr<Node>(new nBreakable));
-    context.ecEngine->addSystem(std::unique_ptr<Node>(new nDeath));
-    context.ecEngine->addSystem(std::unique_ptr<Node>(new nPFUpdater));
-    context.ecEngine->addDrawSystem(std::unique_ptr<Node>(new nDraw));
+
+    if(*context.mode != 1) // not client
+    {
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nAIControl));
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nBalloon));
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nSplosion));
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nBreakable));
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nDeath));
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nPickupHit));
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nPFUpdater));
+    }
+
+    if(*context.mode != 4) // is not no-draw mode
+    {
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nAnimated));
+        context.ecEngine->addDrawSystem(std::unique_ptr<Node>(new nDraw));
+    }
 
     // add entities
     addPathFinder();
 
     for(int i = 0; i < 15; ++i)
     {
-        addWall(88.0f, 32.0f * (float)i);
-        addWall(600.0f, 32.0f * (float)i);
-        addWall(120.0f + 32.0f * (float)i, -32.0f);
-        addWall(120.0f + 32.0f * (float)i, 480.0f);
+        addWall(GRID_OFFSET_X - GRID_SQUARE_SIZE, GRID_OFFSET_Y + GRID_SQUARE_SIZE * i);
+        addWall(GRID_RIGHT, GRID_OFFSET_Y + GRID_SQUARE_SIZE * i);
+        addWall(GRID_OFFSET_X + GRID_SQUARE_SIZE * i, GRID_OFFSET_Y - GRID_SQUARE_SIZE);
+        addWall(GRID_OFFSET_X + GRID_SQUARE_SIZE * i, GRID_BOTTOM);
         if(i < 7)
         {
             for(int j = 0; j < 7; ++j)
             {
-                addWall(152.0f + 64.0f * (float)i, 32.0f + 64.0f * (float)j);
+                addWall(GRID_OFFSET_X + GRID_SQUARE_SIZE + GRID_SQUARE_SIZE * 2 * i, GRID_OFFSET_Y + GRID_SQUARE_SIZE + GRID_SQUARE_SIZE * 2 * j);
             }
         }
     }
 
-    addCombatant(true);
-    addCombatant(false);
-    addCombatant(false);
-    addCombatant(false);
+    if(*context.mode == 0) // local singleplayer
+    {
+        addCombatant(true, true);
+        addCombatant(false, false);
+        addCombatant(false, false);
+        addCombatant(false, false);
+    }
 
-    initBreakables();
+    if(*context.mode != 1) // not client
+        initBreakables();
 
     // other initializations
     fieldBG.setFillColor(sf::Color(127,127,127));
@@ -151,9 +185,12 @@ cpf(nullptr)
 
 void SplashState::draw()
 {
-    getContext().window->draw(fieldBG);
+    if(*getContext().mode != 4) // not no-draw mode
+    {
+        getContext().window->draw(fieldBG);
 
-    getContext().ecEngine->draw(getContext());
+        getContext().ecEngine->draw(getContext());
+    }
 }
 
 bool SplashState::update(sf::Time dt)
@@ -218,6 +255,12 @@ bool SplashState::handleEvent(const sf::Event& event)
     {
         cFired = false;
     }
+    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
+    {
+        getContext().ecEngine->clear();
+        requestStackClear();
+        requestStackPush(States::MENU);
+    }
     return false;
 }
 
@@ -230,9 +273,12 @@ void SplashState::addWall(float x, float y)
     pos->y = y;
     wall->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
 
-    cSprite* sprite = new cSprite;
-    sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::WALL));
-    wall->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
+    if(*getContext().mode != 4)
+    {
+        cSprite* sprite = new cSprite;
+        sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::WALL));
+        wall->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
+    }
 
     cWall* cwall = new cWall;
     wall->addComponent(std::type_index(typeid(cWall)), std::unique_ptr<Component>(cwall));
@@ -240,86 +286,114 @@ void SplashState::addWall(float x, float y)
     getContext().ecEngine->addEntity(std::unique_ptr<Entity>(wall));
 }
 
-void SplashState::addCombatant(bool isPlayer)
+void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, int forceID)
 {
-    unsigned int ID = IDcounter++;
+    unsigned int ID;
+    if(forceID >= 0 && forceID < 4)
+        ID = forceID;
+    else
+        ID = IDcounter++;
 
-    Entity* combatant = new Entity;
+    std::unique_ptr<Entity> combatant = std::unique_ptr<Entity>(new Entity);
 
-    cPosition* pos = new cPosition;
-    cSprite* sprite = new cSprite;
+    std::unique_ptr<Component> posP = std::unique_ptr<Component>(new cPosition);
+    cPosition* pos = static_cast<cPosition*>(posP.get());
+
+    std::unique_ptr<Component> spriteP;
+    if(*getContext().mode != 4)
+        spriteP = std::unique_ptr<Component>(new cSprite);
+
     switch(ID)
     {
     case 0:
         pos->x = 120.0f;
         pos->y = 0.0f;
         pos->rot = 0.0f;
-        if(isPlayer)
-            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::PLAYER_ONE));
-        else
-            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::C_PLAYER_ONE));
+        if(spriteP)
+        {
+            cSprite* sprite = static_cast<cSprite*>(spriteP.get());
+            if(isPlayer)
+                sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::PLAYER_ONE));
+            else
+                sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::C_PLAYER_ONE));
+        }
         break;
     case 1:
         pos->x = 568.0f;
         pos->y = 0.0f;
         pos->rot = 0.0f;
-        if(isPlayer)
-            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::PLAYER_TWO));
-        else
-            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::C_PLAYER_TWO));
+        if(spriteP)
+        {
+            cSprite* sprite = static_cast<cSprite*>(spriteP.get());
+            if(isPlayer)
+                sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::PLAYER_TWO));
+            else
+                sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::C_PLAYER_TWO));
+        }
         break;
     case 2:
         pos->x = 120.0f;
         pos->y = 448.0f;
         pos->rot = 0.0f;
-        if(isPlayer)
-            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::PLAYER_THREE));
-        else
-            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::C_PLAYER_THREE));
+        if(spriteP)
+        {
+            cSprite* sprite = static_cast<cSprite*>(spriteP.get());
+            if(isPlayer)
+                sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::PLAYER_THREE));
+            else
+                sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::C_PLAYER_THREE));
+        }
         break;
     case 3:
         pos->x = 568.0f;
         pos->y = 448.0f;
         pos->rot = 0.0f;
-        if(isPlayer)
-            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::PLAYER_FOUR));
-        else
-            sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::C_PLAYER_FOUR));
+        if(spriteP)
+        {
+            cSprite* sprite = static_cast<cSprite*>(spriteP.get());
+            if(isPlayer)
+                sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::PLAYER_FOUR));
+            else
+                sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::C_PLAYER_FOUR));
+        }
         break;
     default:
-        delete pos;
-        delete sprite;
-        delete combatant;
         return;
     }
-    combatant->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
-    combatant->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
 
-    cVelocity* vel = new cVelocity;
+    playerIDToEntityID.insert(std::make_pair(ID, combatant->getID()));
+
+    combatant->addComponent(std::type_index(typeid(cPosition)), std::move(posP));
+    combatant->addComponent(std::type_index(typeid(cSprite)), std::move(spriteP));
+
+    std::unique_ptr<Component> velP = std::unique_ptr<Component>(new cVelocity);
+    cVelocity* vel = static_cast<cVelocity*>(velP.get());
     vel->x = 0.0f;
     vel->y = 0.0f;
     vel->rot = 0.0f;
-    combatant->addComponent(std::type_index(typeid(cVelocity)), std::unique_ptr<Component>(vel));
+    combatant->addComponent(std::type_index(typeid(cVelocity)), std::move(velP));
 
-    cLiving* living = new cLiving;
+    std::unique_ptr<Component> livingP = std::unique_ptr<Component>(new cLiving);
+    cLiving* living = static_cast<cLiving*>(livingP.get());
     living->ID = ID;
-    combatant->addComponent(std::type_index(typeid(cLiving)), std::unique_ptr<Component>(living));
+    combatant->addComponent(std::type_index(typeid(cLiving)), std::move(livingP));
 
-    if(isPlayer)
+    if(isPlayer && isPlayerLocallyControlled)
     {
         combatant->addComponent(std::type_index(typeid(cPlayerControl)), std::unique_ptr<Component>(new cPlayerControl(&dir, &placeBalloon, &placeAction, &kick, &kickAction, ID, &cFired)));
     }
-    else
+    else if(!isPlayer && *getContext().mode != 1) // not client
     {
-        cAIControl* control = new cAIControl;
+        std::unique_ptr<Component> controlP = std::unique_ptr<Component>(new cAIControl);
+        cAIControl* control = static_cast<cAIControl*>(controlP.get());
         control->ID = ID;
         control->pf = &cpf->pf;
-        combatant->addComponent(std::type_index(typeid(cAIControl)), std::unique_ptr<Component>(control));
+        combatant->addComponent(std::type_index(typeid(cAIControl)), std::move(controlP));
     }
 
     combatant->addComponent(std::type_index(typeid(cPathFinderRef)), std::unique_ptr<Component>(new cPathFinderRef(cpf)));
 
-    getContext().ecEngine->addEntity(std::unique_ptr<Entity>(combatant));
+    getContext().ecEngine->addEntity(std::move(combatant));
 }
 
 void SplashState::addPathFinder()

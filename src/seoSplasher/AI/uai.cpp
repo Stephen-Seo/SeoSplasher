@@ -191,7 +191,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
         if((info & 0x40) != 0)
         {
             pm.paths = pf.getValidDestinations(pos, engine, 0x34, grid);
-            int pdist = -1, tdist, tx, ty;
+            int pdist = -1, tdist = 0, tx, ty;
             for(auto iter = pm.paths.begin(); iter != pm.paths.end(); ++iter)
             {
                 if((grid[iter->first] & 0x8) != 0)
@@ -216,7 +216,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
         if((info & 0x10) != 0)
         {
             pm.paths = pf.getValidDestinations(pos, engine, 0x34, grid);
-            int tx, ty, pdist = -1, tdist;
+            int tx, ty, pdist = -1, tdist = 0;
             for(auto iter = pm.paths.begin(); iter != pm.paths.end(); ++iter)
             {
                 if(xy != iter->first && (grid[iter->first] & 0x1) != 0)
@@ -242,7 +242,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
         if((info & 0x20) != 0)
         {
             pm.paths = pf.getValidDestinations(pos,engine, 0x34, grid);
-            int tx, ty, pdist = -1, tdist;
+            int tx, ty, pdist = -1, tdist = 0;
             for(auto iter = pm.paths.begin(); iter != pm.paths.end(); ++iter)
             {
                 if(iter->first % GRID_WIDTH != 0 && (grid[iter->first - 1] & 0x4) != 0)
@@ -305,7 +305,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
 
             postGrid[xy] &= 0xFD;
             pm.paths = pf.getValidDestinations(pos, engine, 0x16, postGrid);
-            int tx, ty, pdist = -1, tdist;
+            int tx, ty, pdist = -1, tdist = 0;
             for(auto iter = pm.paths.begin(); iter != pm.paths.end(); ++iter)
             {
                 if((grid[iter->first] & 0x20) == 0)

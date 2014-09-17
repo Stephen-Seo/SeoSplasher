@@ -12,11 +12,13 @@
 #include "cWall.hpp"
 #include "cBalloon.hpp"
 #include "cLiving.hpp"
+#include "cMoveDisabler.hpp"
 
 nMove::nMove() :
 pos(nullptr),
 vel(nullptr),
-living(nullptr)
+living(nullptr),
+disable(nullptr)
 {}
 
 bool nMove::checkEntity(Entity& entity)
@@ -40,12 +42,22 @@ void nMove::getCReferencesFromEntity(Entity& entity)
     {
         living = static_cast<cLiving*>(entity.getComponent(std::type_index(typeid(cLiving))));
     }
+    if(entity.hasComponent(std::type_index(typeid(cMoveDisabler))))
+    {
+        disable = static_cast<cMoveDisabler*>(entity.getComponent(std::type_index(typeid(cLiving))));
+    }
 }
 
 void nMove::update(sf::Time dt, Context context)
 {
     if(*entityRemoved)
         return;
+    if(disable && disable->disable)
+    {
+        vel->x = 0.0f;
+        vel->y = 0.0f;
+        return;
+    }
 
     bool ignoreBalloons = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
 

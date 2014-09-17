@@ -32,15 +32,14 @@ struct Context
     Engine* ecEngine;
     std::mt19937* rGen;
     bool* isQuitting;
-    /**
-     * 0000 = computers
-     * 0001 = singleplayer
-     * 0010 = 2 player multiplayer
-     * 0011 = 3 player multiplayer
-     * 0100 = 4 player multiplayer
-     * 1000 = is server
-    **/
     unsigned char* mode;
+    /** mode
+     * 0 = local singleplayer
+     * 1 = networked client multiplayer
+     * 2 = server multiplayer
+     * 3 = dedicated server multiplayer
+     * 4 = dedicated server multiplayer (no draw)
+    **/
 };
 
 #endif

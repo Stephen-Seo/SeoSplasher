@@ -13,6 +13,7 @@
 struct cPosition;
 struct cVelocity;
 struct cLiving;
+struct cMoveDisabler;
 
 struct nMove : Node
 {
@@ -21,6 +22,7 @@ struct nMove : Node
     cPosition* pos;
     cVelocity* vel;
     cLiving* living;
+    cMoveDisabler* disable;
 
     bool isBalloon;
 

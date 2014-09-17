@@ -75,6 +75,7 @@ namespace Fonts
 {
     enum ID
     {
+        CLEAR_SANS
     };
 }
 

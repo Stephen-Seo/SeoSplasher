@@ -62,6 +62,16 @@ void Engine::removeEntity(int eID)
     }
 }
 
+void Engine::clear()
+{
+    systems.clear();
+    drawSystems.clear();
+    entityMap.clear();
+    rfMap.clear();
+    while(!deadQueue.empty())
+        deadQueue.pop();
+}
+
 std::map<int, std::unique_ptr<Entity> >::iterator Engine::getEntityIterBegin()
 {
     return entityMap.begin();

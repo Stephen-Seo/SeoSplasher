@@ -92,6 +92,10 @@ void nPControl::update(sf::Time dt, Context context)
     HitInfo powerinfo = Utility::collideAgainstComponentList(pos->x, pos->y, nPControl::powerupFilter, *context.ecEngine);
     for(auto piter = powerinfo.hit.begin(); piter != powerinfo.hit.end(); ++piter)
     {
+        cPickup* pickup = static_cast<cPickup*>((*piter)->getComponent(std::type_index(typeid(cPickup))));
+        if(pickup->hit)
+            continue;
+
         cPowerup* powerup = static_cast<cPowerup*>((*piter)->getComponent(std::type_index(typeid(cPowerup))));
 
         switch(powerup->powerup)
@@ -127,6 +131,6 @@ void nPControl::update(sf::Time dt, Context context)
             break;
         }
 
-        context.ecEngine->removeEntity((*piter)->getID());
+        pickup->hit = true;
     }
 }

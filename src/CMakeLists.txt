@@ -29,8 +29,10 @@ set(Game_Project_SOURCES
     seoSplasher/nMove.cpp
     seoSplasher/nPControl.cpp
     seoSplasher/nPFUpdater.cpp
+    seoSplasher/nPickupHit.cpp
     seoSplasher/nSplosion.cpp
     seoSplasher/splashClient.cpp
+    seoSplasher/splashMenu.cpp
     seoSplasher/splashServer.cpp
     seoSplasher/splashState.cpp
     seoSplasher/utility.cpp
