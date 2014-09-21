@@ -14,6 +14,19 @@ if(hasProperty('SFML2_DIR'))
                 operatingSystem "linux"
                 architecture "x86"
             }
+            linux_x86_64 {
+                operatingSystem "linux"
+                architecture "x86_64"
+            }
+
+            windows_x86 {
+                operatingSystem "windows"
+                architecture "x86"
+            }
+            windows_x86_64 {
+                operatingSystem "windows"
+                architecture "x86_64"
+            }
         }
 
         toolChains {
@@ -30,13 +43,39 @@ if(hasProperty('SFML2_DIR'))
                         args << "-m32"
                     }
                 }
+                target("linux_x86_64")
+            }
+
+            mingw_w64(Gcc) {
+                path "/usr/bin"
+                eachPlatform() {
+                    if(platform == platforms.windows_x86) {
+                        cCompiler.executable "i686-w64-mingw32-gcc"
+                        cppCompiler.executable "i686-w64-mingw32-g++"
+                        linker.executable "i686-w64-mingw32-g++"
+                        assembler.executable "i686-w64-mingw32-as"
+                        staticLibArchiver.executable "i686-w64-mingw32-ar"
+                    }
+                    if(platform == platforms.windows_x86_64) {
+                        cCompiler.executable "x86_64-w64-mingw32-gcc"
+                        cppCompiler.executable "x86_64-w64-mingw32-g++"
+                        linker.executable "x86_64-w64-mingw32-g++"
+                        assembler.executable "x86_64-w64-mingw32-as"
+                        staticLibArchiver.executable "x86_64-w64-mingw32-ar"
+                    }
+                }
+                target("windows_x86")
+                target("windows_x86_64")
             }
         }
     }
 
     executables {
         SeoSplasher {
-            targetPlatforms "linux_x86"
+            targetPlatforms "linux_x86", "linux_x86_64"
+            if(project.hasProperty('EXTLIBS_DIR')) {
+                targetPlatforms "windows_x86", "windows_x86_64"
+            }
 
             binaries.all {
                 cppCompiler.args "-std=c++11", "-Wall", "-Wextra"
@@ -64,20 +103,20 @@ if(hasProperty('SFML2_DIR'))
         SeoSplasher {
             cpp {
                 if(project.hasProperty('ResourcePacker_DIR')) {
-                    lib project: ":RP_linux_x86", library: "ResourcePacker"
+                    lib project: ":ResourcePacker", library: "ResourcePacker"
                 }
-                lib project: ":sfml_linux_x86", library: "sfml_system"
-                lib project: ":sfml_linux_x86", library: "sfml_window"
-                lib project: ":sfml_linux_x86", library: "sfml_network"
-                lib project: ":sfml_linux_x86", library: "sfml_graphics"
-                lib project: ":sfml_linux_x86", library: "sfml_audio"
+                lib project: ":SFML", library: "sfml_system"
+                lib project: ":SFML", library: "sfml_window"
+                lib project: ":SFML", library: "sfml_network"
+                lib project: ":SFML", library: "sfml_graphics"
+                lib project: ":SFML", library: "sfml_audio"
                 source {
-                    srcDir "${rootDir}/src"
+                    srcDir "${projectDir}/src"
                     include "**/*.cpp"
                     exclude "ec/nMove.cpp"
                 }
                 exportedHeaders {
-                    srcDir "${rootDir}/src"
+                    srcDir "${projectDir}/src"
                     srcDir "${SFML2_DIR}/src/SFML2/headers"
                 }
             }
@@ -95,3 +134,4 @@ if(!hasProperty('ResourcePacker_DIR'))
     println "WARNING: ResourcePacker_DIR property not defined, will compile"
     println "SFML game engine without it!"
 }
+
