@@ -47,6 +47,19 @@ dRight(false),
 cFired(false),
 cpf(nullptr)
 {
+    // init server context
+    for(int i = 0; i < 4; ++i)
+    {
+        context.scontext->playersAlive[i] = false;
+        context.scontext->ppositions[i] = nullptr;
+        context.scontext->pvelocities[i] = nullptr;
+    }
+    context.scontext->balloons.clear();
+    context.scontext->explosions.clear();
+    context.scontext->powerups.clear();
+    context.scontext->breakables.clear();
+    context.scontext->gameState = SS::WAITING_FOR_PLAYERS;
+
     // set servers based on mode
 
     if(*context.mode == 2) // is server
@@ -174,9 +187,33 @@ cpf(nullptr)
         addCombatant(false, false);
         addCombatant(false, false);
     }
+    else if(*context.mode == 2) // server multiplayer
+    {
+        addCombatant(true, true);
+    }
 
     if(*context.mode != 1) // not client
+    {
+        if(server)
+        {
+            context.scontext->breakables.resize(100);
+
+            // register server callbacks
+            server->registerConnectionMadeCall( [this] () {
+                // add player entity on connect
+                this->addCombatant(true, false);
+            });
+
+            server->registerConnectionLostCall( [this] (sf::Uint8 playerID) {
+                // remove player entity on disconnect
+                if(this->getContext().scontext->playersAlive[playerID])
+                {
+                    this->getContext().ecEngine->removeEntity(playerIDToEntityID[playerID]);
+                }
+            });
+        }
         initBreakables();
+    }
 
     // other initializations
     fieldBG.setFillColor(sf::Color(127,127,127));
@@ -203,7 +240,11 @@ bool SplashState::update(sf::Time dt)
     {
         client->update(dt);
     }
-    getContext().ecEngine->update(dt, getContext());
+
+    if(getContext().scontext->gameState == SS::STARTED)
+    {
+        getContext().ecEngine->update(dt, getContext());
+    }
 
     return false;
 }
@@ -297,7 +338,7 @@ void SplashState::addWall(float x, float y)
 void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, int forceID)
 {
     unsigned int ID;
-    if(forceID >= 0 && forceID < 4)
+    if(forceID >= 0 && forceID < 4 && playerIDToEntityID.find(forceID) == playerIDToEntityID.end())
         ID = forceID;
     else
         ID = IDcounter++;
@@ -402,6 +443,17 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
     combatant->addComponent(std::type_index(typeid(cPathFinderRef)), std::unique_ptr<Component>(new cPathFinderRef(cpf)));
 
     getContext().ecEngine->addEntity(std::move(combatant));
+
+    if(server)
+    {
+        getContext().scontext->ppositions[ID] = pos;
+        getContext().scontext->pvelocities[ID] = vel;
+        getContext().scontext->playersAlive[ID] = true;
+
+        getContext().ecEngine->registerRemoveCall(playerIDToEntityID[ID], [ID, this] () {
+            this->getContext().scontext->playersAlive[ID] = false;
+        });
+    }
 }
 
 void SplashState::addPathFinder()
@@ -462,6 +514,11 @@ void SplashState::addBreakable(float x, float y, cPowerup::Powerup powerup)
     breakable->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
 
     getContext().ecEngine->addEntity(std::unique_ptr<Entity>(breakable));
+
+    if(*getContext().mode != 0 && *getContext().mode != 1) // not singleplayer or client
+    {
+        getContext().scontext->breakables[getContext().scontext->breakables.size()] = (sf::Uint8)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE) + ((sf::Uint8)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE) * GRID_WIDTH);
+    }
 }
 
 void SplashState::initBreakables()

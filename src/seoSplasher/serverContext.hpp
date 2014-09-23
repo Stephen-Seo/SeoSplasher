@@ -3,6 +3,7 @@
 #define SERVER_CONTEXT_HPP
 
 #include <map>
+#include <vector>
 
 #include "splashNetworkIdentifiers.hpp"
 #include "../ec/cPosition.hpp"
@@ -14,13 +15,16 @@ struct ServerContext
 
     cPosition* ppositions[4];
     cVelocity* pvelocities[4];
-    float moveTime[4];
 
     std::map<int, BalloonInfo> balloons;
 
-    std::map<int, int> explosions;
+    std::map<int, sf::Uint8> explosions;
 
     std::map<int, PowerupInfo> powerups;
+
+    std::vector<sf::Uint8> breakables;
+
+    SS::GameState gameState;
 };
 
 #endif

@@ -21,7 +21,10 @@ Client in-game packet format:
 
 Server waiting packet format:
     1 byte State Identifier (One of "GameState" enum)
+    1 byte timer until game start (if not 0xFF)
     1 byte # of connected players
+        - least significant 4 bits, 4 bit number of connected players
+        - most significant 4 bits, bitfield indicating which player is the reciever
     1 byte # of breakables on field (usually 100)
     ~100 bytes of breakable pos (each 1 byte)
     1 byte players that have custom name
@@ -87,7 +90,7 @@ struct PowerupInfo
 {
     sf::Uint8 xy;
     sf::Uint8 type;
-    /** type
+    /** type (same as cPowerup::Powerup enum)
     0 - nothing
     1 - balloon up
     2 - range up

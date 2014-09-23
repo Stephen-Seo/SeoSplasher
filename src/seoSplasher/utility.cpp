@@ -24,6 +24,7 @@
 #include "cPathFinderRef.hpp"
 #include "cPathFinder.hpp"
 #include "nMove.hpp"
+#include "splashNetworkIdentifiers.hpp"
 
 HitInfo Utility::collideAll(const float& x, const float& y, Engine& engine)
 {
@@ -299,6 +300,22 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
     }
 
     context.ecEngine->addEntity(std::unique_ptr<Entity>(balloon));
+
+    if(*context.mode != 0 && *context.mode != 1) // not singleplayer or client
+    {
+        BalloonInfo balloonInfo;
+
+        balloonInfo.xy = (sf::Uint8)((v.x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE) + ((sf::Uint8)((v.y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE) * GRID_WIDTH);
+        balloonInfo.typeRange = (distance >= 16 ? 0xF0 : distance << 4);
+        balloonInfo.typeRange |= (isSuper ? 0x1 : 0x0) | (living.rControlUpgrade > 0 ? 0x2 : 0x0) | (living.pierceUpgrade > 0 ? 0x4 : 0x0) | (living.ghostUpgrade > 0 ? 0x8 : 0x0);
+
+        context.scontext->balloons.insert(std::make_pair(balloon->getID(), balloonInfo));
+
+        context.ecEngine->registerRemoveCall(balloon->getID(), [balloon, context] () {
+            context.scontext->balloons.erase(balloon->getID());
+        });
+    }
+
     return true;
 }
 
@@ -337,6 +354,17 @@ void Utility::createExplosion(const float& x, const float& y, Direction::Directi
     splosion->addComponent(std::type_index(typeid(cTimer)), std::unique_ptr<Component>(timer));
 
     context.ecEngine->addEntity(std::unique_ptr<Entity>(splosion));
+
+    if(*context.mode != 0 && *context.mode != 1) // not singleplayer or client
+    {
+        sf::Uint8 xy = (sf::Uint8)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE) + ((sf::Uint8)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE) * GRID_WIDTH);
+
+        context.scontext->explosions.insert(std::make_pair(splosion->getID(), xy));
+
+        context.ecEngine->registerRemoveCall(splosion->getID(), [splosion, context] () {
+            context.scontext->explosions.erase(splosion->getID());
+        });
+    }
 }
 
 void Utility::createPowerup(const float& x, const float& y, cPowerup& powerup, const Context& context)
@@ -425,6 +453,19 @@ void Utility::createPowerup(const float& x, const float& y, cPowerup& powerup, c
     epowerup->addComponent(std::type_index(typeid(cPickup)), std::unique_ptr<Component>(new cPickup));
 
     context.ecEngine->addEntity(std::unique_ptr<Entity>(epowerup));
+
+    if(*context.mode != 0 && *context.mode != 1) // not singleplayer or client
+    {
+        PowerupInfo powerupInfo;
+        powerupInfo.xy = (sf::Uint8)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE) + ((sf::Uint8)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE) / GRID_WIDTH);
+        powerupInfo.type = (sf::Uint8) powerup.powerup;
+
+        context.scontext->powerups.insert(std::make_pair(epowerup->getID(), powerupInfo));
+
+        context.ecEngine->registerRemoveCall(epowerup->getID(), [epowerup, context] () {
+            context.scontext->powerups.erase(epowerup->getID());
+        });
+    }
 }
 
 int Utility::createWIndicator(const float& x, const float& y, Direction::Direction dir, const Context& context, unsigned char ID)
