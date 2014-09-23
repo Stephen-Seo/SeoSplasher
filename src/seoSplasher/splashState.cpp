@@ -195,6 +195,14 @@ void SplashState::draw()
 
 bool SplashState::update(sf::Time dt)
 {
+    if(server)
+    {
+        server->update(dt);
+    }
+    else if(client)
+    {
+        client->update(dt);
+    }
     getContext().ecEngine->update(dt, getContext());
 
     return false;

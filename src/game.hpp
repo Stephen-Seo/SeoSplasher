@@ -15,6 +15,7 @@
 #include "soundPlayer.hpp"
 #include "state.hpp"
 #include "stateStack.hpp"
+#include "seoSplasher/serverContext.hpp"
 
 class Game
 {
@@ -46,6 +47,8 @@ private:
     std::mt19937 rGen;
 
     unsigned char mode;
+
+    ServerContext scontext;
 };
 
 #endif

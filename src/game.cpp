@@ -30,7 +30,7 @@ Game::Game()
 resourceManager(&stateStack, RESOURCE_MANAGER_MODE, PACKFILE_NAME),
 mPlayer(),
 sPlayer(),
-stateStack(Context(window, resourceManager, mPlayer, sPlayer, ecEngine, rGen, isQuitting, mode)),
+stateStack(Context(window, resourceManager, mPlayer, sPlayer, ecEngine, rGen, isQuitting, mode, scontext)),
 isQuitting(false),
 mode(0)
 {

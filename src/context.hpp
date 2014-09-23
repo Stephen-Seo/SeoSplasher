@@ -7,12 +7,13 @@
 #include <SFML/Graphics.hpp>
 
 #include "resourceIdentifiers.hpp"
+#include "seoSplasher/serverContext.hpp"
 
 class ResourceManager;
 class MusicPlayer;
 class SoundPlayer;
 class Engine;
-
+struct ServerContext;
 
 struct Context
 {
@@ -23,7 +24,8 @@ struct Context
             Engine& ecEngine,
             std::mt19937& rGen,
             bool& isQuitting,
-            unsigned char& mode);
+            unsigned char& mode,
+            ServerContext& scontext);
 
     sf::RenderWindow* window;
     ResourceManager* resourceManager;
@@ -40,6 +42,7 @@ struct Context
      * 3 = dedicated server multiplayer
      * 4 = dedicated server multiplayer (no draw)
     **/
+    ServerContext* scontext;
 };
 
 #endif

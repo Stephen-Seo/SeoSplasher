@@ -36,6 +36,8 @@ public:
 
 protected:
     bool acceptNewConnections;
+    bool ignoreOutOfSequence;
+    bool resendTimedOutPackets;
 
     void preparePacket(sf::Packet& packet, sf::Uint32& sequenceID, sf::IpAddress address, bool isPing = false);
 

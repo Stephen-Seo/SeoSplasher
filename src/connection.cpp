@@ -3,6 +3,8 @@
 
 Connection::Connection() :
 acceptNewConnections(true),
+ignoreOutOfSequence(false),
+resendTimedOutPackets(true),
 mode(SERVER)
 {
     socket.bind(GAME_PORT);
@@ -11,6 +13,8 @@ mode(SERVER)
 
 Connection::Connection(Mode mode) :
 acceptNewConnections(true),
+ignoreOutOfSequence(false),
+resendTimedOutPackets(true),
 mode(mode)
 {
     socket.bind(GAME_PORT);
@@ -160,6 +164,9 @@ void Connection::update(sf::Time dt)
                         return;
                     }
                     ackBitfieldMap[clientAddress] |= (0x100000000 >> diff);
+
+                    if(ignoreOutOfSequence)
+                        return;
                 }
             }
             else if(rSequenceMap[clientAddress] > sequence)
@@ -182,6 +189,9 @@ void Connection::update(sf::Time dt)
                         return;
                     }
                     ackBitfieldMap[clientAddress] |= (0x100000000 >> diff);
+
+                    if(ignoreOutOfSequence)
+                        return;
                 }
             }
             else
@@ -298,6 +308,9 @@ void Connection::update(sf::Time dt)
                             return;
                         }
                         ackBitfieldMap[serverAddress] |= (0x100000000 >> diff);
+
+                        if(ignoreOutOfSequence)
+                            return;
                     }
                 }
                 else if(rSequenceMap[serverAddress] > sequence)
@@ -320,6 +333,9 @@ void Connection::update(sf::Time dt)
                             return;
                         }
                         ackBitfieldMap[serverAddress] |= (0x100000000 >> diff);
+
+                        if(ignoreOutOfSequence)
+                            return;
                     }
                 }
                 else
@@ -470,6 +486,9 @@ void Connection::shiftBitfield(sf::IpAddress address, sf::Uint32 diff)
 
 void Connection::checkSentPackets(sf::Uint32 ack, sf::Uint32 bitfield, sf::Uint32 address)
 {
+    if(!resendTimedOutPackets)
+        return;
+
     --ack;
     for(; bitfield != 0x0; bitfield = bitfield << 1)
     {

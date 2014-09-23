@@ -18,32 +18,18 @@ public:
 
     void update(sf::Time dt);
 
-    void gridUpdate(const unsigned char* grid);
-    void notifyBalloonInfo(BalloonInfo info);
-    void notifyBalloonDestroyed(BalloonInfo info);
-    void notifyBreakableDestroyed(BrDestroyedInfo info);
-    void notifyPowerupDestroyed(sf::Uint8 xy);
-    void notifyPlayerDead(sf::Uint8 ID);
-    void notifyGameState(SS::GameState state);
+    void setGridReference(const unsigned char* grid);
 
 private:
     Context context;
+
     bool isSpectating;
     bool startTimer;
     float timer;
-    unsigned char grid[GRID_TOTAL];
+    const unsigned char* grid;
 
     bool playerConnected[4];
     sf::Uint32 playerAddresses[4];
-
-    std::queue<BalloonInfo> newBalloons;
-    std::queue<BrDestroyedInfo> destBreakables;
-    std::queue<sf::Uint8> destPowerups;
-    std::queue<sf::Uint8> deadPlayers;
-
-    void notifyFinalSetup();
-    void notifyPlayerJoined(PlayerJoinInfo info);
-    void sendPlayerInfo(PlayerInfo info1, PlayerInfo info2, PlayerInfo info3, PlayerInfo info4);
 
     void receivedPacket(sf::Packet packet);
 
