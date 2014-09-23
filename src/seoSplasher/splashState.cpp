@@ -62,13 +62,9 @@ cpf(nullptr)
 
     // set servers based on mode
 
-    if(*context.mode == 2) // is server
+    if(*context.mode != 0 && *context.mode != 1) // is server
     {
-        server = std::unique_ptr<SplashServer>(new SplashServer(context, false));
-    }
-    else if(*context.mode == 3 || *context.mode == 4) // is dedicated server
-    {
-        server = std::unique_ptr<SplashServer>(new SplashServer(context, true));
+        server = std::unique_ptr<SplashServer>(new SplashServer(context));
     }
     else if(*context.mode == 1) // is client
     {
@@ -199,9 +195,9 @@ cpf(nullptr)
             context.scontext->breakables.resize(100);
 
             // register server callbacks
-            server->registerConnectionMadeCall( [this] () {
+            server->registerConnectionMadeCall( [this] (sf::Uint8 playerID) {
                 // add player entity on connect
-                this->addCombatant(true, false);
+                this->addCombatant(true, false, playerID);
             });
 
             server->registerConnectionLostCall( [this] (sf::Uint8 playerID) {
@@ -517,7 +513,7 @@ void SplashState::addBreakable(float x, float y, cPowerup::Powerup powerup)
 
     if(*getContext().mode != 0 && *getContext().mode != 1) // not singleplayer or client
     {
-        getContext().scontext->breakables[getContext().scontext->breakables.size()] = (sf::Uint8)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE) + ((sf::Uint8)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE) * GRID_WIDTH);
+        getContext().scontext->breakables.push_back((sf::Uint8)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE) + ((sf::Uint8)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE) * GRID_WIDTH));
     }
 }
 

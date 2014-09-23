@@ -34,10 +34,11 @@ Server waiting packet format:
 Server in-game packet format:
     1 byte State Identifier (One of "GameState" enum)
     1 byte # of connected players, who's alive
-        - least significant 4 bits, # of connected players
+        - least significant 4 bits, 1 bit per connected player
+            - 0001 P1 connected, 0010 P2 connected, etc.
         - most significant 4 bits, 1 bit per living player
             - 0001 P1 alive, 0010 P2 alive, etc.
-    21 bytes PlayerInfo struct per player (up to 4 times)
+    20 bytes PlayerInfo struct per player (up to 4 times)
     1 byte # of balloons on field
     2 bytes BallonInfo struct per balloon (up to ? times)
     1 byte # of explosions on field
@@ -52,18 +53,9 @@ struct PlayerJoinInfo
     std::string name;
 };
 
-// 21 bytes
+// 20 bytes
 struct PlayerInfo
 {
-    /**
-     * type
-     * 0000 0001 player 1
-     * 0000 0010 player 2
-     * 0000 0100 player 3
-     * 0000 1000 player 4
-     * 0001 0000 is computer
-    **/
-    sf::Uint8 type;
     float posx;
     float posy;
     float velx;

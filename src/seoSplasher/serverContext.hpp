@@ -4,6 +4,7 @@
 
 #include <map>
 #include <vector>
+#include <string>
 
 #include "splashNetworkIdentifiers.hpp"
 #include "../ec/cPosition.hpp"
@@ -15,6 +16,7 @@ struct ServerContext
 
     cPosition* ppositions[4];
     cVelocity* pvelocities[4];
+    float movementTime[4];
 
     std::map<int, BalloonInfo> balloons;
 
@@ -25,6 +27,10 @@ struct ServerContext
     std::vector<sf::Uint8> breakables;
 
     SS::GameState gameState;
+
+    float startTimer;
+
+    std::string customNames[4];
 };
 
 #endif

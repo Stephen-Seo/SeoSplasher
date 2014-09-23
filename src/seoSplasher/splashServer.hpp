@@ -16,33 +16,30 @@
 class SplashServer : public Connection
 {
 public:
-    SplashServer(Context context, bool isSpectating = true);
+    SplashServer(Context context);
 
     void update(sf::Time dt);
 
-    void setGridReference(const unsigned char* grid);
-
-    void registerConnectionMadeCall(std::function<void()> function);
+    void registerConnectionMadeCall(std::function<void(sf::Uint8)> function);
     void registerConnectionLostCall(std::function<void(sf::Uint8)> function);
 
 private:
     Context context;
 
-    bool isSpectating;
-    bool startTimer;
-    float timer;
-    const unsigned char* grid;
+    float updateTimer;
 
     bool playerConnected[4];
     sf::Uint32 playerAddresses[4];
 
-    std::list<std::function<void()> > connectionMadeFunctions;
+    std::list<std::function<void(sf::Uint8)> > connectionMadeFunctions;
     std::list<std::function<void(sf::Uint8)> > connectionLostFunctions;
 
     void receivedPacket(sf::Packet packet);
 
     void connectionMade(sf::Uint32 address);
     void connectionLost(sf::Uint32 address);
+
+    void sendPacket();
 };
 
 #endif
