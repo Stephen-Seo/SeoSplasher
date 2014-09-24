@@ -3,7 +3,6 @@
 #define SPLASH_SERVER_HPP
 
 #define START_TIMER_SECONDS 3.0f
-#define SERVER_UPDATE_TIME (1.0f / 15.0f)
 
 #include <queue>
 #include <functional>
@@ -34,7 +33,7 @@ private:
     std::list<std::function<void(sf::Uint8)> > connectionMadeFunctions;
     std::list<std::function<void(sf::Uint8)> > connectionLostFunctions;
 
-    void receivedPacket(sf::Packet packet);
+    void receivedPacket(sf::Packet packet, sf::Uint32 address);
 
     void connectionMade(sf::Uint32 address);
     void connectionLost(sf::Uint32 address);

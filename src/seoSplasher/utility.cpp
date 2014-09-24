@@ -25,6 +25,7 @@
 #include "cPathFinder.hpp"
 #include "nMove.hpp"
 #include "splashNetworkIdentifiers.hpp"
+#include "cBreakable.hpp"
 
 HitInfo Utility::collideAll(const float& x, const float& y, Engine& engine)
 {
@@ -305,8 +306,12 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
     {
         BalloonInfo balloonInfo;
 
-        balloonInfo.xy = (sf::Uint8)((v.x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE) + ((sf::Uint8)((v.y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE) * GRID_WIDTH);
-        balloonInfo.typeRange = (distance >= 16 ? 0xF0 : distance << 4);
+        balloonInfo.EID = balloon->getID();
+        balloonInfo.posx = &(pos->x);
+        balloonInfo.posy = &(pos->y);
+        balloonInfo.velx = &(vel->x);
+        balloonInfo.vely = &(vel->y);
+        balloonInfo.typeRange = (distance >= 16 ? 0xF0 : ((sf::Uint8) distance) << 4);
         balloonInfo.typeRange |= (isSuper ? 0x1 : 0x0) | (living.rControlUpgrade > 0 ? 0x2 : 0x0) | (living.pierceUpgrade > 0 ? 0x4 : 0x0) | (living.ghostUpgrade > 0 ? 0x8 : 0x0);
 
         context.scontext->balloons.insert(std::make_pair(balloon->getID(), balloonInfo));
@@ -357,9 +362,25 @@ void Utility::createExplosion(const float& x, const float& y, Direction::Directi
 
     if(*context.mode != 0 && *context.mode != 1) // not singleplayer or client
     {
-        sf::Uint8 xy = (sf::Uint8)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE) + ((sf::Uint8)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE) * GRID_WIDTH);
+        ExplosionInfo explosionInfo;
+        explosionInfo.xy = (sf::Uint8)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE) + ((sf::Uint8)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE) * GRID_WIDTH);
+        switch(dir)
+        {
+        case Direction::HORIZONTAL:
+            explosionInfo.direction = 0;
+            break;
+        case Direction::VERTICAL:
+            explosionInfo.direction = 1;
+            break;
+        case Direction::PLUS:
+            explosionInfo.direction = 2;
+            break;
+        default:
+            explosionInfo.direction = 2;
+            break;
+        }
 
-        context.scontext->explosions.insert(std::make_pair(splosion->getID(), xy));
+        context.scontext->explosions.insert(std::make_pair(splosion->getID(), explosionInfo));
 
         context.ecEngine->registerRemoveCall(splosion->getID(), [splosion, context] () {
             context.scontext->explosions.erase(splosion->getID());
@@ -509,4 +530,226 @@ bool Utility::isAligned(const float& x, const float& y)
     if(diffx <= MAX_MOVE_OFFSET && diffy <= MAX_MOVE_OFFSET)
         return true;
     return false;
+}
+
+BalloonInfo Utility::clientCreateBalloon(const float& x, const float& y, sf::Uint8 typeRange, Context context)
+{
+    BalloonInfo balloonInfo;
+    balloonInfo.typeRange = typeRange;
+
+    std::unique_ptr<Entity> balloon(new Entity);
+    balloonInfo.EID = balloon->getID();
+
+    std::unique_ptr<Component> pos(new cPosition);
+    cPosition* cpos = static_cast<cPosition*>(pos.get());
+    cpos->x = x;
+    cpos->y = y;
+    balloonInfo.posx = &(cpos->x);
+    balloonInfo.posy = &(cpos->y);
+    balloon->addComponent(std::type_index(typeid(cPosition)), std::move(pos));
+
+    std::unique_ptr<Component> vel(new cVelocity);
+    cVelocity* cvel = static_cast<cVelocity*>(vel.get());
+    cvel->x = 0.0f;
+    cvel->y = 0.0f;
+    balloonInfo.velx = &(cvel->x);
+    balloonInfo.vely = &(cvel->y);
+    balloon->addComponent(std::type_index(typeid(cVelocity)), std::move(vel));
+
+    std::unique_ptr<Component> sprite(new cSprite);
+    cSprite* csprite = static_cast<cSprite*>(sprite.get());
+    if((typeRange & 0x2) == 0)
+    {
+        if((typeRange & 0x1) != 0)
+        {
+            csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SUPER_BALLOON_0));
+
+            std::unique_ptr<Component> animated(new cAnimated);
+            cAnimated* canimated = static_cast<cAnimated*>(animated.get());
+            canimated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_0));
+            canimated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_1));
+            canimated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_2));
+            balloon->addComponent(std::type_index(typeid(cAnimated)), std::move(animated));
+        }
+        else
+        {
+            csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::BALLOON_0));
+
+            std::unique_ptr<Component> animated(new cAnimated);
+            cAnimated* canimated = static_cast<cAnimated*>(animated.get());
+            canimated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_0));
+            canimated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_1));
+            canimated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_2));
+            balloon->addComponent(std::type_index(typeid(cAnimated)), std::move(animated));
+        }
+    }
+    else
+    {
+        if((typeRange & 0x1) != 0)
+        {
+            csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_0));
+
+            std::unique_ptr<Component> animated(new cAnimated);
+            cAnimated* canimated = static_cast<cAnimated*>(animated.get());
+            canimated->textures.push_back(&context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_0));
+            canimated->textures.push_back(&context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_1));
+            canimated->textures.push_back(&context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_2));
+            balloon->addComponent(std::type_index(typeid(cAnimated)), std::move(animated));
+        }
+        else
+        {
+            csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::C_BALLOON_0));
+
+            std::unique_ptr<Component> animated(new cAnimated);
+            cAnimated* canimated = static_cast<cAnimated*>(animated.get());
+            canimated->textures.push_back(&context.resourceManager->getTexture(Textures::C_BALLOON_0));
+            canimated->textures.push_back(&context.resourceManager->getTexture(Textures::C_BALLOON_1));
+            canimated->textures.push_back(&context.resourceManager->getTexture(Textures::C_BALLOON_2));
+            balloon->addComponent(std::type_index(typeid(cAnimated)), std::move(animated));
+        }
+    }
+    balloon->addComponent(std::type_index(typeid(cSprite)), std::move(sprite));
+
+    context.ecEngine->addEntity(std::move(balloon));
+
+    return balloonInfo;
+}
+
+int Utility::clientCreateExplosion(sf::Uint8 xy, sf::Uint8 direction, Context context)
+{
+    std::unique_ptr<Entity> explosion(new Entity);
+
+    std::unique_ptr<Component> pos(new cPosition);
+    cPosition* cpos = static_cast<cPosition*>(pos.get());
+    cpos->x = (xy % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X;
+    cpos->y = (xy / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y;
+    explosion->addComponent(std::type_index(typeid(cPosition)), std::move(pos));
+
+    std::unique_ptr<Component> sprite(new cSprite);
+    cSprite* csprite = static_cast<cSprite*>(sprite.get());
+    switch(direction)
+    {
+    case 0:
+        csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_HORIZ));
+        break;
+    case 1:
+        csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_VERT));
+        break;
+    default:
+    case 2:
+        csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPLOSION_PLUS));
+        break;
+    }
+    explosion->addComponent(std::type_index(typeid(cSprite)), std::move(sprite));
+
+    int EID = explosion->getID();
+
+    context.ecEngine->addEntity(std::move(explosion));
+
+    return EID;
+}
+
+int Utility::clientCreatePowerup(sf::Uint8 xy, sf::Uint8 type, Context context)
+{
+    std::unique_ptr<Entity> powerup(new Entity);
+
+    std::unique_ptr<Component> pos(new cPosition);
+    cPosition* cpos = static_cast<cPosition*>(pos.get());
+    cpos->x = (xy % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X;
+    cpos->y = (xy / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y;
+    powerup->addComponent(std::type_index(typeid(cPosition)), std::move(pos));
+
+    std::unique_ptr<Component> sprite(new cSprite);
+    std::unique_ptr<Component> animated(new cAnimated);
+    cSprite* csprite = static_cast<cSprite*>(sprite.get());
+    cAnimated* canimated = static_cast<cAnimated*>(animated.get());
+
+    canimated->frameTime = 0.3f;
+    switch(type)
+    {
+    case cPowerup::BALLOON_UP:
+        csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::BALLOON_UP_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_UP_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_UP_1));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_UP_2));
+        break;
+    case cPowerup::RANGE_UP:
+        csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::RANGE_UP_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::RANGE_UP_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::RANGE_UP_1));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::RANGE_UP_2));
+        break;
+    case cPowerup::SPEED_UP:
+        csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPEED_UP_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::SPEED_UP_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::SPEED_UP_1));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::SPEED_UP_2));
+        break;
+    case cPowerup::KICK_UPGRADE:
+        csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::KICK_UPGRADE_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::KICK_UPGRADE_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::KICK_UPGRADE_1));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::KICK_UPGRADE_2));
+        break;
+    case cPowerup::RCONTROL_UPGRADE:
+        csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::RCONTROL_UPGRADE_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::RCONTROL_UPGRADE_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::RCONTROL_UPGRADE_1));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::RCONTROL_UPGRADE_2));
+        break;
+    case cPowerup::SBALLOON_UPGRADE:
+        csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SBALLOON_UPGRADE_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::SBALLOON_UPGRADE_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::SBALLOON_UPGRADE_1));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::SBALLOON_UPGRADE_2));
+        break;
+    case cPowerup::PIERCE_UPGRADE:
+        csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::PIERCE_UPGRADE_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::PIERCE_UPGRADE_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::PIERCE_UPGRADE_1));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::PIERCE_UPGRADE_2));
+        break;
+    case cPowerup::SPREAD_UPGRADE:
+        csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SPREAD_UPGRADE_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::SPREAD_UPGRADE_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::SPREAD_UPGRADE_1));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::SPREAD_UPGRADE_2));
+        break;
+    case cPowerup::GHOST_UPGRADE:
+        csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::GHOST_UPGRADE_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::GHOST_UPGRADE_0));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::GHOST_UPGRADE_1));
+        canimated->textures.push_back(&context.resourceManager->getTexture(Textures::GHOST_UPGRADE_2));
+        break;
+    default:
+        break;
+    }
+    powerup->addComponent(std::type_index(typeid(cSprite)), std::move(sprite));
+    powerup->addComponent(std::type_index(typeid(cAnimated)), std::move(animated));
+
+    int EID = powerup->getID();
+    context.ecEngine->addEntity(std::move(powerup));
+    return EID;
+}
+
+int Utility::clientCreateBreakable(sf::Uint8 xy, Context context)
+{
+    std::unique_ptr<Entity> breakable(new Entity);
+
+    std::unique_ptr<Component> pos(new cPosition);
+    cPosition* cpos = static_cast<cPosition*>(pos.get());
+    cpos->x = (xy % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X;
+    cpos->y = (xy / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y;
+    breakable->addComponent(std::type_index(typeid(cPosition)), std::move(pos));
+
+    std::unique_ptr<Component> sprite(new cSprite);
+    cSprite* csprite = static_cast<cSprite*>(sprite.get());
+    csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::BREAKABLE));
+    breakable->addComponent(std::type_index(typeid(cSprite)), std::move(sprite));
+
+    breakable->addComponent(std::type_index(typeid(cBreakable)), std::unique_ptr<Component>(new cBreakable));
+
+    int EID = breakable->getID();
+    context.ecEngine->addEntity(std::move(breakable));
+    return EID;
 }

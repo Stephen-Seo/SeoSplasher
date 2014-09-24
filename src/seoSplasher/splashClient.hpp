@@ -23,10 +23,27 @@ private:
     sf::Uint32 address;
     bool connectedToServer;
 
-    void receivedPacket(sf::Packet packet);
+    float updateTimer;
+
+    sf::Uint8 playerID;
+
+    std::vector<sf::Uint8> breakables;
+    bool breakablesSet;
+
+    sf::Uint8 numberOfPlayers;
+
+    std::queue<int> IDqueue;
+
+    void receivedPacket(sf::Packet packet, sf::Uint32 address);
+
     void connectionMade(sf::Uint32 address);
     void connectionLost(sf::Uint32 address);
 
+    void sendPacket();
+
+    void removeUnmentionedBalloons();
+    void removeUnmentionedExplosions();
+    void removeUnmentionedPowerups();
 };
 
 #endif

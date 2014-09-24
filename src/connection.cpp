@@ -200,7 +200,7 @@ void Connection::update(sf::Time dt)
                 return;
             }
 
-            receivedPacket(packet);
+            receivedPacket(packet, clientAddress);
         }
     } // if(mode == SERVER)
     else if(mode == CLIENT)
@@ -344,8 +344,7 @@ void Connection::update(sf::Time dt)
                     return;
                 }
 
-                receivedPacket(packet);
-
+                receivedPacket(packet, serverAddress);
             }
         }
         // connection not yet established
@@ -424,7 +423,7 @@ void Connection::sendPacket(sf::Packet& packet, sf::Uint32 sequenceID, sf::IpAdd
     sendPacketQueue.push_front(PacketInfo(packet, sequenceID, address.toInteger()));
 }
 
-void Connection::receivedPacket(sf::Packet packet)
+void Connection::receivedPacket(sf::Packet packet, sf::Uint32 address)
 {}
 
 void Connection::connectionMade(sf::Uint32 address)

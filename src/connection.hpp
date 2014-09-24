@@ -43,7 +43,7 @@ protected:
 
     void sendPacket(sf::Packet& packet, sf::Uint32 sequenceID, sf::IpAddress address);
 
-    virtual void receivedPacket(sf::Packet packet);
+    virtual void receivedPacket(sf::Packet packet, sf::Uint32 address);
 
     virtual void connectionMade(sf::Uint32 address);
 

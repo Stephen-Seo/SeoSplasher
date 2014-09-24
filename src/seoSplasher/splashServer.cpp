@@ -3,9 +3,14 @@
 
 #include <algorithm>
 
+#ifndef NDEBUG
+  #include <iostream>
+#endif
+
 SplashServer::SplashServer(Context context) :
 Connection(Connection::SERVER),
-context(context)
+context(context),
+updateTimer(SERVER_UPDATE_TIME)
 {
     ignoreOutOfSequence = true;
     resendTimedOutPackets = false;
@@ -16,7 +21,9 @@ context(context)
     if(*context.mode < 3) // not dedicated
         playerConnected[0] = true;
 
-    updateTimer = SERVER_UPDATE_TIME;
+    // set server player's movetime value to something non-zero so s/he can move
+    if(*context.mode == 2)
+        context.scontext->movementTime[0] = 1.0f;
 }
 
 void SplashServer::update(sf::Time dt)
@@ -30,6 +37,8 @@ void SplashServer::update(sf::Time dt)
 
     for(int i = 0; i < 4; ++i)
     {
+        if(i == 0 && *context.mode == 2) // don't stop server player's movement
+            continue;
         context.scontext->movementTime[i] -= dt.asSeconds();
         if(context.scontext->movementTime[i] < 0.0f)
             context.scontext->movementTime[i] = 0.0f;
@@ -52,14 +61,62 @@ void SplashServer::registerConnectionLostCall(std::function<void(sf::Uint8)> fun
     connectionLostFunctions.push_back(function);
 }
 
-void SplashServer::receivedPacket(sf::Packet packet)
+void SplashServer::receivedPacket(sf::Packet packet, sf::Uint32 address)
 {
+    // get player ID from address
+    int i;
+    for(i = 0; i < 5; ++i)
+    {
+        if(i != 4 && playerConnected[i] && playerAddresses[i] == address)
+            break;
+    }
+
+    if(i == 4)
+    {
+        return;
+    }
+
+    // get packet type
     sf::Uint8 packetID;
     if(!(packet >> packetID))
         return;
 
-    switch(packetID) //TODO
+    sf::Uint8 temp;
+
+    switch(packetID)
     {
+    // pre game data
+    case SS::WAITING_FOR_PLAYERS:
+    case SS::WAITING_FOR_SERVER:
+    {
+        if(!(packet >> temp))
+            return;
+        if(temp != 0x0)
+        {
+            std::string name;
+            if(!(packet >> name))
+                return;
+            context.scontext->customNames[i] = name;
+        }
+    }
+        break;
+    // in game data
+    case SS::STARTED:
+    case SS::ENDED:
+    {
+        if(!context.scontext->playersAlive[i])
+            return;
+        float posx, posy, velx, vely;
+        if(!(packet >> posx) || !(packet >> posy) || !(packet >> velx) || !(packet >> vely) || !(packet >> temp))
+            return;
+        context.scontext->ppositions[i]->x = posx;
+        context.scontext->ppositions[i]->y = posy;
+        context.scontext->pvelocities[i]->x = velx;
+        context.scontext->pvelocities[i]->y = vely;
+        context.scontext->placedBalloon[i] = temp != 0x0;
+        context.scontext->movementTime[i] = SERVER_UPDATE_TIME;
+    }
+        break;
     default:
         return;
     }
@@ -115,6 +172,9 @@ void SplashServer::sendPacket()
 {
     for(int i = 0; i < 4; ++i)
     {
+        if(!playerConnected[i])
+            continue;
+
         sf::Packet packet;
         sf::Uint32 sequenceID;
         sf::IpAddress address(playerAddresses[i]);
@@ -201,7 +261,19 @@ void SplashServer::sendPacket()
             // BallonInfo bytes
             for(auto iter = context.scontext->balloons.begin(); iter != context.scontext->balloons.end(); ++iter)
             {
-                packet << iter->second.xy;
+                packet << iter->second.EID;
+                packet << *(iter->second.posx);
+                packet << *(iter->second.posy);
+                if(*(iter->second.velx) != 0.0f)
+                {
+                    packet << (sf::Uint8) 0x0;
+                    packet << *(iter->second.velx);
+                }
+                else
+                {
+                    packet << (sf::Uint8) 0x1;
+                    packet << *(iter->second.vely);
+                }
                 packet << iter->second.typeRange;
             }
 
@@ -211,7 +283,8 @@ void SplashServer::sendPacket()
             // explosion pos bytes
             for(auto iter = context.scontext->explosions.begin(); iter != context.scontext->explosions.end(); ++iter)
             {
-                packet << iter->second;
+                packet << iter->second.xy;
+                packet << iter->second.direction;
             }
 
             // # of powerups byte
@@ -224,6 +297,11 @@ void SplashServer::sendPacket()
                 packet << iter->second.type;
             }
         }
+            break;
+        default:
+#ifndef NDEBUG
+            std::clog << "WARNING: server in state CONNECTION_LOST, this should never happen!\n";
+#endif
             break;
         }
 

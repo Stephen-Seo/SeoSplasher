@@ -440,14 +440,24 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
 
     getContext().ecEngine->addEntity(std::move(combatant));
 
-    if(server)
+    if(client || server)
     {
+        // assign context variables
         getContext().scontext->ppositions[ID] = pos;
         getContext().scontext->pvelocities[ID] = vel;
         getContext().scontext->playersAlive[ID] = true;
 
+        // set alive to false when player entity is removed
         getContext().ecEngine->registerRemoveCall(playerIDToEntityID[ID], [ID, this] () {
             this->getContext().scontext->playersAlive[ID] = false;
+        });
+    }
+
+    // remove ID mapping when player is removed
+    if(isPlayer)
+    {
+        getContext().ecEngine->registerRemoveCall(playerIDToEntityID[ID], [this, ID] () {
+            this->playerIDToEntityID.erase(ID);
         });
     }
 }
@@ -511,7 +521,7 @@ void SplashState::addBreakable(float x, float y, cPowerup::Powerup powerup)
 
     getContext().ecEngine->addEntity(std::unique_ptr<Entity>(breakable));
 
-    if(*getContext().mode != 0 && *getContext().mode != 1) // not singleplayer or client
+    if(server)
     {
         getContext().scontext->breakables.push_back((sf::Uint8)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE) + ((sf::Uint8)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE) * GRID_WIDTH));
     }

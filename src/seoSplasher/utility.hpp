@@ -17,6 +17,7 @@ struct cBalloon;
 struct cDamage;
 struct cPowerup;
 struct cPathFinderRef;
+struct BalloonInfo;
 
 struct HitInfo
 {
@@ -39,6 +40,11 @@ namespace Utility
 
     sf::Vector2f alignToGrid(const float& x, const float& y);
     bool isAligned(const float& x, const float& y);
+
+    BalloonInfo clientCreateBalloon(const float& x, const float& y, sf::Uint8 typeRange, Context context);
+    int clientCreateExplosion(sf::Uint8 xy, sf::Uint8 direction, Context context);
+    int clientCreatePowerup(sf::Uint8 xy, sf::Uint8 type, Context context);
+    int clientCreateBreakable(sf::Uint8 xy, Context context);
 };
 
 #endif

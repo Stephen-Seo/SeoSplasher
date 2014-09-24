@@ -2,6 +2,8 @@
 #ifndef SPLASH_NETWORK_IDENTIFIERS_HPP
 #define SPLASH_NETWORK_IDENTIFIERS_HPP
 
+#define SERVER_UPDATE_TIME (1.0f / 15.0f)
+
 /*
 PACKET INFORMATION:
     Two packet 'types'
@@ -40,33 +42,29 @@ Server in-game packet format:
             - 0001 P1 alive, 0010 P2 alive, etc.
     20 bytes PlayerInfo struct per player (up to 4 times)
     1 byte # of balloons on field
-    2 bytes BallonInfo struct per balloon (up to ? times)
+    18 bytes BallonInfo per balloon (up to ? times)
     1 byte # of explosions on field
-    1 byte explosion pos per explosion (up to ? times)
+    2 byte explosionInfo per explosion (up to ? times)
     1 byte # of powerups on field
-    2 bytes PowerupInfo struct per powerup (up to ? times)
+    2 bytes PowerupInfo per powerup (up to ? times)
 */
 
-struct PlayerJoinInfo
-{
-    sf::Uint8 ID;
-    std::string name;
-};
-
-// 20 bytes
-struct PlayerInfo
-{
-    float posx;
-    float posy;
-    float velx;
-    float vely;
-    float timeToStop;
-};
-
-// 2 bytes
+/*
+Will be sent as 18 bytes as:
+    4 byte EID
+    4 byte posx
+    4 byte posy
+    1 byte velDirection (horizontal/vertical - 0/1)
+    4 byte vel
+    1 byte typeRange
+*/
 struct BalloonInfo
 {
-    sf::Uint8 xy;
+    int EID;
+    float* posx;
+    float* posy;
+    float* velx;
+    float* vely;
     sf::Uint8 typeRange;
     /** typeRange
      * 0000 0001 - super
@@ -75,6 +73,13 @@ struct BalloonInfo
      * 0000 1000 - ghost
      * 4 most significant bits is a 4-bit number defining range
     **/
+};
+
+// 2 bytes
+struct ExplosionInfo
+{
+    sf::Uint8 xy;
+    sf::Uint8 direction;
 };
 
 // 2 bytes
@@ -103,7 +108,8 @@ namespace SS
         WAITING_FOR_PLAYERS,
         WAITING_FOR_SERVER,
         STARTED,
-        ENDED
+        ENDED,
+        CONNECTION_LOST
     };
 }
 

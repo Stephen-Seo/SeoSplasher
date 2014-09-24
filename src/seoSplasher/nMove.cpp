@@ -58,6 +58,9 @@ void nMove::update(sf::Time dt, Context context)
         vel->y = 0.0f;
         return;
     }
+    // don't move continuously if pos/vel of player hasn't been updated for a while
+    if(*context.mode != 0 && living && context.scontext->movementTime[living->ID] <= 0.0f)
+        return;
 
     bool ignoreBalloons = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
 
