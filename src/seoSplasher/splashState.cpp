@@ -45,7 +45,9 @@ aLeft(false),
 sDown(false),
 dRight(false),
 cFired(false),
-cpf(nullptr)
+cpf(nullptr),
+guiSystem(this),
+startPressed(false)
 {
     // init server context
     for(int i = 0; i < 4; ++i)
@@ -192,7 +194,7 @@ cpf(nullptr)
     {
         if(server)
         {
-            context.scontext->breakables.resize(100);
+            context.scontext->breakables.reserve(100);
 
             // register server callbacks
             server->registerConnectionMadeCall( [this] (sf::Uint8 playerID) {
@@ -211,9 +213,24 @@ cpf(nullptr)
         initBreakables();
     }
 
-    // other initializations
+    // init fieldBG
     fieldBG.setFillColor(sf::Color(127,127,127));
     fieldBG.setPosition(120.0f, 0.0f);
+
+    // init GUI
+    /*
+    if(*context.mode != 1) // not client
+    {
+        sf::Text startText(
+        GuiButton startButton(context.window, GuiCommand(GuiCommand::VALUE_BOOL, GuiCommand::Value(false), GuiCommand::Ptr(&startPressed)), sf::Color::Green, sf::Color(127,255,127), sf::Vector2f(200.0f, 90.0f), 
+    }
+    */
+
+    // get client to connect to server
+    if(*context.mode == 1)
+    {
+        client->connectToServer(sf::IpAddress(context.scontext->serverIP));
+    }
 }
 
 void SplashState::draw()
@@ -305,6 +322,10 @@ bool SplashState::handleEvent(const sf::Event& event)
         getContext().ecEngine->clear();
         requestStackClear();
         requestStackPush(States::MENU);
+    }
+    else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Return)
+    {
+        getContext().scontext->gameState = SS::STARTED;
     }
     return false;
 }

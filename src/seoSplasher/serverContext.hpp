@@ -41,6 +41,8 @@ struct ServerContext
 
     std::string customNames[4];
     std::string ownName;
+
+    std::string serverIP;
 };
 
 #endif

@@ -29,16 +29,17 @@ void SplashClient::update(sf::Time dt)
         {
             updateTimer = SERVER_UPDATE_TIME;
             sendPacket();
-        }
 
-        if(!breakablesSet && breakables.size() > 0)
-        {
-            breakablesSet = true;
-            for(int i = 0; i < breakables.size(); ++i)
+            if(!breakablesSet && breakables.size() > 0)
             {
-                context.scontext->breakableXYToEID.insert(std::make_pair(breakables[i], Utility::clientCreateBreakable(breakables[i], context)));
+                breakablesSet = true;
+                for(int i = 0; i < breakables.size(); ++i)
+                {
+                    context.scontext->breakableXYToEID.insert(std::make_pair(breakables[i], Utility::clientCreateBreakable(breakables[i], context)));
+                }
             }
         }
+
     }
 }
 

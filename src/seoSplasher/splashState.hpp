@@ -10,6 +10,7 @@
 #include "cPlayerControl.hpp"
 #include "cPowerup.hpp"
 #include "direction.hpp"
+#include "../gui.hpp"
 
 class SplashServer;
 class SplashClient;
@@ -45,6 +46,9 @@ private:
     std::unique_ptr<SplashClient> client;
 
     std::map<int, int> playerIDToEntityID;
+
+    GuiSystem guiSystem;
+    bool startPressed;
 
     void addWall(float x, float y);
     void addCombatant(bool isPlayer, bool isPlayerLocallyControlled, int forceID = -1);

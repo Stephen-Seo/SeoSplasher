@@ -175,6 +175,9 @@ void SplashServer::sendPacket()
         if(!playerConnected[i])
             continue;
 
+        if(i == 0 && *context.mode == 2)
+            continue;
+
         sf::Packet packet;
         sf::Uint32 sequenceID;
         sf::IpAddress address(playerAddresses[i]);

@@ -19,8 +19,11 @@ public:
 private:
     GuiSystem guiSystem;
 
-    bool singlePlayer;
+    sf::Text IPText;
 
+    bool singlePlayer;
+    bool client;
+    bool server;
 };
 
 #endif
