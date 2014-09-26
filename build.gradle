@@ -79,7 +79,7 @@ if(hasProperty('SFML2_DIR'))
 
             binaries.all {
                 cppCompiler.args "-std=c++11", "-Wall", "-Wextra"
-                if(project.hasProperty('SET_RPATH'))
+                if(project.hasProperty('SET_RPATH') && (targetPlatform == platforms.linux_x86 || targetPlatform == platforms.linux_x86_64))
                 {
                     linker.args "-Xlinker", "-rpath=${SET_RPATH}"
                 }
