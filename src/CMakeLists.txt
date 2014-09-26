@@ -24,6 +24,7 @@ set(Game_Project_SOURCES
     seoSplasher/nAnimated.cpp
     seoSplasher/nBalloon.cpp
     seoSplasher/nBreakable.cpp
+    seoSplasher/nCControl.cpp
     seoSplasher/nDeath.cpp
     seoSplasher/nDraw.cpp
     seoSplasher/nMove.cpp
