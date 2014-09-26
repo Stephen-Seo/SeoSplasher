@@ -17,7 +17,7 @@ struct ServerContext
     cPosition* ppositions[4];
     cVelocity* pvelocities[4];
     float movementTime[4];
-    bool placedBalloon[4];
+    sf::Uint8 input[4];
     int playerEID[4];
 
 /*

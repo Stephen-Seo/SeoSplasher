@@ -46,6 +46,7 @@ private:
     std::unique_ptr<SplashClient> client;
 
     std::map<int, int> playerIDToEntityID;
+    int controllingPlayerID;
 
     GuiSystem guiSystem;
     bool startPressed;

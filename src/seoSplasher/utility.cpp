@@ -195,6 +195,12 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
     if(living.balloonsInPlay >= DEFAULT_BALLOONS + living.balloonUp)
         return false;
 
+    sf::Vector2f v = alignToGrid(x,y);
+    // check if balloon already exists in spot
+    HitInfo hitInfo = collideAgainstComponent(v.x, v.y, std::type_index(typeid(cBalloon)), *context.ecEngine);
+    if(hitInfo.hit.size() > 0)
+        return false;
+
     ++living.balloonsInPlay;
 
     bool isSuper = false;
@@ -202,7 +208,6 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
     Entity* balloon = new Entity;
 
     cPosition* pos = new cPosition;
-    sf::Vector2f v = alignToGrid(x,y);
     pos->x = v.x;
     pos->y = v.y;
     pos->rot = 0.0f;
@@ -478,7 +483,7 @@ void Utility::createPowerup(const float& x, const float& y, cPowerup& powerup, c
     if(*context.mode != 0 && *context.mode != 1) // not singleplayer or client
     {
         PowerupInfo powerupInfo;
-        powerupInfo.xy = (sf::Uint8)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE) + ((sf::Uint8)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE) / GRID_WIDTH);
+        powerupInfo.xy = (sf::Uint8)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE) + ((sf::Uint8)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE) * GRID_WIDTH);
         powerupInfo.type = (sf::Uint8) powerup.powerup;
 
         context.scontext->powerups.insert(std::make_pair(epowerup->getID(), powerupInfo));
@@ -609,6 +614,8 @@ BalloonInfo Utility::clientCreateBalloon(const float& x, const float& y, sf::Uin
         }
     }
     balloon->addComponent(std::type_index(typeid(cSprite)), std::move(sprite));
+
+    balloon->addComponent(std::type_index(typeid(cBalloon)), std::unique_ptr<Component>(new cBalloon));
 
     context.ecEngine->addEntity(std::move(balloon));
 

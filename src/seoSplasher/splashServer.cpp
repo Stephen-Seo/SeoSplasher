@@ -106,15 +106,10 @@ void SplashServer::receivedPacket(sf::Packet packet, sf::Uint32 address)
     {
         if(!context.scontext->playersAlive[i])
             return;
-        float posx, posy, velx, vely;
-        if(!(packet >> posx) || !(packet >> posy) || !(packet >> velx) || !(packet >> vely) || !(packet >> temp))
+        if(!(packet >> temp))
             return;
-        context.scontext->ppositions[i]->x = posx;
-        context.scontext->ppositions[i]->y = posy;
-        context.scontext->pvelocities[i]->x = velx;
-        context.scontext->pvelocities[i]->y = vely;
-        context.scontext->placedBalloon[i] = temp != 0x0;
-        context.scontext->movementTime[i] = SERVER_UPDATE_TIME;
+        context.scontext->input[i] = temp;
+        context.scontext->movementTime[i] = SERVER_UPDATE_TIME * 2.0f;
     }
         break;
     default:
@@ -254,7 +249,6 @@ void SplashServer::sendPacket()
                     packet << context.scontext->ppositions[j]->y;
                     packet << context.scontext->pvelocities[j]->x;
                     packet << context.scontext->pvelocities[j]->y;
-                    packet << context.scontext->movementTime[j];
                 }
             }
 

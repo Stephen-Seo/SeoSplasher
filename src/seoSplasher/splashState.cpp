@@ -30,6 +30,8 @@
 #include "splashServer.hpp"
 #include "splashClient.hpp"
 #include "nPickupHit.hpp"
+#include "nCControl.hpp"
+#include "cClientControl.hpp"
 
 SplashState::SplashState(StateStack& stack, Context context) :
 State(stack, context),
@@ -46,6 +48,7 @@ sDown(false),
 dRight(false),
 cFired(false),
 cpf(nullptr),
+controllingPlayerID(0),
 guiSystem(this),
 startPressed(false)
 {
@@ -55,11 +58,17 @@ startPressed(false)
         context.scontext->playersAlive[i] = false;
         context.scontext->ppositions[i] = nullptr;
         context.scontext->pvelocities[i] = nullptr;
+        context.scontext->movementTime[i] = 0.0f;
+        context.scontext->input[i] = 0;
+        context.scontext->customNames[i] = "";
     }
     context.scontext->balloons.clear();
     context.scontext->explosions.clear();
+    context.scontext->explosionXYToEID.clear();
     context.scontext->powerups.clear();
+    context.scontext->powerupXYToEID.clear();
     context.scontext->breakables.clear();
+    context.scontext->breakableXYToEID.clear();
     context.scontext->gameState = SS::WAITING_FOR_PLAYERS;
 
     // set servers based on mode
@@ -145,6 +154,10 @@ startPressed(false)
 
     if(*context.mode != 1) // not client
     {
+        if(*context.mode != 0) // not singleplayer)
+        {
+            context.ecEngine->addSystem(std::unique_ptr<Node>(new nCControl));
+        }
         context.ecEngine->addSystem(std::unique_ptr<Node>(new nAIControl));
         context.ecEngine->addSystem(std::unique_ptr<Node>(new nBalloon));
         context.ecEngine->addSystem(std::unique_ptr<Node>(new nSplosion));
@@ -226,6 +239,34 @@ startPressed(false)
     }
     */
 
+    // register client callback
+    if(client)
+    {
+        client->registerPlayersChangedCall( [this] (sf::Uint8 playerInfo) {
+            if(playerIDToEntityID.size() > 0)
+            {
+                std::map<int, int> pIDToEIDCopy = playerIDToEntityID;
+                for(auto iter = pIDToEIDCopy.begin(); iter != pIDToEIDCopy.end(); ++iter)
+                {
+                    this->getContext().ecEngine->removeEntity(iter->second);
+                }
+                playerIDToEntityID.clear();
+            }
+
+            for(int i = 0; i < 4; ++i)
+            {
+                if((playerInfo & (0x10 << i)) != 0x0)
+                {
+                    addCombatant(true, true, i);
+                }
+                else if(i < (playerInfo & 0xF))
+                    addCombatant(true, false, i);
+                else
+                    addCombatant(false, false, i);
+            }
+        });
+    }
+
     // get client to connect to server
     if(*context.mode == 1)
     {
@@ -266,56 +307,122 @@ bool SplashState::handleEvent(const sf::Event& event)
 {
     if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::W)
     {
-        dir = Direction::UP;
-        wUp = true;
+        if(client)
+        {
+            getContext().scontext->input[controllingPlayerID] |= 0x2;
+        }
+        else
+        {
+            dir = Direction::UP;
+            wUp = true;
+        }
     }
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::A)
     {
-        dir = Direction::LEFT;
-        aLeft = true;
+        if(client)
+        {
+            getContext().scontext->input[controllingPlayerID] |= 0x8;
+        }
+        else
+        {
+            dir = Direction::LEFT;
+            aLeft = true;
+        }
     }
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S)
     {
-        dir = Direction::DOWN;
-        sDown = true;
+        if(client)
+        {
+            getContext().scontext->input[controllingPlayerID] |= 0x4;
+        }
+        else
+        {
+            dir = Direction::DOWN;
+            sDown = true;
+        }
     }
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::D)
     {
-        dir = Direction::RIGHT;
-        dRight = true;
+        if(client)
+        {
+            getContext().scontext->input[controllingPlayerID] |= 0x1;
+        }
+        else
+        {
+            dir = Direction::RIGHT;
+            dRight = true;
+        }
     }
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::E)
     {
         cFired = true;
+        if(client)
+        {
+            getContext().scontext->input[controllingPlayerID] |= 0x20;
+        }
     }
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
     {
-        placeBalloon = true;
-        placeAction = false;
+        if(client)
+        {
+            getContext().scontext->input[controllingPlayerID] |= 0x10;
+        }
+        else
+        {
+            placeBalloon = true;
+            placeAction = false;
+        }
     }
     else if(event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::W)
     {
         wUp = false;
         checkReleasedInput();
+        if(client)
+        {
+            getContext().scontext->input[controllingPlayerID] &= 0xFD;
+        }
     }
     else if(event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::A)
     {
         aLeft = false;
         checkReleasedInput();
+        if(client)
+        {
+            getContext().scontext->input[controllingPlayerID] &= 0xF7;
+        }
     }
     else if(event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::S)
     {
         sDown = false;
         checkReleasedInput();
+        if(client)
+        {
+            getContext().scontext->input[controllingPlayerID] &= 0xFB;
+        }
     }
     else if(event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::D)
     {
         dRight = false;
         checkReleasedInput();
+        if(client)
+        {
+            getContext().scontext->input[controllingPlayerID] &= 0xFE;
+        }
     }
     else if(event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::E)
     {
         cFired = false;
+        if(client)
+        {
+            getContext().scontext->input[controllingPlayerID] &= 0xDF;
+        }
+    }
+    else if(event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Space)
+    {
+        if(client)
+        {
+            getContext().scontext->input[controllingPlayerID] &= 0xEF;
+        }
     }
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
     {
@@ -325,7 +432,28 @@ bool SplashState::handleEvent(const sf::Event& event)
     }
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Return)
     {
-        getContext().scontext->gameState = SS::STARTED;
+        //TODO do better way of starting game
+        if(getContext().scontext->gameState != SS::STARTED)
+        {
+            getContext().scontext->gameState = SS::STARTED;
+
+            if(playerIDToEntityID.find(0) == playerIDToEntityID.end())
+            {
+                addCombatant(false, false, 0);
+            }
+            if(playerIDToEntityID.find(1) == playerIDToEntityID.end())
+            {
+                addCombatant(false, false, 1);
+            }
+            if(playerIDToEntityID.find(2) == playerIDToEntityID.end())
+            {
+                addCombatant(false, false, 2);
+            }
+            if(playerIDToEntityID.find(3) == playerIDToEntityID.end())
+            {
+                addCombatant(false, false, 3);
+            }
+        }
     }
     return false;
 }
@@ -447,6 +575,11 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
     if(isPlayer && isPlayerLocallyControlled)
     {
         combatant->addComponent(std::type_index(typeid(cPlayerControl)), std::unique_ptr<Component>(new cPlayerControl(&dir, &placeBalloon, &placeAction, &kick, &kickAction, ID, &cFired)));
+        controllingPlayerID = ID;
+    }
+    else if(isPlayer && server)
+    {
+        combatant->addComponent(std::type_index(typeid(cClientControl)), std::unique_ptr<Component>(new cClientControl));
     }
     else if(!isPlayer && *getContext().mode != 1) // not client
     {
@@ -463,6 +596,9 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
 
     if(client || server)
     {
+        // set ID
+        getContext().scontext->playerEID[ID] = playerIDToEntityID[ID];
+
         // assign context variables
         getContext().scontext->ppositions[ID] = pos;
         getContext().scontext->pvelocities[ID] = vel;
@@ -475,12 +611,9 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
     }
 
     // remove ID mapping when player is removed
-    if(isPlayer)
-    {
-        getContext().ecEngine->registerRemoveCall(playerIDToEntityID[ID], [this, ID] () {
-            this->playerIDToEntityID.erase(ID);
-        });
-    }
+    getContext().ecEngine->registerRemoveCall(playerIDToEntityID[ID], [this, ID] () {
+        this->playerIDToEntityID.erase(ID);
+    });
 }
 
 void SplashState::addPathFinder()

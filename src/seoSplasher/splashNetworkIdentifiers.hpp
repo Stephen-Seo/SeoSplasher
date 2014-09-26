@@ -15,11 +15,13 @@ Client waiting packet format:
     1-? bytes custom name
 
 Client in-game packet format:
-    4 bytes posx
-    4 bytes posy
-    4 bytes velx
-    4 bytes vely
-    1 byte boolean placing balloon
+    1 byte input
+        - 0000 0001 going right
+        - 0000 0010 going up
+        - 0000 0100 going down
+        - 0000 1000 going left
+        - 0001 0000 balloon placed
+        - 0010 0000 remote triggered
 
 Server waiting packet format:
     1 byte State Identifier (One of "GameState" enum)
@@ -47,6 +49,15 @@ Server in-game packet format:
     2 byte explosionInfo per explosion (up to ? times)
     1 byte # of powerups on field
     2 bytes PowerupInfo per powerup (up to ? times)
+*/
+
+/*
+16 bytes
+PlayerInfo
+    float posx
+    float posy
+    float velx
+    float vely
 */
 
 /*

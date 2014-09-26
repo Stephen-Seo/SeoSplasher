@@ -5,6 +5,8 @@
 #include <string>
 #include <queue>
 #include <list>
+#include <functional>
+
 #include <SFML/System.hpp>
 
 #include "../connection.hpp"
@@ -18,6 +20,8 @@ public:
 
     void update(sf::Time dt);
 
+    void registerPlayersChangedCall(std::function<void(sf::Uint8)> function);
+    void registerGameStartedCall(std::function<void()> function);
 private:
     Context context;
     sf::Uint32 address;
@@ -33,6 +37,8 @@ private:
     sf::Uint8 numberOfPlayers;
 
     std::queue<int> IDqueue;
+
+    std::list<std::function<void(sf::Uint8)> > playerChangedFunctions;
 
     void receivedPacket(sf::Packet packet, sf::Uint32 address);
 

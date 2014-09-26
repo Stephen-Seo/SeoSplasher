@@ -24,6 +24,13 @@ void SplashClient::update(sf::Time dt)
 
     if(connectedToServer)
     {
+        for(int i = 0; i < 4; ++i)
+        {
+            context.scontext->movementTime[i] -= dt.asSeconds();
+            if(context.scontext->movementTime[i] < 0.0f)
+                context.scontext->movementTime[i] = 0.0f;
+        }
+
         updateTimer -= dt.asSeconds();
         if(updateTimer <= 0.0f)
         {
@@ -43,15 +50,25 @@ void SplashClient::update(sf::Time dt)
     }
 }
 
+void SplashClient::registerPlayersChangedCall(std::function<void(sf::Uint8)> function)
+{
+    playerChangedFunctions.push_back(function);
+}
+
 void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
 {
+    bool playersChanged = false;
+    sf::Uint8 playerInfo;
+
     sf::Uint8 packetType, temp;
     if(!(packet >> packetType))
         return;
 
     SS::GameState gs = static_cast<SS::GameState>(packetType);
     if(context.scontext->gameState != gs)
+    {
         context.scontext->gameState = gs;
+    }
 
     switch(packetType)
     {
@@ -69,6 +86,9 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
         // # of connected players
         if(!(packet >> temp))
             return;
+        playerInfo = temp;
+        if(numberOfPlayers != (temp & 0xF))
+            playersChanged = true;
         numberOfPlayers = (temp & 0xF);
         if(playerID == 0xFF)
         {
@@ -119,6 +139,15 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
             if(!(packet >> context.scontext->customNames[3]))
                 return;
         }
+
+
+        if(playersChanged)
+        {
+            for(auto iter = playerChangedFunctions.begin(); iter != playerChangedFunctions.end(); ++iter)
+            {
+                (*iter)(playerInfo);
+            }
+        }
     }
         break;
     case SS::STARTED:
@@ -145,6 +174,8 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
             context.ecEngine->removeEntity(context.scontext->playerEID[3]);
         }
 
+        float floatTemp;
+
         // playerInfo data
         if((temp & 0x10) != 0)
         {
@@ -156,8 +187,7 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
                 return;
             if(!(packet >> context.scontext->pvelocities[0]->y))
                 return;
-            if(!(packet >> context.scontext->movementTime[0]))
-                return;
+            context.scontext->movementTime[0] = SERVER_UPDATE_TIME;
         }
         if((temp & 0x20) != 0)
         {
@@ -169,8 +199,7 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
                 return;
             if(!(packet >> context.scontext->pvelocities[1]->y))
                 return;
-            if(!(packet >> context.scontext->movementTime[1]))
-                return;
+            context.scontext->movementTime[1] = SERVER_UPDATE_TIME;
         }
         if((temp & 0x40) != 0)
         {
@@ -182,8 +211,7 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
                 return;
             if(!(packet >> context.scontext->pvelocities[2]->y))
                 return;
-            if(!(packet >> context.scontext->movementTime[2]))
-                return;
+            context.scontext->movementTime[2] = SERVER_UPDATE_TIME;
         }
         if((temp & 0x80) != 0)
         {
@@ -195,8 +223,7 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
                 return;
             if(!(packet >> context.scontext->pvelocities[3]->y))
                 return;
-            if(!(packet >> context.scontext->movementTime[3]))
-                return;
+            context.scontext->movementTime[3] = SERVER_UPDATE_TIME;
         }
 
         // # of balloons
@@ -356,11 +383,8 @@ void SplashClient::sendPacket()
     case SS::STARTED:
     case SS::ENDED:
     {
-        packet << context.scontext->ppositions[playerID]->x;
-        packet << context.scontext->ppositions[playerID]->y;
-        packet << context.scontext->pvelocities[playerID]->x;
-        packet << context.scontext->pvelocities[playerID]->y;
-        packet << (context.scontext->placedBalloon[playerID] ? (sf::Uint8) 0x1 : (sf::Uint8) 0x0);
+        // send input
+        packet << context.scontext->input[playerID];
     }
         break;
     default:
