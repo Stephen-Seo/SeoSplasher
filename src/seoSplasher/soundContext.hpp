@@ -21,6 +21,8 @@ struct SoundContext
 
     bool happened[SIZE];
 
+    bool mute;
+
     void reset();
 };
 

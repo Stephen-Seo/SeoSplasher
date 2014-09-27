@@ -3,6 +3,7 @@
 
 #include "../ec/engine.hpp"
 #include "utility.hpp"
+#include "soundContext.hpp"
 
 SplashClient::SplashClient(Context context) :
 Connection(Connection::CLIENT),
@@ -54,6 +55,11 @@ void SplashClient::registerPlayersChangedCall(std::function<void(sf::Uint8)> fun
     playerChangedFunctions.push_back(function);
 }
 
+void SplashClient::registerGameRestartedCall(std::function<void()> function)
+{
+    gameRestartedFunctions.push_back(function);
+}
+
 void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
 {
     bool playersChanged = false;
@@ -66,7 +72,31 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
     SS::GameState gs = static_cast<SS::GameState>(packetType);
     if(context.scontext->gameState != gs)
     {
+        if(context.scontext->gameState == SS::ENDED && (gs == SS::WAITING_FOR_PLAYERS || gs == SS::WAITING_FOR_SERVER))
+        {
+            for(auto iter = gameRestartedFunctions.begin(); iter != gameRestartedFunctions.end(); ++iter)
+            {
+                (*iter)();
+            }
+            numberOfPlayers = 0;
+            breakables.clear();
+        }
+        else if((context.scontext->gameState == SS::WAITING_FOR_PLAYERS || context.scontext->gameState == SS::WAITING_FOR_SERVER) && gs == SS::STARTED)
+        {
+            context.sfxContext->happened[SoundContext::COUNTDOWN_ENDED] = true;
+        }
         context.scontext->gameState = gs;
+        if(gs == SS::ENDED)
+        {
+            if(context.scontext->playersAlive[playerID])
+            {
+                context.sfxContext->happened[SoundContext::GAME_ENDED_WELL] = true;
+            }
+            else
+            {
+                context.sfxContext->happened[SoundContext::GAME_ENDED_BADLY] = true;
+            }
+        }
     }
 
     switch(packetType)

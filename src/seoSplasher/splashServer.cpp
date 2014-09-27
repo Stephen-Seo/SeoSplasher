@@ -10,7 +10,8 @@
 SplashServer::SplashServer(Context context) :
 Connection(Connection::SERVER),
 context(context),
-updateTimer(SERVER_UPDATE_TIME)
+updateTimer(SERVER_UPDATE_TIME),
+prevState(SS::WAITING_FOR_PLAYERS)
 {
     ignoreOutOfSequence = true;
     resendTimedOutPackets = false;
@@ -48,6 +49,26 @@ void SplashServer::update(sf::Time dt)
     {
         updateTimer = SERVER_UPDATE_TIME;
         sendPacket();
+    }
+
+    if(prevState != context.scontext->gameState)
+    {
+        if(prevState == SS::ENDED && (context.scontext->gameState == SS::WAITING_FOR_PLAYERS || context.scontext->gameState == SS::WAITING_FOR_SERVER))
+        {
+            for(int i = 0; i < 4; ++i)
+            {
+                if(i == 0 && *context.mode == 2) // is non-spectating server
+                    continue;
+                if(playerConnected[i])
+                {
+                    for(auto iter = connectionMadeFunctions.begin(); iter != connectionMadeFunctions.end(); ++iter)
+                    {
+                        (*iter)(i);
+                    }
+                }
+            }
+        }
+        prevState = context.scontext->gameState;
     }
 }
 

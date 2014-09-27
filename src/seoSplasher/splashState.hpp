@@ -12,6 +12,7 @@
 #include "cPowerup.hpp"
 #include "direction.hpp"
 #include "../gui.hpp"
+#include "soundEventManager.hpp"
 
 class SplashServer;
 class SplashClient;
@@ -54,7 +55,10 @@ private:
 
     sf::Text statusText;
     sf::Text countdownText;
+    int countdownNumber;
     sf::RectangleShape statusBG;
+
+    SoundEventManager sem;
 
     void addWall(float x, float y);
     void addCombatant(bool isPlayer, bool isPlayerLocallyControlled, int forceID = -1);

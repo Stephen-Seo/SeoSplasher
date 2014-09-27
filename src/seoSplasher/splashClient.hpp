@@ -21,7 +21,7 @@ public:
     void update(sf::Time dt);
 
     void registerPlayersChangedCall(std::function<void(sf::Uint8)> function);
-    void registerGameStartedCall(std::function<void()> function);
+    void registerGameRestartedCall(std::function<void()> function);
 private:
     Context context;
     sf::Uint32 address;
@@ -38,6 +38,7 @@ private:
     std::queue<int> IDqueue;
 
     std::list<std::function<void(sf::Uint8)> > playerChangedFunctions;
+    std::list<std::function<void()> > gameRestartedFunctions;
 
     void receivedPacket(sf::Packet packet, sf::Uint32 address);
 

@@ -14,6 +14,7 @@
 #include "cLiving.hpp"
 #include "cMoveDisabler.hpp"
 #include "cAIControl.hpp"
+#include "soundContext.hpp"
 
 nMove::nMove() :
 pos(nullptr),
@@ -129,6 +130,7 @@ void nMove::update(sf::Time dt, Context context)
             {
                 if(!isBalloon && living && living->kickUpgrade > 0 && infoBalloon.hit.size() == 1)
                 {
+                    context.sfxContext->happened[SoundContext::BALLOON_KICKED] = true;
                     if(prev < pos->x)
                     {
                         static_cast<cVelocity*>(infoBalloon.hit.front()->getComponent(std::type_index(typeid(cVelocity))))->x = BALLOON_KICK_SPEED;
@@ -204,6 +206,7 @@ void nMove::update(sf::Time dt, Context context)
             {
                 if(!isBalloon && living && living->kickUpgrade > 0 && infoBalloon.hit.size() == 1)
                 {
+                    context.sfxContext->happened[SoundContext::BALLOON_KICKED] = true;
                     if(prev < pos->y)
                     {
                         static_cast<cVelocity*>(infoBalloon.hit.front()->getComponent(std::type_index(typeid(cVelocity))))->y = BALLOON_KICK_SPEED;

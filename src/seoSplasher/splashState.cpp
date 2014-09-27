@@ -33,6 +33,7 @@
 #include "nCControl.hpp"
 #include "cClientControl.hpp"
 #include "utility.hpp"
+#include "soundContext.hpp"
 
 SplashState::SplashState(StateStack& stack, Context context) :
 State(stack, context),
@@ -279,7 +280,7 @@ startPressed(false)
     }
     */
 
-    // register client callback
+    // register client callbacks
     if(client)
     {
         client->registerPlayersChangedCall( [this] (sf::Uint8 playerInfo) {
@@ -304,6 +305,10 @@ startPressed(false)
                 else
                     addCombatant(false, false, i);
             }
+        });
+
+        client->registerGameRestartedCall( [this] () {
+            this->reset();
         });
     }
 
@@ -330,7 +335,7 @@ void SplashState::draw()
             {
                 getContext().window->draw(countdownText);
             }
-            else if(*getContext().mode != 0)
+            else if(*getContext().mode != 0 || getContext().scontext->gameState == SS::ENDED)
             {
                 getContext().window->draw(statusText);
             }
@@ -352,36 +357,54 @@ bool SplashState::update(sf::Time dt)
     if(getContext().scontext->gameState == SS::STARTED)
     {
         getContext().ecEngine->update(dt, getContext());
-        if(playerIDToEntityID.size() <= 1)
+        if((server || *getContext().mode == 0) && playerIDToEntityID.size() <= 1)
         {
             getContext().scontext->gameState = SS::ENDED;
             setStatusText();
+
+            if(playerIDToEntityID.find(0) != playerIDToEntityID.end())
+            {
+                getContext().sfxContext->happened[SoundContext::GAME_ENDED_WELL] = true;
+            }
+            else
+            {
+                getContext().sfxContext->happened[SoundContext::GAME_ENDED_BADLY] = true;
+            }
         }
     }
     else if(getContext().scontext->startTimer >= 0.0f && (getContext().scontext->gameState == SS::WAITING_FOR_PLAYERS || getContext().scontext->gameState == SS::WAITING_FOR_SERVER))
     {
-        getContext().scontext->startTimer -= dt.asSeconds();
+        if(server || *getContext().mode == 0)
+            getContext().scontext->startTimer -= dt.asSeconds();
 
         if(getContext().scontext->startTimer >= 0.0f)
         {
             if(server || *getContext().mode == 0)
             {
-                countdownText.setString(std::to_string((int)(getContext().scontext->startTimer + 1.0f)));
+                if(countdownNumber != (int)(getContext().scontext->startTimer + 1.0f))
+                    getContext().sfxContext->happened[SoundContext::COUNTDOWN_COUNTED] = true;
+                countdownNumber = (getContext().scontext->startTimer + 1.0f);
+                countdownText.setString(std::to_string(countdownNumber));
             }
             else if(client)
             {
-                countdownText.setString(std::to_string(getContext().scontext->startTimer));
+                if(countdownNumber != (int)(getContext().scontext->startTimer))
+                    getContext().sfxContext->happened[SoundContext::COUNTDOWN_COUNTED] = true;
+                countdownNumber = getContext().scontext->startTimer;
+                countdownText.setString(std::to_string(countdownNumber));
             }
             Utility::centerTextOrigin(countdownText);
         }
         else
         {
+            getContext().sfxContext->happened[SoundContext::COUNTDOWN_ENDED] = true;
             startPressed = false;
             getContext().scontext->gameState = SS::STARTED;
             countdownText.setString("");
-
         }
     }
+
+    sem.update(dt, getContext());
 
     return false;
 }
@@ -701,8 +724,10 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
     }
 
     // remove ID mapping when player is removed
+    // trigger death sfx
     getContext().ecEngine->registerRemoveCall(playerIDToEntityID[ID], [this, ID] () {
         this->playerIDToEntityID.erase(ID);
+        this->getContext().sfxContext->happened[SoundContext::COMBATANT_DIED] = true;
     });
 }
 
@@ -769,6 +794,10 @@ void SplashState::addBreakable(float x, float y, cPowerup::Powerup powerup)
     {
         getContext().scontext->breakables.push_back((sf::Uint8)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE) + ((sf::Uint8)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE) * GRID_WIDTH));
     }
+
+    getContext().ecEngine->registerRemoveCall(breakable->getID(), [this] () {
+        this->getContext().sfxContext->happened[SoundContext::BREAKABLE_BROKEN] = true;
+    });
 }
 
 void SplashState::initBreakables()
@@ -980,6 +1009,8 @@ void SplashState::reset()
 {
     getContext().scontext->gameState = SS::WAITING_FOR_PLAYERS;
 
+    playerIDToEntityID.clear();
+
     setStatusText();
 
     getContext().ecEngine->clearEntities();
@@ -1020,6 +1051,7 @@ void SplashState::reset()
         {
             addCombatant(true, true);
         }
+        getContext().scontext->breakables.clear();
         initBreakables();
     }
     else

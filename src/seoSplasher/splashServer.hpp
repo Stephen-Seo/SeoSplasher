@@ -33,6 +33,8 @@ private:
     std::list<std::function<void(sf::Uint8)> > connectionMadeFunctions;
     std::list<std::function<void(sf::Uint8)> > connectionLostFunctions;
 
+    SS::GameState prevState;
+
     void receivedPacket(sf::Packet packet, sf::Uint32 address);
 
     void connectionMade(sf::Uint32 address);

@@ -1,7 +1,8 @@
 
 #include "soundContext.hpp"
 
-SoundContext::SoundContext()
+SoundContext::SoundContext() :
+mute(false)
 {
     reset();
 }

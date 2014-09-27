@@ -26,6 +26,7 @@
 #include "nMove.hpp"
 #include "splashNetworkIdentifiers.hpp"
 #include "cBreakable.hpp"
+#include "soundContext.hpp"
 
 HitInfo Utility::collideAll(const float& x, const float& y, Engine& engine)
 {
@@ -326,6 +327,11 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
         });
     }
 
+    // trigger explosion on balloon removal
+    context.ecEngine->registerRemoveCall(balloon->getID(), [context] () {
+        context.sfxContext->happened[SoundContext::SPLOSION] = true;
+    });
+
     return true;
 }
 
@@ -617,6 +623,11 @@ BalloonInfo Utility::clientCreateBalloon(const float& x, const float& y, sf::Uin
 
     balloon->addComponent(std::type_index(typeid(cBalloon)), std::unique_ptr<Component>(new cBalloon));
 
+    // trigger explosion on balloon removal
+    context.ecEngine->registerRemoveCall(balloon->getID(), [context] () {
+        context.sfxContext->happened[SoundContext::SPLOSION] = true;
+    });
+
     context.ecEngine->addEntity(std::move(balloon));
 
     return balloonInfo;
@@ -758,6 +769,11 @@ int Utility::clientCreateBreakable(sf::Uint8 xy, Context context)
 
     int EID = breakable->getID();
     context.ecEngine->addEntity(std::move(breakable));
+
+    context.ecEngine->registerRemoveCall(EID, [context] () {
+        context.sfxContext->happened[SoundContext::BREAKABLE_BROKEN] = true;
+    });
+
     return EID;
 }
 
