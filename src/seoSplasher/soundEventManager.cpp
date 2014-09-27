@@ -8,6 +8,9 @@
 
 void SoundEventManager::update(sf::Time dt, Context context)
 {
+    if(context.sfxContext->mute)
+        return;
+
     soundCheckTimer -= dt.asSeconds();
     if(soundCheckTimer <= 0.0f)
     {
@@ -38,6 +41,9 @@ void SoundEventManager::update(sf::Time dt, Context context)
                 break;
             case SoundContext::SPLOSION:
                 context.sPlayer->play(context.resourceManager->getSoundBuffer(Sound::SPLOSION));
+                break;
+            case SoundContext::PICKUP_GET:
+                context.sPlayer->play(context.resourceManager->getSoundBuffer(Sound::POWERUP));
                 break;
             case SoundContext::GAME_ENDED_BADLY:
                 context.sPlayer->play(context.resourceManager->getSoundBuffer(Sound::TRY_AGAIN));

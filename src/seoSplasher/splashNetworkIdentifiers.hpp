@@ -2,7 +2,8 @@
 #ifndef SPLASH_NETWORK_IDENTIFIERS_HPP
 #define SPLASH_NETWORK_IDENTIFIERS_HPP
 
-#define SERVER_UPDATE_TIME (1.0f / 15.0f)
+#define CONNECTION_UPDATE_TIME (1.0f / 15.0f)
+#define MOVEMENT_TIMEOUT_TIME 1.0f
 
 /*
 PACKET INFORMATION:
@@ -22,6 +23,8 @@ Client in-game packet format:
         - 0000 1000 going left
         - 0001 0000 balloon placed
         - 0010 0000 remote triggered
+Client post-game packet format:
+    Nothing
 
 Server waiting packet format:
     1 byte State Identifier (One of "GameState" enum)
@@ -35,7 +38,7 @@ Server waiting packet format:
         - 0001 P1 has custom name, 0010 P2 has custom name, etc.
     1-? bytes custom name per player (up to 4 times)
 
-Server in-game packet format:
+Server in-game/post-game packet format:
     1 byte State Identifier (One of "GameState" enum)
     1 byte # of connected players, who's alive
         - least significant 4 bits, 1 bit per connected player
@@ -49,6 +52,8 @@ Server in-game packet format:
     2 byte explosionInfo per explosion (up to ? times)
     1 byte # of powerups on field
     2 bytes PowerupInfo per powerup (up to ? times)
+    1 byte sound information
+        - 0000 0001 powerup picked up (all other sounds handled already?)
 */
 
 /*

@@ -11,7 +11,10 @@ State(stack, context),
 guiSystem(this),
 singlePlayer(false),
 client(false),
-server(false)
+server(false),
+blinkTime(0.0f),
+blinkInterval(0.0f),
+blinking(false)
 {
     // load needed resources
     fset.insert(Fonts::CLEAR_SANS);
@@ -42,14 +45,25 @@ server(false)
     IPText.setString("");
     IPText.setCharacterSize(30);
     IPText.setFont(cSans);
-    IPText.setColor(sf::Color(255,240,240));
+    IPText.setColor(sf::Color(220,255,220));
     IPText.setPosition(360.0f, 450.0f);
+
+    infoIPText.setString("Start typing an ip address if you want to connect to a server.");
+    infoIPText.setCharacterSize(15);
+    infoIPText.setFont(cSans);
+    infoIPText.setColor(sf::Color::White);
+    infoIPText.setPosition(360.0f, 430.0f);
+    Utility::centerTextOrigin(infoIPText);
 }
 
 void SplashMenu::draw()
 {
     guiSystem.draw(*getContext().window);
 
+    if(blinkTime == 0.0f || !blinking)
+    {
+        getContext().window->draw(infoIPText);
+    }
     getContext().window->draw(IPText);
 }
 
@@ -65,15 +79,41 @@ bool SplashMenu::update(sf::Time dt)
     }
     else if(client)
     {
-        *getContext().mode = 1;
-        requestStackClear();
-        requestStackPush(States::SPLASH);
+        if(getContext().scontext->serverIP.size() == 0)
+        {
+            client = false;
+            blinkTime = BLINK_TIME;
+            blinkInterval = BLINK_INTERVAL;
+            blinking = true;
+        }
+        else
+        {
+            *getContext().mode = 1;
+            requestStackClear();
+            requestStackPush(States::SPLASH);
+        }
     }
     else if(server)
     {
         *getContext().mode = 2;
         requestStackClear();
         requestStackPush(States::SPLASH);
+    }
+
+    if(blinkTime > 0.0f)
+    {
+        blinkTime -= dt.asSeconds();
+        if(blinkTime < 0.0f)
+        {
+            blinkTime = 0.0f;
+        }
+
+        blinkInterval -= dt.asSeconds();
+        if(blinkInterval <= 0.0f)
+        {
+            blinking = !blinking;
+            blinkInterval = BLINK_INTERVAL;
+        }
     }
 
     return false;

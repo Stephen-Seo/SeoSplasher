@@ -44,6 +44,8 @@ struct ServerContext
     std::string ownName;
 
     std::string serverIP;
+
+    bool powerupPickedup[4];
 };
 
 #endif

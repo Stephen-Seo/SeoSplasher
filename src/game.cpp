@@ -148,6 +148,7 @@ void Game::registerResources()
     resourceManager.registerSoundBuffer(Sound::DEATH, "death.ogg");
     resourceManager.registerSoundBuffer(Sound::KICK, "kick.ogg");
     resourceManager.registerSoundBuffer(Sound::SPLOSION, "splosion.ogg");
+    resourceManager.registerSoundBuffer(Sound::POWERUP, "powerup.ogg");
     resourceManager.registerSoundBuffer(Sound::TRY_AGAIN, "tryagain.ogg");
     resourceManager.registerSoundBuffer(Sound::VICTORY, "victory.ogg");
 }

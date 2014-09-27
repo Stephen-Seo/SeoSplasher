@@ -40,6 +40,8 @@ private:
     std::list<std::function<void(sf::Uint8)> > playerChangedFunctions;
     std::list<std::function<void()> > gameRestartedFunctions;
 
+    bool endMusicPlayed;
+
     void receivedPacket(sf::Packet packet, sf::Uint32 address);
 
     void connectionMade(sf::Uint32 address);

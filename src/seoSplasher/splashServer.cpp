@@ -10,7 +10,7 @@
 SplashServer::SplashServer(Context context) :
 Connection(Connection::SERVER),
 context(context),
-updateTimer(SERVER_UPDATE_TIME),
+updateTimer(CONNECTION_UPDATE_TIME),
 prevState(SS::WAITING_FOR_PLAYERS)
 {
     ignoreOutOfSequence = true;
@@ -47,7 +47,7 @@ void SplashServer::update(sf::Time dt)
     updateTimer -= dt.asSeconds();
     if(updateTimer <= 0.0f)
     {
-        updateTimer = SERVER_UPDATE_TIME;
+        updateTimer = CONNECTION_UPDATE_TIME;
         sendPacket();
     }
 
@@ -55,6 +55,7 @@ void SplashServer::update(sf::Time dt)
     {
         if(prevState == SS::ENDED && (context.scontext->gameState == SS::WAITING_FOR_PLAYERS || context.scontext->gameState == SS::WAITING_FOR_SERVER))
         {
+
             for(int i = 0; i < 4; ++i)
             {
                 if(i == 0 && *context.mode == 2) // is non-spectating server
@@ -68,6 +69,8 @@ void SplashServer::update(sf::Time dt)
                 }
             }
         }
+
+
         prevState = context.scontext->gameState;
     }
 }
@@ -123,14 +126,13 @@ void SplashServer::receivedPacket(sf::Packet packet, sf::Uint32 address)
         break;
     // in game data
     case SS::STARTED:
-    case SS::ENDED:
     {
         if(!context.scontext->playersAlive[i])
             return;
         if(!(packet >> temp))
             return;
         context.scontext->input[i] = temp;
-        context.scontext->movementTime[i] = SERVER_UPDATE_TIME * 2.0f;
+        context.scontext->movementTime[i] = MOVEMENT_TIMEOUT_TIME;
     }
         break;
     default:
@@ -313,6 +315,17 @@ void SplashServer::sendPacket()
             {
                 packet << iter->second.xy;
                 packet << iter->second.type;
+            }
+
+            // sound info byte
+            if(context.scontext->powerupPickedup[i])
+            {
+                context.scontext->powerupPickedup[i] = false;
+                packet << (sf::Uint8) 0x1;
+            }
+            else
+            {
+                packet << (sf::Uint8) 0x0;
             }
         }
             break;

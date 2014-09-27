@@ -60,6 +60,8 @@ private:
 
     SoundEventManager sem;
 
+    SS::GameState prevState;
+
     void addWall(float x, float y);
     void addCombatant(bool isPlayer, bool isPlayerLocallyControlled, int forceID = -1);
     void addPathFinder();

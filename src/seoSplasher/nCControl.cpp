@@ -131,5 +131,6 @@ void nCControl::update(sf::Time dt, Context context)
         }
 
         pickup->hit = true;
+        context.scontext->powerupPickedup[living->ID] = true;
     }
 }

@@ -11,6 +11,7 @@
 #include "cPickup.hpp"
 #include "../ec/engine.hpp"
 #include "cPathFinderRef.hpp"
+#include "soundContext.hpp"
 
 std::list<std::type_index> nPControl::powerupFilter;
 
@@ -132,5 +133,6 @@ void nPControl::update(sf::Time dt, Context context)
         }
 
         pickup->hit = true;
+        context.sfxContext->happened[SoundContext::PICKUP_GET] = true;
     }
 }

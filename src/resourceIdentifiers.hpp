@@ -96,6 +96,7 @@ namespace Sound
         DEATH,
         KICK,
         SPLOSION,
+        POWERUP,
         TRY_AGAIN,
         VICTORY
     };

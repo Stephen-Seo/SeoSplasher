@@ -12,6 +12,7 @@ struct SoundContext
         COMBATANT_DIED,
         BALLOON_KICKED,
         SPLOSION,
+        PICKUP_GET,
         GAME_ENDED_BADLY,
         GAME_ENDED_WELL,
         SIZE

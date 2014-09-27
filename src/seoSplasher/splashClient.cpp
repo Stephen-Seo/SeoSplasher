@@ -9,10 +9,11 @@ SplashClient::SplashClient(Context context) :
 Connection(Connection::CLIENT),
 context(context),
 connectedToServer(false),
-updateTimer(SERVER_UPDATE_TIME),
+updateTimer(CONNECTION_UPDATE_TIME),
 playerID(0xFF),
 breakables(100),
-numberOfPlayers(0)
+numberOfPlayers(0),
+endMusicPlayed(false)
 {
     ignoreOutOfSequence = true;
     resendTimedOutPackets = false;
@@ -34,7 +35,7 @@ void SplashClient::update(sf::Time dt)
         updateTimer -= dt.asSeconds();
         if(updateTimer <= 0.0f)
         {
-            updateTimer = SERVER_UPDATE_TIME;
+            updateTimer = CONNECTION_UPDATE_TIME;
             sendPacket();
 
             if(!context.scontext->breakablesSet && breakables.size() > 0)
@@ -80,23 +81,18 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
             }
             numberOfPlayers = 0;
             breakables.clear();
+            endMusicPlayed = false;
+            context.scontext->explosionXYToEID.clear();
+            context.scontext->powerupXYToEID.clear();
+            context.scontext->breakableXYToEID.clear();
         }
         else if((context.scontext->gameState == SS::WAITING_FOR_PLAYERS || context.scontext->gameState == SS::WAITING_FOR_SERVER) && gs == SS::STARTED)
         {
             context.sfxContext->happened[SoundContext::COUNTDOWN_ENDED] = true;
+            context.scontext->startTimer = 0.0f;
         }
+
         context.scontext->gameState = gs;
-        if(gs == SS::ENDED)
-        {
-            if(context.scontext->playersAlive[playerID])
-            {
-                context.sfxContext->happened[SoundContext::GAME_ENDED_WELL] = true;
-            }
-            else
-            {
-                context.sfxContext->happened[SoundContext::GAME_ENDED_BADLY] = true;
-            }
-        }
     }
 
     switch(packetType)
@@ -207,7 +203,18 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
             context.ecEngine->removeEntity(context.scontext->playerEID[3]);
         }
 
-        float floatTemp;
+        if(gs == SS::ENDED && !endMusicPlayed)
+        {
+            endMusicPlayed = true;
+            if((temp & (0x10 << playerID)) != 0x0)
+            {
+                context.sfxContext->happened[SoundContext::GAME_ENDED_WELL] = true;
+            }
+            else
+            {
+                context.sfxContext->happened[SoundContext::GAME_ENDED_BADLY] = true;
+            }
+        }
 
         // playerInfo data
         if((temp & 0x10) != 0)
@@ -220,7 +227,7 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
                 return;
             if(!(packet >> context.scontext->pvelocities[0]->y))
                 return;
-            context.scontext->movementTime[0] = SERVER_UPDATE_TIME;
+            context.scontext->movementTime[0] = MOVEMENT_TIMEOUT_TIME;
         }
         if((temp & 0x20) != 0)
         {
@@ -232,7 +239,7 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
                 return;
             if(!(packet >> context.scontext->pvelocities[1]->y))
                 return;
-            context.scontext->movementTime[1] = SERVER_UPDATE_TIME;
+            context.scontext->movementTime[1] = MOVEMENT_TIMEOUT_TIME;
         }
         if((temp & 0x40) != 0)
         {
@@ -244,7 +251,7 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
                 return;
             if(!(packet >> context.scontext->pvelocities[2]->y))
                 return;
-            context.scontext->movementTime[2] = SERVER_UPDATE_TIME;
+            context.scontext->movementTime[2] = MOVEMENT_TIMEOUT_TIME;
         }
         if((temp & 0x80) != 0)
         {
@@ -256,7 +263,7 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
                 return;
             if(!(packet >> context.scontext->pvelocities[3]->y))
                 return;
-            context.scontext->movementTime[3] = SERVER_UPDATE_TIME;
+            context.scontext->movementTime[3] = MOVEMENT_TIMEOUT_TIME;
         }
 
         // # of balloons
@@ -265,7 +272,7 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
 
         // balloon info
         sf::Uint8 direction, typeRange;
-        int EID, SEID;
+        int SEID;
         float posx, posy, velx = 0.0f, vely = 0.0f;
         while(!IDqueue.empty())
         {
@@ -363,6 +370,14 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
             }
         }
         removeUnmentionedPowerups();
+
+        // sound info byte
+        if(!(packet >> temp))
+            return;
+        if(temp != 0x0) // if sound byte is changed, then TODO change here!
+        {
+            context.sfxContext->happened[SoundContext::PICKUP_GET] = true;
+        }
     }
         break;
     default:
@@ -414,11 +429,12 @@ void SplashClient::sendPacket()
     }
         break;
     case SS::STARTED:
-    case SS::ENDED:
     {
         // send input
         packet << context.scontext->input[playerID];
     }
+        break;
+    case SS::ENDED: // nothing to send
         break;
     default:
         break;

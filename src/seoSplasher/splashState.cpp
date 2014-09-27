@@ -54,7 +54,7 @@ controllingPlayerID(0),
 guiSystem(this),
 startPressed(false)
 {
-    // init server context
+    // init server context in case of resetting of this state
     for(int i = 0; i < 4; ++i)
     {
         context.scontext->playersAlive[i] = false;
@@ -63,6 +63,7 @@ startPressed(false)
         context.scontext->movementTime[i] = 0.0f;
         context.scontext->input[i] = 0;
         context.scontext->customNames[i] = "";
+        context.scontext->powerupPickedup[i] = false;
     }
     context.scontext->balloons.clear();
     context.scontext->explosions.clear();
@@ -165,6 +166,7 @@ startPressed(false)
         sset.insert(Sound::DEATH);
         sset.insert(Sound::KICK);
         sset.insert(Sound::SPLOSION);
+        sset.insert(Sound::POWERUP);
         sset.insert(Sound::TRY_AGAIN);
         sset.insert(Sound::VICTORY);
 
@@ -331,7 +333,7 @@ void SplashState::draw()
         {
             getContext().window->draw(statusBG);
 
-            if(getContext().scontext->startTimer >= 0.0f)
+            if(getContext().scontext->startTimer > 0.0f)
             {
                 getContext().window->draw(countdownText);
             }
@@ -354,13 +356,18 @@ bool SplashState::update(sf::Time dt)
         client->update(dt);
     }
 
+    if(prevState != getContext().scontext->gameState)
+    {
+        prevState = getContext().scontext->gameState;
+        setStatusText();
+    }
+
     if(getContext().scontext->gameState == SS::STARTED)
     {
         getContext().ecEngine->update(dt, getContext());
         if((server || *getContext().mode == 0) && playerIDToEntityID.size() <= 1)
         {
             getContext().scontext->gameState = SS::ENDED;
-            setStatusText();
 
             if(playerIDToEntityID.find(0) != playerIDToEntityID.end())
             {
@@ -370,6 +377,10 @@ bool SplashState::update(sf::Time dt)
             {
                 getContext().sfxContext->happened[SoundContext::GAME_ENDED_BADLY] = true;
             }
+        }
+        else if(client && countdownText.getString().getSize() > 0)
+        {
+            countdownText.setString("");
         }
     }
     else if(getContext().scontext->startTimer >= 0.0f && (getContext().scontext->gameState == SS::WAITING_FOR_PLAYERS || getContext().scontext->gameState == SS::WAITING_FOR_SERVER))
@@ -1011,8 +1022,6 @@ void SplashState::reset()
 
     playerIDToEntityID.clear();
 
-    setStatusText();
-
     getContext().ecEngine->clearEntities();
 
     addPathFinder();
@@ -1034,6 +1043,10 @@ void SplashState::reset()
 
     if(!client)
     {
+        getContext().scontext->balloons.clear();
+        getContext().scontext->explosions.clear();
+        getContext().scontext->powerups.clear();
+
         IDcounter = 0;
         if(*getContext().mode == 0) // local singleplayer
         {
