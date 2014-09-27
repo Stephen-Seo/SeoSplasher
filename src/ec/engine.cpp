@@ -72,6 +72,18 @@ void Engine::clear()
         deadQueue.pop();
 }
 
+void Engine::clearEntities()
+{
+    for(auto iter = systems.begin(); iter != systems.end(); ++iter)
+        (*iter)->clearEntities();
+    for(auto iter = drawSystems.begin(); iter != drawSystems.end(); ++iter)
+        (*iter)->clearEntities();
+    entityMap.clear();
+    rfMap.clear();
+    while(!deadQueue.empty())
+        deadQueue.pop();
+}
+
 std::map<int, std::unique_ptr<Entity> >::iterator Engine::getEntityIterBegin()
 {
     return entityMap.begin();

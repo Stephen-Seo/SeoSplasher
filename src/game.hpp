@@ -16,6 +16,7 @@
 #include "state.hpp"
 #include "stateStack.hpp"
 #include "seoSplasher/serverContext.hpp"
+#include "seoSplasher/soundContext.hpp"
 
 class Game
 {
@@ -49,6 +50,7 @@ private:
     unsigned char mode;
 
     ServerContext scontext;
+    SoundContext sfxContext;
 };
 
 #endif

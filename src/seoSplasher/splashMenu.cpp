@@ -4,6 +4,7 @@
 #include "../context.hpp"
 #include "../resourceManager.hpp"
 #include "splashNetworkIdentifiers.hpp"
+#include "utility.hpp"
 
 SplashMenu::SplashMenu(StateStack& stack, Context context) :
 State(stack, context),
@@ -42,7 +43,7 @@ server(false)
     IPText.setCharacterSize(30);
     IPText.setFont(cSans);
     IPText.setColor(sf::Color(255,240,240));
-
+    IPText.setPosition(360.0f, 450.0f);
 }
 
 void SplashMenu::draw()
@@ -55,8 +56,6 @@ void SplashMenu::draw()
 bool SplashMenu::update(sf::Time dt)
 {
     guiSystem.update(dt);
-
-    IPText.setString(getContext().scontext->serverIP);
 
     if(singlePlayer)
     {
@@ -87,11 +86,15 @@ bool SplashMenu::handleEvent(const sf::Event& event)
     if(event.type == sf::Event::TextEntered && ((event.text.unicode >= 48 && event.text.unicode <= 57) || event.text.unicode == 46))
     {
         getContext().scontext->serverIP.push_back((unsigned char) event.text.unicode);
+        IPText.setString(getContext().scontext->serverIP);
+        Utility::centerTextOrigin(IPText);
     }
     if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::BackSpace)
     {
         if(getContext().scontext->serverIP.size() > 0)
             getContext().scontext->serverIP.pop_back();
+        IPText.setString(getContext().scontext->serverIP);
+        Utility::centerTextOrigin(IPText);
     }
 
     return false;

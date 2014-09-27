@@ -6,6 +6,7 @@
 
 #include <random>
 #include <memory>
+#include <set>
 
 #include "cPlayerControl.hpp"
 #include "cPowerup.hpp"
@@ -51,6 +52,10 @@ private:
     GuiSystem guiSystem;
     bool startPressed;
 
+    sf::Text statusText;
+    sf::Text countdownText;
+    sf::RectangleShape statusBG;
+
     void addWall(float x, float y);
     void addCombatant(bool isPlayer, bool isPlayerLocallyControlled, int forceID = -1);
     void addPathFinder();
@@ -59,6 +64,9 @@ private:
     void addBreakable(float x, float y, cPowerup::Powerup powerup = cPowerup::NONE);
     void initBreakables();
     bool validBreakableCoordinate(int x, int y);
+
+    void setStatusText();
+    void reset();
 };
 
 #endif

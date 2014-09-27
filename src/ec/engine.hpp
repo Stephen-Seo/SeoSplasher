@@ -20,6 +20,7 @@ public:
     void addEntity(std::unique_ptr<Entity> entity);
     void removeEntity(int eID);
     void clear();
+    void clearEntities();
     std::map<int, std::unique_ptr<Entity> >::iterator getEntityIterBegin();
     std::map<int, std::unique_ptr<Entity> >::iterator getEntityIterEnd();
 

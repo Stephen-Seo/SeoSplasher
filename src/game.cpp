@@ -30,7 +30,7 @@ Game::Game()
 resourceManager(&stateStack, RESOURCE_MANAGER_MODE, PACKFILE_NAME),
 mPlayer(),
 sPlayer(),
-stateStack(Context(window, resourceManager, mPlayer, sPlayer, ecEngine, rGen, isQuitting, mode, scontext)),
+stateStack(Context(window, resourceManager, mPlayer, sPlayer, ecEngine, rGen, isQuitting, mode, scontext, sfxContext)),
 isQuitting(false),
 mode(0)
 {
@@ -141,6 +141,15 @@ void Game::registerResources()
     resourceManager.registerTexture(Textures::GHOST_UPGRADE_2, "ghostUp02.png");
 
     resourceManager.registerFont(Fonts::CLEAR_SANS, "ClearSans-Regular.ttf");
+
+    resourceManager.registerSoundBuffer(Sound::BREAKABLE, "breakable.ogg");
+    resourceManager.registerSoundBuffer(Sound::COUNTDOWN_0, "countdown0.ogg");
+    resourceManager.registerSoundBuffer(Sound::COUNTDOWN_1, "countdown1.ogg");
+    resourceManager.registerSoundBuffer(Sound::DEATH, "death.ogg");
+    resourceManager.registerSoundBuffer(Sound::KICK, "kick.ogg");
+    resourceManager.registerSoundBuffer(Sound::SPLOSION, "splosion.ogg");
+    resourceManager.registerSoundBuffer(Sound::TRY_AGAIN, "tryagain.ogg");
+    resourceManager.registerSoundBuffer(Sound::VICTORY, "victory.ogg");
 }
 
 // register states via stateStack

@@ -34,6 +34,7 @@ struct ServerContext
 
     std::vector<sf::Uint8> breakables;
     std::map<sf::Uint8, int> breakableXYToEID;
+    bool breakablesSet;
 
     SS::GameState gameState;
 

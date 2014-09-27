@@ -760,3 +760,9 @@ int Utility::clientCreateBreakable(sf::Uint8 xy, Context context)
     context.ecEngine->addEntity(std::move(breakable));
     return EID;
 }
+
+void Utility::centerTextOrigin(sf::Text& text)
+{
+    sf::FloatRect rect = text.getLocalBounds();
+    text.setOrigin(rect.width / 2.0f, rect.height / 2.0f);
+}

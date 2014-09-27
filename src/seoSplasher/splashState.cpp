@@ -32,6 +32,7 @@
 #include "nPickupHit.hpp"
 #include "nCControl.hpp"
 #include "cClientControl.hpp"
+#include "utility.hpp"
 
 SplashState::SplashState(StateStack& stack, Context context) :
 State(stack, context),
@@ -69,7 +70,18 @@ startPressed(false)
     context.scontext->powerupXYToEID.clear();
     context.scontext->breakables.clear();
     context.scontext->breakableXYToEID.clear();
+    context.scontext->breakablesSet = false;
     context.scontext->gameState = SS::WAITING_FOR_PLAYERS;
+
+    if(*context.mode == 0)
+    {
+        context.scontext->startTimer = 2.99f;
+        startPressed = true;
+    }
+    else
+    {
+        context.scontext->startTimer = -1.0f;
+    }
 
     // set servers based on mode
 
@@ -144,6 +156,17 @@ startPressed(false)
         tset.insert(Textures::GHOST_UPGRADE_1);
         tset.insert(Textures::GHOST_UPGRADE_2);
 
+        fset.insert(Fonts::CLEAR_SANS);
+
+        sset.insert(Sound::BREAKABLE);
+        sset.insert(Sound::COUNTDOWN_0);
+        sset.insert(Sound::COUNTDOWN_1);
+        sset.insert(Sound::DEATH);
+        sset.insert(Sound::KICK);
+        sset.insert(Sound::SPLOSION);
+        sset.insert(Sound::TRY_AGAIN);
+        sset.insert(Sound::VICTORY);
+
         context.resourceManager->loadResources(getNeededResources());
     }
 
@@ -152,7 +175,7 @@ startPressed(false)
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nPControl));
     context.ecEngine->addSystem(std::unique_ptr<Node>(new nMove));
 
-    if(*context.mode != 1) // not client
+    if(!client)
     {
         if(*context.mode != 0) // not singleplayer)
         {
@@ -203,7 +226,7 @@ startPressed(false)
         addCombatant(true, true);
     }
 
-    if(*context.mode != 1) // not client
+    if(!client)
     {
         if(server)
         {
@@ -229,6 +252,23 @@ startPressed(false)
     // init fieldBG
     fieldBG.setFillColor(sf::Color(127,127,127));
     fieldBG.setPosition(120.0f, 0.0f);
+
+    // init status
+    statusText.setFont(context.resourceManager->getFont(Fonts::CLEAR_SANS));
+    statusText.setCharacterSize(30);
+    statusText.setPosition(360.0f, 50.0f);
+    setStatusText();
+
+    statusBG.setFillColor(sf::Color(0,0,0,127));
+    statusBG.setSize(sf::Vector2f(600.0f, 400.0f));
+    sf::FloatRect rect = statusBG.getLocalBounds();
+    statusBG.setOrigin(rect.width / 2, rect.height / 2);
+    statusBG.setPosition(360.0f, 240.0f);
+
+    // init countdown text
+    countdownText.setFont(context.resourceManager->getFont(Fonts::CLEAR_SANS));
+    countdownText.setCharacterSize(70);
+    countdownText.setPosition(360.0f, 240.0f);
 
     // init GUI
     /*
@@ -281,6 +321,20 @@ void SplashState::draw()
         getContext().window->draw(fieldBG);
 
         getContext().ecEngine->draw(getContext());
+
+        if(getContext().scontext->gameState != SS::STARTED)
+        {
+            getContext().window->draw(statusBG);
+
+            if(getContext().scontext->startTimer >= 0.0f)
+            {
+                getContext().window->draw(countdownText);
+            }
+            else if(*getContext().mode != 0)
+            {
+                getContext().window->draw(statusText);
+            }
+        }
     }
 }
 
@@ -298,6 +352,35 @@ bool SplashState::update(sf::Time dt)
     if(getContext().scontext->gameState == SS::STARTED)
     {
         getContext().ecEngine->update(dt, getContext());
+        if(playerIDToEntityID.size() <= 1)
+        {
+            getContext().scontext->gameState = SS::ENDED;
+            setStatusText();
+        }
+    }
+    else if(getContext().scontext->startTimer >= 0.0f && (getContext().scontext->gameState == SS::WAITING_FOR_PLAYERS || getContext().scontext->gameState == SS::WAITING_FOR_SERVER))
+    {
+        getContext().scontext->startTimer -= dt.asSeconds();
+
+        if(getContext().scontext->startTimer >= 0.0f)
+        {
+            if(server || *getContext().mode == 0)
+            {
+                countdownText.setString(std::to_string((int)(getContext().scontext->startTimer + 1.0f)));
+            }
+            else if(client)
+            {
+                countdownText.setString(std::to_string(getContext().scontext->startTimer));
+            }
+            Utility::centerTextOrigin(countdownText);
+        }
+        else
+        {
+            startPressed = false;
+            getContext().scontext->gameState = SS::STARTED;
+            countdownText.setString("");
+
+        }
     }
 
     return false;
@@ -432,27 +515,34 @@ bool SplashState::handleEvent(const sf::Event& event)
     }
     else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Return)
     {
-        //TODO do better way of starting game
-        if(getContext().scontext->gameState != SS::STARTED)
+        if(!client && !startPressed && (getContext().scontext->gameState == SS::WAITING_FOR_PLAYERS || getContext().scontext->gameState == SS::WAITING_FOR_SERVER))
         {
-            getContext().scontext->gameState = SS::STARTED;
+            getContext().scontext->startTimer = 2.99f;
+            startPressed = true;
 
-            if(playerIDToEntityID.find(0) == playerIDToEntityID.end())
+            if(*getContext().mode != 0)
             {
-                addCombatant(false, false, 0);
+                if(playerIDToEntityID.find(0) == playerIDToEntityID.end())
+                {
+                    addCombatant(false, false, 0);
+                }
+                if(playerIDToEntityID.find(1) == playerIDToEntityID.end())
+                {
+                    addCombatant(false, false, 1);
+                }
+                if(playerIDToEntityID.find(2) == playerIDToEntityID.end())
+                {
+                    addCombatant(false, false, 2);
+                }
+                if(playerIDToEntityID.find(3) == playerIDToEntityID.end())
+                {
+                    addCombatant(false, false, 3);
+                }
             }
-            if(playerIDToEntityID.find(1) == playerIDToEntityID.end())
-            {
-                addCombatant(false, false, 1);
-            }
-            if(playerIDToEntityID.find(2) == playerIDToEntityID.end())
-            {
-                addCombatant(false, false, 2);
-            }
-            if(playerIDToEntityID.find(3) == playerIDToEntityID.end())
-            {
-                addCombatant(false, false, 3);
-            }
+        }
+        else if(!client && getContext().scontext->gameState == SS::ENDED)
+        {
+            reset();
         }
     }
     return false;
@@ -581,7 +671,7 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
     {
         combatant->addComponent(std::type_index(typeid(cClientControl)), std::unique_ptr<Component>(new cClientControl));
     }
-    else if(!isPlayer && *getContext().mode != 1) // not client
+    else if(!isPlayer && !client)
     {
         std::unique_ptr<Component> controlP = std::unique_ptr<Component>(new cAIControl);
         cAIControl* control = static_cast<cAIControl*>(controlP.get());
@@ -859,4 +949,79 @@ bool SplashState::validBreakableCoordinate(int x, int y)
         return false;
 
     return true;
+}
+
+void SplashState::setStatusText()
+{
+    switch(getContext().scontext->gameState)
+    {
+    case SS::WAITING_FOR_PLAYERS:
+        statusText.setString("Waiting for players");
+        Utility::centerTextOrigin(statusText);
+        break;
+    case SS::WAITING_FOR_SERVER:
+        statusText.setString("Waiting for server");
+        Utility::centerTextOrigin(statusText);
+        break;
+    case SS::STARTED:
+        statusText.setString("");
+        break;
+    case SS::ENDED:
+        statusText.setString("Game Over");
+        Utility::centerTextOrigin(statusText);
+        break;
+    case SS::CONNECTION_LOST:
+        statusText.setString("Connection Lost");
+        Utility::centerTextOrigin(statusText);
+    }
+}
+
+void SplashState::reset()
+{
+    getContext().scontext->gameState = SS::WAITING_FOR_PLAYERS;
+
+    setStatusText();
+
+    getContext().ecEngine->clearEntities();
+
+    addPathFinder();
+
+    for(int i = 0; i < 15; ++i)
+    {
+        addWall(GRID_OFFSET_X - GRID_SQUARE_SIZE, GRID_OFFSET_Y + GRID_SQUARE_SIZE * i);
+        addWall(GRID_RIGHT, GRID_OFFSET_Y + GRID_SQUARE_SIZE * i);
+        addWall(GRID_OFFSET_X + GRID_SQUARE_SIZE * i, GRID_OFFSET_Y - GRID_SQUARE_SIZE);
+        addWall(GRID_OFFSET_X + GRID_SQUARE_SIZE * i, GRID_BOTTOM);
+        if(i < 7)
+        {
+            for(int j = 0; j < 7; ++j)
+            {
+                addWall(GRID_OFFSET_X + GRID_SQUARE_SIZE + GRID_SQUARE_SIZE * 2 * i, GRID_OFFSET_Y + GRID_SQUARE_SIZE + GRID_SQUARE_SIZE * 2 * j);
+            }
+        }
+    }
+
+    if(!client)
+    {
+        IDcounter = 0;
+        if(*getContext().mode == 0) // local singleplayer
+        {
+            placeBalloon = false;
+
+            addCombatant(true, true);
+            addCombatant(false, false);
+            addCombatant(false, false);
+            addCombatant(false, false);
+
+            startPressed = true;
+            getContext().scontext->startTimer = 2.99f;
+        }
+        else if(*getContext().mode == 2) // server multiplayer
+        {
+            addCombatant(true, true);
+        }
+        initBreakables();
+    }
+    else
+        getContext().scontext->breakablesSet = false;
 }

@@ -3,6 +3,10 @@
 
 #include <queue>
 
+#ifndef NDEBUG
+    #include <iostream>
+#endif
+
 #include "pathFinder.hpp"
 #include "../../ec/cPosition.hpp"
 #include "../cLiving.hpp"
@@ -291,8 +295,12 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
                 }
             }
             if(mult == 0.0f)
+            {
                 break;
+            }
             ret = (float)pdist / 20.0f;
+            if(ret == 0.0f)
+                ret = 0.2f;
         }
         break;
     case AI::MOVE_TO_SAFETY:

@@ -32,7 +32,6 @@ private:
     sf::Uint8 playerID;
 
     std::vector<sf::Uint8> breakables;
-    bool breakablesSet;
 
     sf::Uint8 numberOfPlayers;
 

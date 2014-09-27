@@ -25,6 +25,7 @@ struct nMove : Node
     cMoveDisabler* disable;
 
     bool isBalloon;
+    bool isAI;
 
     bool checkEntity(Entity& entity);
     std::unique_ptr<Node> getNewNode();

@@ -6,6 +6,7 @@
 #include <typeindex>
 
 #include <SFML/System.hpp>
+#include <SFML/Graphics.hpp>
 
 #include "direction.hpp"
 
@@ -45,6 +46,8 @@ namespace Utility
     int clientCreateExplosion(sf::Uint8 xy, sf::Uint8 direction, Context context);
     int clientCreatePowerup(sf::Uint8 xy, sf::Uint8 type, Context context);
     int clientCreateBreakable(sf::Uint8 xy, Context context);
+
+    void centerTextOrigin(sf::Text& text);
 };
 
 #endif

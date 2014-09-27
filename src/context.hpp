@@ -14,6 +14,7 @@ class MusicPlayer;
 class SoundPlayer;
 class Engine;
 struct ServerContext;
+struct SoundContext;
 
 struct Context
 {
@@ -25,7 +26,8 @@ struct Context
             std::mt19937& rGen,
             bool& isQuitting,
             unsigned char& mode,
-            ServerContext& scontext);
+            ServerContext& scontext,
+            SoundContext& sfxContext);
 
     sf::RenderWindow* window;
     ResourceManager* resourceManager;
@@ -43,6 +45,7 @@ struct Context
      * 4 = dedicated server multiplayer (no draw)
     **/
     ServerContext* scontext;
+    SoundContext* sfxContext;
 };
 
 #endif

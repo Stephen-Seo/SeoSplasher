@@ -11,7 +11,6 @@ connectedToServer(false),
 updateTimer(SERVER_UPDATE_TIME),
 playerID(0xFF),
 breakables(100),
-breakablesSet(false),
 numberOfPlayers(0)
 {
     ignoreOutOfSequence = true;
@@ -37,9 +36,9 @@ void SplashClient::update(sf::Time dt)
             updateTimer = SERVER_UPDATE_TIME;
             sendPacket();
 
-            if(!breakablesSet && breakables.size() > 0)
+            if(!context.scontext->breakablesSet && breakables.size() > 0)
             {
-                breakablesSet = true;
+                context.scontext->breakablesSet = true;
                 for(int i = 0; i < breakables.size(); ++i)
                 {
                     context.scontext->breakableXYToEID.insert(std::make_pair(breakables[i], Utility::clientCreateBreakable(breakables[i], context)));
@@ -81,6 +80,10 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
         if(temp != 0xFF)
         {
             context.scontext->startTimer = (float) temp;
+        }
+        else
+        {
+            context.scontext->startTimer = -1.0f;
         }
 
         // # of connected players

@@ -90,6 +90,14 @@ namespace Sound
 {
     enum ID
     {
+        BREAKABLE,
+        COUNTDOWN_0,
+        COUNTDOWN_1,
+        DEATH,
+        KICK,
+        SPLOSION,
+        TRY_AGAIN,
+        VICTORY
     };
 }
 

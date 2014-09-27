@@ -189,7 +189,7 @@ void SplashServer::sendPacket()
         case SS::WAITING_FOR_SERVER:
         {
             // start timer byte
-            packet << (context.scontext->startTimer >= 0.0f ? (sf::Uint8) (context.scontext->startTimer + 0.5f) : (sf::Uint8) 0xFF);
+            packet << (context.scontext->startTimer >= 0.0f ? (sf::Uint8) (context.scontext->startTimer + 1.0f) : (sf::Uint8) 0xFF);
 
             // connected players byte
             temp = 0;

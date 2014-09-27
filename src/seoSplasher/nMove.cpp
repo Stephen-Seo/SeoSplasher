@@ -13,12 +13,15 @@
 #include "cBalloon.hpp"
 #include "cLiving.hpp"
 #include "cMoveDisabler.hpp"
+#include "cAIControl.hpp"
 
 nMove::nMove() :
 pos(nullptr),
 vel(nullptr),
 living(nullptr),
-disable(nullptr)
+disable(nullptr),
+isBalloon(false),
+isAI(false)
 {}
 
 bool nMove::checkEntity(Entity& entity)
@@ -38,6 +41,7 @@ void nMove::getCReferencesFromEntity(Entity& entity)
     vel = static_cast<cVelocity*>(entity.getComponent(std::type_index(typeid(cVelocity))));
     entityRemoved = &entity.removed;
     isBalloon = entity.hasComponent(std::type_index(typeid(cBalloon)));
+    isAI = entity.hasComponent(std::type_index(typeid(cAIControl)));
     if(entity.hasComponent(std::type_index(typeid(cLiving))))
     {
         living = static_cast<cLiving*>(entity.getComponent(std::type_index(typeid(cLiving))));
@@ -59,7 +63,7 @@ void nMove::update(sf::Time dt, Context context)
         return;
     }
     // don't move continuously if pos/vel of player hasn't been updated for a while
-    if(*context.mode != 0 && living && context.scontext->movementTime[living->ID] <= 0.0f)
+    if(*context.mode != 0 && living && !isAI && context.scontext->movementTime[living->ID] <= 0.0f)
         return;
 
     bool ignoreBalloons = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
