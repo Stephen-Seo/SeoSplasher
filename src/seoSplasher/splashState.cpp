@@ -199,6 +199,14 @@ startPressed(false)
         context.ecEngine->addDrawSystem(std::unique_ptr<Node>(new nDraw));
     }
 
+    // init playerInfo text
+    playerInfoText.setFont(context.resourceManager->getFont(Fonts::CLEAR_SANS));
+    playerInfoText.setCharacterSize(40);
+    if(*context.mode == 0)
+        playerInfoText.setPosition(360.0f, 360.0f);
+    else
+        playerInfoText.setPosition(360.0f, 240.0f);
+
     // add entities
     addPathFinder();
 
@@ -273,6 +281,8 @@ startPressed(false)
     countdownText.setCharacterSize(70);
     countdownText.setPosition(360.0f, 240.0f);
 
+
+
     // init GUI
     /*
     if(*context.mode != 1) // not client
@@ -341,6 +351,11 @@ void SplashState::draw()
             {
                 getContext().window->draw(statusText);
             }
+
+            if(((getContext().scontext->gameState == SS::WAITING_FOR_PLAYERS || getContext().scontext->gameState == SS::WAITING_FOR_SERVER) && (*getContext().mode == 0 || getContext().scontext->startTimer < 0.0f)) || (getContext().scontext->gameState == SS::ENDED))
+            {
+                getContext().window->draw(playerInfoText);
+            }
         }
     }
 }
@@ -358,6 +373,11 @@ bool SplashState::update(sf::Time dt)
 
     if(prevState != getContext().scontext->gameState)
     {
+        if(client && getContext().scontext->gameState == SS::ENDED)
+        {
+            playerInfoText.setString("Waiting for server to restart...");
+            Utility::centerTextOrigin(playerInfoText);
+        }
         prevState = getContext().scontext->gameState;
         setStatusText();
     }
@@ -377,6 +397,9 @@ bool SplashState::update(sf::Time dt)
             {
                 getContext().sfxContext->happened[SoundContext::GAME_ENDED_BADLY] = true;
             }
+
+            playerInfoText.setString("Press Enter to restart the game");
+            Utility::centerTextOrigin(playerInfoText);
         }
         else if(client && countdownText.getString().getSize() > 0)
         {
@@ -700,6 +723,11 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
     {
         combatant->addComponent(std::type_index(typeid(cPlayerControl)), std::unique_ptr<Component>(new cPlayerControl(&dir, &placeBalloon, &placeAction, &kick, &kickAction, ID, &cFired)));
         controllingPlayerID = ID;
+        if(server)
+            playerInfoText.setString("You are Player " + std::to_string(ID + 1) + "!\nPress Enter to Start");
+        else
+            playerInfoText.setString("You are Player " + std::to_string(ID + 1) + "!");
+        Utility::centerTextOrigin(playerInfoText);
     }
     else if(isPlayer && server)
     {

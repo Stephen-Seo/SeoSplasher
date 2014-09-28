@@ -55,6 +55,7 @@ private:
 
     sf::Text statusText;
     sf::Text countdownText;
+    sf::Text playerInfoText;
     int countdownNumber;
     sf::RectangleShape statusBG;
 
