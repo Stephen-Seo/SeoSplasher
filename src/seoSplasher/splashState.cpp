@@ -721,7 +721,8 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
 
     if(isPlayer && isPlayerLocallyControlled)
     {
-        combatant->addComponent(std::type_index(typeid(cPlayerControl)), std::unique_ptr<Component>(new cPlayerControl(&dir, &placeBalloon, &placeAction, &kick, &kickAction, ID, &cFired)));
+        if(!client)
+            combatant->addComponent(std::type_index(typeid(cPlayerControl)), std::unique_ptr<Component>(new cPlayerControl(&dir, &placeBalloon, &placeAction, &kick, &kickAction, ID, &cFired)));
         controllingPlayerID = ID;
         if(server)
             playerInfoText.setString("You are Player " + std::to_string(ID + 1) + "!\nPress Enter to Start");

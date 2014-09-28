@@ -22,6 +22,7 @@
 #include "direction.hpp"
 #include "cWIndicator.hpp"
 #include "cBalloon.hpp"
+#include "cPathFinder.hpp"
 
 nAIControl::nAIControl() :
 control(nullptr),
@@ -357,7 +358,7 @@ void nAIControl::update(sf::Time dt, Context context)
 
     if(living->rControlUpgrade > 0) //TODO fix inDanger detection
     {
-        bool inDanger = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cWIndicator)), *context.ecEngine);
+        bool inDanger = Utility::livingInDanger(pos->x, pos->y, pfref->cpf->pf, context);
         if(justPlacedBalloon || inDanger)
         {
             controlFireTime = 0.0f;

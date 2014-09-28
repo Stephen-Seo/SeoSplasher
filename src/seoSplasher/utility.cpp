@@ -782,3 +782,134 @@ void Utility::centerTextOrigin(sf::Text& text)
     sf::FloatRect rect = text.getLocalBounds();
     text.setOrigin(rect.width / 2.0f, rect.height / 2.0f);
 }
+
+bool Utility::livingInDanger(const float& x, const float& y, PathFinder& pf, Context context)
+{
+    unsigned char postGrid[GRID_TOTAL];
+    const unsigned char* grid = pf.getValidGrid(*context.ecEngine);
+
+    // get copy of grid
+    for(int i = 0; i < GRID_TOTAL; ++i)
+    {
+        postGrid[i] = grid[i];
+    }
+
+    // populate copy with WIndicators
+    for(auto iter = context.ecEngine->getEntityIterBegin(); iter != context.ecEngine->getEntityIterEnd(); ++iter)
+    {
+        if(iter->second->hasComponent(std::type_index(typeid(cBalloon))) && iter->second->hasComponent(std::type_index(typeid(cPosition))))
+        {
+            cBalloon* balloon = static_cast<cBalloon*>(iter->second->getComponent(std::type_index(typeid(cBalloon))));
+            cPosition* pos = static_cast<cPosition*>(iter->second->getComponent(std::type_index(typeid(cPosition))));
+
+            unsigned char xy = (unsigned char)((pos->x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE) + ((unsigned char)((pos->y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE) * GRID_WIDTH);
+
+            // right
+            for(int i = xy + 1; i <= xy + balloon->range; ++i)
+            {
+                if((i - 1) % GRID_WIDTH != GRID_WIDTH - 1 && ((postGrid[i] & 0x10) == 0x0 || balloon->ghosting))
+                {
+                    postGrid[i] |= 0x20;
+                    if((postGrid[i] & 0x4) != 0x0 && !balloon->piercing)
+                        break;
+                }
+                else
+                    break;
+            }
+            // left
+            for(int i = xy - 1; i >= xy - balloon->range; --i)
+            {
+                if((i + 1) % GRID_WIDTH != 0 && ((postGrid[i] & 0x10) == 0x0 || balloon->ghosting))
+                {
+                    postGrid[i] |= 0x20;
+                    if((postGrid[i] & 0x4) != 0x0 && !balloon->piercing)
+                        break;
+                }
+                else
+                    break;
+            }
+            // up
+            for(int i = xy - GRID_WIDTH; i >= (int)xy - (int)(GRID_WIDTH * balloon->range) ; i -= GRID_WIDTH)
+            {
+                if(i >= 0 && ((postGrid[i] & 0x10) == 0x0 || balloon->ghosting))
+                {
+                    postGrid[i] |= 0x20;
+                    if((postGrid[i] & 0x4) != 0x0 && !balloon->piercing)
+                        break;
+                }
+                else
+                    break;
+            }
+            // down
+            for(int i = xy + GRID_WIDTH; i <= (int)xy + (int)(GRID_WIDTH * balloon->range); i += GRID_WIDTH)
+            {
+                if(i < GRID_TOTAL && ((postGrid[i] & 0x10) == 0x0 || balloon->ghosting))
+                {
+                    postGrid[i] |= 0x20;
+                    if((postGrid[i] & 0x4) != 0x0 && !balloon->piercing)
+                        break;
+                }
+                else
+                    break;
+            }
+        }
+    }
+
+    /*
+    // get approximate grid coordinate of living entity
+    int xy = (int)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE + 0.5f) + ((int)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE + 0.5f) * GRID_WIDTH);
+
+    // check 9 valid grid cells at/around xy for collision
+    for(int i = -1; i <= 1; ++i)
+    {
+        if(xy % GRID_WIDTH == 0 && i == -1)
+            continue;
+        else if(xy % GRID_WIDTH == GRID_WIDTH - 1 && i == 1)
+            break;
+        for(int j = -GRID_WIDTH; j <= GRID_WIDTH; j += GRID_WIDTH)
+        {
+            if(xy / GRID_WIDTH == 0 && j == -GRID_WIDTH)
+                continue;
+            else if(xy / GRID_WIDTH == GRID_HEIGHT - 1)
+                break;
+            // convert valid coordinate to global coordinates to check against global coordinate living entity
+            float wx = ((xy + i + j) % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X;
+            float wy = ((xy + i + j) / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y;
+            if(collide(x, y, wx, wy))
+                return true;
+        }
+    }
+
+    */
+
+    int xCoord0 = (int)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE + 0.5f);
+    int yCoord0 = (int)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE + 0.5f);
+    int xCoord1;
+    int yCoord1;
+    float alignedX = xCoord0 * GRID_SQUARE_SIZE + GRID_OFFSET_X;
+    float alignedY = yCoord0 * GRID_SQUARE_SIZE + GRID_OFFSET_Y;
+
+    if(alignedX > x)
+        xCoord1 = xCoord0 - 1;
+    else if(alignedX < x)
+        xCoord1 = xCoord0 + 1;
+    else
+        xCoord1 = xCoord0;
+    if(alignedY > y)
+        yCoord1 = yCoord0 - 1;
+    else if(alignedY < y)
+        yCoord1 = yCoord0 + 1;
+    else
+        yCoord1 = yCoord0;
+
+    int xy0 = xCoord0 + yCoord0 * GRID_WIDTH;
+    int xy1 = xCoord1 + yCoord1 * GRID_WIDTH;
+
+    // check xy0 and xy1
+    if(xy0 >= 0 && xy0 < GRID_TOTAL && (postGrid[xy0] & 0x20) != 0)
+        return true;
+    else if(xy1 >= 0 && xy1 < GRID_TOTAL && (postGrid[xy1] & 0x20) != 0)
+        return true;
+
+    return false;
+}

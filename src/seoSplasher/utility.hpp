@@ -19,6 +19,7 @@ struct cDamage;
 struct cPowerup;
 struct cPathFinderRef;
 struct BalloonInfo;
+class PathFinder;
 
 struct HitInfo
 {
@@ -48,6 +49,8 @@ namespace Utility
     int clientCreateBreakable(sf::Uint8 xy, Context context);
 
     void centerTextOrigin(sf::Text& text);
+
+    bool livingInDanger(const float& x, const float& y, PathFinder& pf, Context context);
 };
 
 #endif
