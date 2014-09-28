@@ -97,8 +97,8 @@ namespace Sound
         KICK,
         SPLOSION,
         POWERUP,
-        TRY_AGAIN,
-        VICTORY
+        TRY_AGAIN_TUNE,
+        VICTORY_TUNE
     };
 }
 

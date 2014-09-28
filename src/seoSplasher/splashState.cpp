@@ -167,8 +167,8 @@ startPressed(false)
         sset.insert(Sound::KICK);
         sset.insert(Sound::SPLOSION);
         sset.insert(Sound::POWERUP);
-        sset.insert(Sound::TRY_AGAIN);
-        sset.insert(Sound::VICTORY);
+        sset.insert(Sound::TRY_AGAIN_TUNE);
+        sset.insert(Sound::VICTORY_TUNE);
 
         context.resourceManager->loadResources(getNeededResources());
     }

@@ -149,8 +149,8 @@ void Game::registerResources()
     resourceManager.registerSoundBuffer(Sound::KICK, "kick.ogg");
     resourceManager.registerSoundBuffer(Sound::SPLOSION, "splosion.ogg");
     resourceManager.registerSoundBuffer(Sound::POWERUP, "powerup.ogg");
-    resourceManager.registerSoundBuffer(Sound::TRY_AGAIN, "tryagain.ogg");
-    resourceManager.registerSoundBuffer(Sound::VICTORY, "victory.ogg");
+    resourceManager.registerSoundBuffer(Sound::TRY_AGAIN_TUNE, "tryagain.ogg");
+    resourceManager.registerSoundBuffer(Sound::VICTORY_TUNE, "victory.ogg");
 }
 
 // register states via stateStack

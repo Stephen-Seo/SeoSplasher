@@ -46,10 +46,10 @@ void SoundEventManager::update(sf::Time dt, Context context)
                 context.sPlayer->play(context.resourceManager->getSoundBuffer(Sound::POWERUP));
                 break;
             case SoundContext::GAME_ENDED_BADLY:
-                context.sPlayer->play(context.resourceManager->getSoundBuffer(Sound::TRY_AGAIN));
+                context.sPlayer->play(context.resourceManager->getSoundBuffer(Sound::TRY_AGAIN_TUNE));
                 break;
             case SoundContext::GAME_ENDED_WELL:
-                context.sPlayer->play(context.resourceManager->getSoundBuffer(Sound::VICTORY));
+                context.sPlayer->play(context.resourceManager->getSoundBuffer(Sound::VICTORY_TUNE));
                 break;
             default:
                 break;
