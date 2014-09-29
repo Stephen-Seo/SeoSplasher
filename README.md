@@ -19,7 +19,7 @@ Enter/Return to start/reset the game (cannot start/reset the game as a client).
 
 ## Using Gradle
 
-The gradle build scripts build for Linux 32/64 and Windows 32/64 on a Arch Linux 64-bit system.
+The gradle build scripts build for Linux 32/64 and Windows 32/64 on a Arch Linux 64-bit system. Those on other systems can build with CMake instead.
 
 ### Prerequisites
 
