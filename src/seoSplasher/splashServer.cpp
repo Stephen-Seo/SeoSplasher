@@ -288,11 +288,18 @@ void SplashServer::sendPacket()
                 {
                     packet << (sf::Uint8) 0x0;
                     packet << *(iter->second.velx);
+                    iter->second.typeRange |= 0x10;
                 }
-                else
+                else if(*(iter->second.vely) != 0.0f)
                 {
                     packet << (sf::Uint8) 0x1;
                     packet << *(iter->second.vely);
+                    iter->second.typeRange |= 0x10;
+                }
+                else
+                {
+                    packet << (sf::Uint8) 0x0;
+                    packet << 0.0f;
                 }
                 packet << iter->second.typeRange;
             }

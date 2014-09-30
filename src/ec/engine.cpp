@@ -62,6 +62,15 @@ void Engine::removeEntity(int eID)
     }
 }
 
+Entity* Engine::getEntity(int eID)
+{
+    auto findIter = entityMap.find(eID);
+    if(findIter == entityMap.end())
+        return nullptr;
+    else
+        return findIter->second.get();
+}
+
 void Engine::clear()
 {
     systems.clear();

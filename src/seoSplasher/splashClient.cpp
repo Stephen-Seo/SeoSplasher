@@ -1,6 +1,10 @@
 
 #include "splashClient.hpp"
 
+#ifndef NDEBUG
+  #include <iostream>
+#endif
+
 #include "../ec/engine.hpp"
 #include "utility.hpp"
 #include "soundContext.hpp"
@@ -304,9 +308,30 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
             if(!(packet >> typeRange))
                 return;
 
-            if(context.scontext->balloons.find(SEID) == context.scontext->balloons.end())
+            auto findIter = context.scontext->balloons.find(SEID);
+            if(findIter == context.scontext->balloons.end())
             {
                 context.scontext->balloons.insert(std::make_pair(SEID, Utility::clientCreateBalloon(posx, posy, typeRange, context)));
+            }
+            else if((typeRange & 0x10) != 0x0)
+            {
+                Entity* balloonEntity = context.ecEngine->getEntity(findIter->second.EID);
+                if(balloonEntity != nullptr)
+                {
+                    cPosition* pos = static_cast<cPosition*>(balloonEntity->getComponent(std::type_index(typeid(cPosition))));
+                    cVelocity* vel = static_cast<cVelocity*>(balloonEntity->getComponent(std::type_index(typeid(cVelocity))));
+
+                    pos->x = posx;
+                    pos->y = posy;
+                    vel->x = velx;
+                    vel->y = vely;
+                }
+#ifndef NDEBUG
+                else
+                {
+                    std::clog << "SplashClient> WARNING: Balloon EID " << findIter->second.EID << " not found in engine!\n";
+                }
+#endif
             }
         }
         removeUnmentionedBalloons();

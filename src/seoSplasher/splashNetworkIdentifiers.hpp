@@ -48,6 +48,12 @@ Server in-game/post-game packet format:
     20 bytes PlayerInfo struct per player (up to 4 times)
     1 byte # of balloons on field
     18 bytes BallonInfo per balloon (up to ? times)
+        - EID as int
+        - posx as float
+        - posy as float
+        - direction as unsigned char
+        - vel as float
+        - typeRange as unsigned char
     1 byte # of explosions on field
     2 byte explosionInfo per explosion (up to ? times)
     1 byte # of powerups on field
@@ -87,7 +93,7 @@ struct BalloonInfo
      * 0000 0010 - rcontrol
      * 0000 0100 - pierce
      * 0000 1000 - ghost
-     * 4 most significant bits is a 4-bit number defining range
+     * 0001 0000 - was kicked
     **/
 };
 

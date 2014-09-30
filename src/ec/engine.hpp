@@ -19,6 +19,7 @@ public:
     void addDrawSystem(std::unique_ptr<Node> type);
     void addEntity(std::unique_ptr<Entity> entity);
     void removeEntity(int eID);
+    Entity* getEntity(int eID);
     void clear();
     void clearEntities();
     std::map<int, std::unique_ptr<Entity> >::iterator getEntityIterBegin();
