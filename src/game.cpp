@@ -26,7 +26,7 @@
 #endif
 
 Game::Game()
-: window(sf::VideoMode(720,480), "SFML App"),
+: window(sf::VideoMode(720,480), "SeoSplasher"),
 resourceManager(&stateStack, RESOURCE_MANAGER_MODE, PACKFILE_NAME),
 mPlayer(),
 sPlayer(),
