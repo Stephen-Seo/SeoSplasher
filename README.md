@@ -1,4 +1,4 @@
-SeoSplasher
+[SeoSplasher](https://github.com/Stephen-Seo/SeoSplasher/wiki/Downloads)
 ===========
 
 A Bomberman clone with networked multiplayer capabilities.
