@@ -32,6 +32,8 @@ set(Game_Project_SOURCES
     seoSplasher/nPFUpdater.cpp
     seoSplasher/nPickupHit.cpp
     seoSplasher/nSplosion.cpp
+    seoSplasher/soundContext.cpp
+    seoSplasher/soundEventManager.cpp
     seoSplasher/splashClient.cpp
     seoSplasher/splashMenu.cpp
     seoSplasher/splashServer.cpp
