@@ -3,6 +3,10 @@
 
 A Bomberman clone with networked multiplayer capabilities.
 
+# Networked Multiplayer
+
+If you want to try out multiplayer, the host must have port 12084 open.
+
 # Controls
 
 WASD to move
