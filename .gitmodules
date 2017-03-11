@@ -1,3 +1,6 @@
 [submodule "ResourcePacker"]
 	path = ResourcePacker
 	url = https://github.com/Stephen-Seo/ResourcePacker.git
+[submodule "SFML"]
+	path = SFML
+	url = https://github.com/SFML/SFML.git
