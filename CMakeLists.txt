@@ -68,6 +68,10 @@ if(SFML_FOUND)
 else()
     message(STATUS "SFML not found, building it")
 
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/SFML/src")
+        message(FATAL_ERROR "SFML submodule not loaded, please do `git submodule update --init`!")
+    endif()
+
     # use extlibs
     if(WIN32)
         if(MINGW)
