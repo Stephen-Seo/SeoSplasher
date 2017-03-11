@@ -5,6 +5,7 @@
 #include <list>
 #include <map>
 #include <cassert>
+#include <random>
 
 #ifndef NDEBUG
 #include <iostream>
