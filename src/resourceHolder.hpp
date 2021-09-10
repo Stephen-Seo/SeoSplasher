@@ -12,6 +12,7 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include <cstdint>
 
 #if defined(ResourcePacker_FOUND)
 #include <ResourcePacker.hpp>

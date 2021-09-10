@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=SeoSplasher
+GenericName=Waterballoon game
+Comment=Play some SeoSplasher
+Icon=SeoSplasher
+TryExec=SeoSplasher
+Exec=SeoSplasher
+Terminal=false
+Categories=Game
+X-AppImage-Name=SeoSplasher
+X-AppImage-Version=1.2
+X-AppImage-Arch=x86_64

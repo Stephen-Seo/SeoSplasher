@@ -34,8 +34,10 @@ void ResourceHolder<Resource, Identifier>::load(Identifier id)
     else if(mode == GameResources::PACKFILE)
     {
         std::unique_ptr<char[]> data;
-        unsigned long long size;
-        if(!RP::getFileData(data, size, packfile, pathIter->second)) {
+        std::uint64_t size;
+        if(!RP::getFileData(data, size, packfile, pathIter->second) ||
+                !RP::getFileData(data, size, "/usr/local/opt/SeoSplasher/" + packfile, pathIter->second)
+                || !RP::getFileData(data, size, "/usr/opt/SeoSplasher/" + packfile, pathIter->second)) {
             const char *root = getenv("APPDIR"); // for AppImage builds
             if(!root || !RP::getFileData(data,
                                         size,
@@ -79,8 +81,10 @@ void ResourceHolder<Resource, Identifier>::load(Identifier id, const Parameter& 
     else if(mode == GameResources::PACKFILE)
     {
         std::unique_ptr<char[]> data;
-        unsigned long long size;
-        if(!RP::getFileData(data, size, packfile, pathIter->second)) {
+        uint64_t size;
+        if(!RP::getFileData(data, size, packfile, pathIter->second) ||
+                !RP::getFileData(data, size, "/usr/local/opt/SeoSplasher/" + packfile, pathIter->second)
+                || !RP::getFileData(data, size, "/usr/opt/SeoSplasher/" + packfile, pathIter->second)) {
             const char *root = getenv("APPDIR"); // for AppImage builds
             if(!root || !RP::getFileData(data,
                                         size,

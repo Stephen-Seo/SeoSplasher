@@ -1,53 +1,55 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.7)
 project(Game_Project)
 
 set(Game_Project_SOURCES
-    src/animatedSprite.cpp
-    src/connection.cpp
-    src/context.cpp
-    src/game.cpp
-    src/gui.cpp
-    src/musicPlayer.cpp
-    src/networkIdentifiers.cpp
-    src/resourceIdentifiers.cpp
-    src/resourceManager.cpp
-    src/sceneNode.cpp
-    src/soundPlayer.cpp
-    src/state.cpp
-    src/stateStack.cpp
-    src/ec/engine.cpp
-    src/ec/entity.cpp
-    src/ec/system.cpp
-    src/seoSplasher/cPathFinderRef.cpp
-    src/seoSplasher/cPlayerControl.cpp
-    src/seoSplasher/nAIControl.cpp
-    src/seoSplasher/nAnimated.cpp
-    src/seoSplasher/nBalloon.cpp
-    src/seoSplasher/nBreakable.cpp
-    src/seoSplasher/nCControl.cpp
-    src/seoSplasher/nDeath.cpp
-    src/seoSplasher/nDraw.cpp
-    src/seoSplasher/nMove.cpp
-    src/seoSplasher/nPControl.cpp
-    src/seoSplasher/nPFUpdater.cpp
-    src/seoSplasher/nPickupHit.cpp
-    src/seoSplasher/nSplosion.cpp
-    src/seoSplasher/soundContext.cpp
-    src/seoSplasher/soundEventManager.cpp
-    src/seoSplasher/splashClient.cpp
-    src/seoSplasher/splashMenu.cpp
-    src/seoSplasher/splashServer.cpp
-    src/seoSplasher/splashState.cpp
-    src/seoSplasher/utility.cpp
-    src/seoSplasher/AI/pathFinder.cpp
-    src/seoSplasher/AI/uai.cpp
-    src/main.cpp)
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/animatedSprite.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/connection.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/context.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/game.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/gui.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/musicPlayer.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/networkIdentifiers.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/resourceIdentifiers.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/resourceManager.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/sceneNode.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/soundPlayer.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/state.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/stateStack.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/ec/engine.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/ec/entity.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/ec/system.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/cPathFinderRef.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/cPlayerControl.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/nAIControl.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/nAnimated.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/nBalloon.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/nBreakable.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/nCControl.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/nDeath.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/nDraw.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/nMove.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/nPControl.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/nPFUpdater.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/nPickupHit.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/nSplosion.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/soundContext.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/soundEventManager.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/splashClient.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/splashMenu.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/splashServer.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/splashState.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/utility.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/AI/pathFinder.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/seoSplasher/AI/uai.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ResourcePacker/src/ResourcePacker.cpp"
+)
 
 if(WIN32)
-add_executable(Game_Project WIN32
+add_executable(SeoSplasher WIN32
     ${Game_Project_SOURCES})
 else()
-add_executable(Game_Project
+add_executable(SeoSplasher
     ${Game_Project_SOURCES})
 endif()
 
@@ -64,7 +66,7 @@ find_package(SFML 2 QUIET COMPONENTS audio network graphics window system)
 if(SFML_FOUND)
     message(STATUS "SFML found, using it")
     include_directories(${SFML_INCLUDE_DIR})
-    target_link_libraries(Game_Project ${SFML_LIBRARIES})
+    target_link_libraries(SeoSplasher ${SFML_LIBRARIES})
 else()
     message(STATUS "SFML not found, building it")
 
@@ -101,29 +103,26 @@ else()
     endif()
 
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/SFML")
-    target_include_directories(Game_Project PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/SFML/include")
-    target_link_libraries(Game_Project sfml-system sfml-window sfml-graphics sfml-audio sfml-network)
+    target_include_directories(SeoSplasher PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/SFML/include")
+    target_link_libraries(SeoSplasher sfml-system sfml-window sfml-graphics sfml-audio sfml-network)
 endif()
 
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ResourcePacker/src")
 message(FATAL_ERROR "ResourcePacker not found! Please do `git submodule update --init`")
 endif()
 
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/ResourcePacker/src")
-
-target_include_directories(Game_Project
+target_include_directories(SeoSplasher
     PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/ResourcePacker/src")
-target_link_libraries(Game_Project ResourcePacker)
 
-target_compile_definitions(Game_Project
+target_compile_definitions(SeoSplasher
     PUBLIC ResourcePacker_FOUND)
 
 if(WIN32)
-    add_custom_command(TARGET Game_Project POST_BUILD
+    add_custom_command(TARGET SeoSplasher POST_BUILD
         COMMAND copy "${CMAKE_CURRENT_SOURCE_DIR}/seoSplasherResources.dat" "${CMAKE_CURRENT_BINARY_DIR}/seoSplasherResources.dat"
         BYPRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/seoSplasherResources.dat")
 else()
-    add_custom_command(TARGET Game_Project POST_BUILD
+    add_custom_command(TARGET SeoSplasher POST_BUILD
         COMMAND cp "${CMAKE_CURRENT_SOURCE_DIR}/seoSplasherResources.dat" "${CMAKE_CURRENT_BINARY_DIR}/seoSplasherResources.dat"
         BYPRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/seoSplasherResources.dat")
 endif()
@@ -138,6 +137,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 endif()
 
-install(TARGETS Game_Project DESTINATION bin)
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/seoSplasherResources.dat" DESTINATION bin)
-
+install(TARGETS SeoSplasher DESTINATION bin)
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/seoSplasherResources.dat" DESTINATION opt/SeoSplasher)
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/SeoSplasher.desktop" DESTINATION share/applications)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/packaging/icons" DESTINATION share)
