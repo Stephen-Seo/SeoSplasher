@@ -68,6 +68,12 @@ void Game::processEvents()
         stateStack.handleEvent(event);
         if(event.type == sf::Event::Closed)
             window.close();
+        else if(event.type == sf::Event::Resized)
+        {
+//            window.setSize(sf::Vector2u(event.size.width, event.size.height));
+            auto view = sf::View(sf::FloatRect(0.0f, 0.0f, 720.0f, 480.0f));
+            window.setView(view);
+        }
     }
 }
 
