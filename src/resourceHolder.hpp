@@ -10,6 +10,8 @@
 #include <string>
 #include <stdexcept>
 #include <iostream>
+#include <string>
+#include <cstdlib>
 
 #if defined(ResourcePacker_FOUND)
 #include <ResourcePacker.hpp>

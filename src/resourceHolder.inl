@@ -35,8 +35,16 @@ void ResourceHolder<Resource, Identifier>::load(Identifier id)
     {
         std::unique_ptr<char[]> data;
         unsigned long long size;
-        if(!RP::getFileData(data, size, packfile, pathIter->second))
-            throw std::runtime_error("ResourceHolder::load - Failed to load " + pathIter->second);
+        if(!RP::getFileData(data, size, packfile, pathIter->second)) {
+            const char *root = getenv("APPDIR"); // for AppImage builds
+            if(!root || !RP::getFileData(data,
+                                        size,
+                                        std::string(root)
+                                            + "/usr/opt/SeoSplasher/"
+                                            + packfile,
+                                        pathIter->second))
+                throw std::runtime_error("ResourceHolder::load - Failed to load " + pathIter->second);
+        }
 
         if(!resource->loadFromMemory(data.get(), size))
             throw std::runtime_error("ResourceHolder::load - Failed to load " + pathIter->second);
@@ -72,8 +80,16 @@ void ResourceHolder<Resource, Identifier>::load(Identifier id, const Parameter& 
     {
         std::unique_ptr<char[]> data;
         unsigned long long size;
-        if(!RP::getFileData(data, size, packfile, pathIter->second))
-            throw std::runtime_error("ResourceHolder::load - Failed to load " + pathIter->second);
+        if(!RP::getFileData(data, size, packfile, pathIter->second)) {
+            const char *root = getenv("APPDIR"); // for AppImage builds
+            if(!root || !RP::getFileData(data,
+                                        size,
+                                        std::string(root)
+                                            + "/usr/opt/SeoSplasher/"
+                                            + packfile,
+                                        pathIter->second))
+                throw std::runtime_error("ResourceHolder::load - Failed to load " + pathIter->second);
+        }
 
         if(!resource->loadFromMemory(data.get(), size, secondParam))
             throw std::runtime_error("ResourceHolder::load - Failed to load " + pathIter->second);
