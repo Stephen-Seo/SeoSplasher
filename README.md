@@ -5,6 +5,8 @@
 
 A Bomberman clone with networked multiplayer capabilities.
 
+[Downloads](https://github.com/Stephen-Seo/SeoSplasher/wiki/Downloads)
+
 # Networked Multiplayer
 
 If you want to try out multiplayer, the host must have port 12084 open.
