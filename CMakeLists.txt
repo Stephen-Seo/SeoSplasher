@@ -117,7 +117,7 @@ target_include_directories(SeoSplasher
 target_compile_definitions(SeoSplasher
     PUBLIC ResourcePacker_FOUND)
 
-if(WIN32)
+if(WIN32 AND NOT MINGW)
     add_custom_command(TARGET SeoSplasher POST_BUILD
         COMMAND copy "${CMAKE_CURRENT_SOURCE_DIR}/seoSplasherResources.dat" "${CMAKE_CURRENT_BINARY_DIR}/seoSplasherResources.dat"
         BYPRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/seoSplasherResources.dat")
