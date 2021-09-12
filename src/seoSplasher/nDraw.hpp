@@ -14,10 +14,10 @@ struct nDraw : Node
     cPosition* pos;
     cSprite* sprite;
 
-    bool checkEntity(Entity& entity);
-    std::unique_ptr<Node> getNewNode();
-    void getCReferencesFromEntity(Entity& entity);
-    void update(sf::Time dt, Context context);
+    bool checkEntity(Entity& entity) override;
+    std::unique_ptr<Node> getNewNode() override;
+    void getCReferencesFromEntity(Entity& entity) override;
+    void update(sf::Time dt, Context context) override;
 };
 
 #endif

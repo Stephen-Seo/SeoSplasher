@@ -31,7 +31,7 @@ pos(nullptr),
 vel(nullptr),
 alignAction(false),
 tick(0),
-controlFireTime(0.0f)
+controlFireTime(0.0F)
 {}
 
 bool nAIControl::checkEntity(Entity& entity)
@@ -45,7 +45,7 @@ bool nAIControl::checkEntity(Entity& entity)
 
 std::unique_ptr<Node> nAIControl::getNewNode()
 {
-    return std::unique_ptr<Node>(new nAIControl);
+    return std::unique_ptr<Node>(new nAIControl());
 }
 
 void nAIControl::getCReferencesFromEntity(Entity& entity)
@@ -77,36 +77,36 @@ void nAIControl::update(sf::Time dt, Context context)
         pos->y = aligned.y;
         alignAction = false;
         if(tick == TICK_TO_ALIGN)
-            control->timer = 0.4f;
+            control->timer = 0.4F;
         tick = 0;
     }
 
     bool justPlacedBalloon = false;
     control->timer -= dt.asSeconds();
-    if(control->timer <= 0.0f || control->currentAction == AI::NONE)
+    if(control->timer <= 0.0F || control->currentAction == AI::NONE)
     {
         control->timer = control->aiTickTime;
         pam = control->ai.determineAction(*pos, *living, *control->pf, *context.ecEngine, *context.rGen);
         control->currentAction = pam.action;
-        const unsigned char* grid = control->pf->getValidGrid(*context.ecEngine);
+        //const unsigned char* grid = control->pf->getValidGrid(*context.ecEngine);
 
         int xy = (int)((pos->x + (float)(-GRID_OFFSET_X + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE) + (int)((pos->y + (float)(-GRID_OFFSET_Y + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE) * GRID_WIDTH;
         int prev;
 
-        int r;
-        if(pam.paths.size() <= 1)
-            r = 0;
-        else
-        {
-            std::uniform_int_distribution<> dist(0, pam.paths.size() - 1);
-            r = dist(*context.rGen);
-        }
+        //int r;
+        //if(pam.paths.size() <= 1)
+        //    r = 0;
+        //else
+        //{
+        //    std::uniform_int_distribution<> dist(0, pam.paths.size() - 1);
+        //    r = dist(*context.rGen);
+        //}
 
 #ifndef NDEBUG
         std::clog << "STATE: " << control->currentAction << '\n';
 #endif
-        vel->x = 0.0f;
-        vel->y = 0.0f;
+        vel->x = 0.0F;
+        vel->y = 0.0F;
 
         if(pam.destination == -1)
         {
@@ -116,7 +116,7 @@ void nAIControl::update(sf::Time dt, Context context)
             case AI::PLACE_BALLOON:
                 justPlacedBalloon = true;
                 Utility::createBalloon(pos->x, pos->y, *living, context, control->ID, &control->fired, *pfref);
-                control->timer = 0.0f;
+                control->timer = 0.0F;
                 control->pf->invalidateValidGrid();
                 break;
             case AI::GET_POWERUP:
@@ -125,7 +125,7 @@ void nAIControl::update(sf::Time dt, Context context)
 #ifndef NDEBUG
                     std::clog << "WARNING: failed to find valid powerup path\n";
 #endif
-                    control->timer = 0.0f;
+                    control->timer = 0.0F;
                     break;
                 }
                 break;
@@ -135,7 +135,7 @@ void nAIControl::update(sf::Time dt, Context context)
 #ifndef NDEBUG
                     std::clog << "WARNING: failed to find valid path to enemy\n";
 #endif
-                    control->timer = 0.0f;
+                    control->timer = 0.0F;
                     break;
                 }
                 break;
@@ -145,7 +145,7 @@ void nAIControl::update(sf::Time dt, Context context)
 #ifndef NDEBUG
                     std::clog << "WARNING: failed to find adjacent breakable\n";
 #endif
-                    control->timer = 0.0f;
+                    control->timer = 0.0F;
                     break;
                 }
                 break;
@@ -155,7 +155,7 @@ void nAIControl::update(sf::Time dt, Context context)
 #ifndef NDEBUG
                     std::clog << "WARNING: failed to find safe spot\n";
 #endif
-                    control->timer = 0.0f;
+                    control->timer = 0.0F;
                     break;
                 }
                 break;
@@ -164,7 +164,7 @@ void nAIControl::update(sf::Time dt, Context context)
             case AI::PANIC:
                 break;
             case AI::WAIT:
-                control->timer = BALLOON_ALIVE_TIME - 0.3f;
+                control->timer = BALLOON_ALIVE_TIME - 0.3F;
                 alignAction = true;
                 break;
             default:
@@ -235,16 +235,16 @@ void nAIControl::update(sf::Time dt, Context context)
             {
                 if(prev < xy)
                 {
-                    vel->x = 0.0f;
+                    vel->x = 0.0F;
                     vel->y = -DEFAULT_SPEED - SPEED_UP_MULT * (float)living->speedUp;
                     control->timer = (float)((xy / GRID_WIDTH - prev / GRID_WIDTH) * GRID_SQUARE_SIZE) / -vel->y;
                 }
                 else
                 {
-                    vel->x = 0.0f;
+                    vel->x = 0.0F;
                     vel->y = DEFAULT_SPEED + SPEED_UP_MULT * (float)living->speedUp;
                     if(prev == xy)
-                        control->timer = 0.0f;
+                        control->timer = 0.0F;
                     else
                         control->timer = (float)((prev / GRID_WIDTH - xy / GRID_WIDTH) * GRID_SQUARE_SIZE) / vel->y;
                 }
@@ -254,15 +254,15 @@ void nAIControl::update(sf::Time dt, Context context)
                 if(prev < xy)
                 {
                     vel->x = -DEFAULT_SPEED - SPEED_UP_MULT * (float)living->speedUp;
-                    vel->y = 0.0f;
+                    vel->y = 0.0F;
                     control->timer = (float)((xy - prev) * GRID_SQUARE_SIZE) / -vel->x;
                 }
                 else
                 {
                     vel->x = DEFAULT_SPEED + SPEED_UP_MULT * (float)living->speedUp;
-                    vel->y = 0.0f;
+                    vel->y = 0.0F;
                     if(prev == xy)
-                        control->timer = 0.0f;
+                        control->timer = 0.0F;
                     else
                         control->timer = (float)((prev - xy) * GRID_SQUARE_SIZE) / vel->x;
                 }
@@ -283,42 +283,42 @@ void nAIControl::update(sf::Time dt, Context context)
                 if(offsetx < x)
                 {
                     vel->x = -DEFAULT_SPEED - SPEED_UP_MULT * (float)living->speedUp;
-                    vel->y = 0.0f;
+                    vel->y = 0.0F;
                     control->timer = (pos->x - offsetx) / -vel->x;
                 }
                 else if(offsetx > x)
                 {
                     vel->x = DEFAULT_SPEED + SPEED_UP_MULT * (float)living->speedUp;
-                    vel->y = 0.0f;
+                    vel->y = 0.0F;
                     control->timer = (offsetx - pos->x) / vel->x;
                 }
                 else if(offsety < y)
                 {
-                    vel->x = 0.0f;
+                    vel->x = 0.0F;
                     vel->y = -DEFAULT_SPEED - SPEED_UP_MULT * (float)living->speedUp;
                     control->timer = (pos->y - offsety) / -vel->y;
                 }
                 else if(offsety > y)
                 {
-                    vel->x = 0.0f;
+                    vel->x = 0.0F;
                     vel->y = DEFAULT_SPEED + SPEED_UP_MULT * (float)living->speedUp;
                     control->timer = (offsety - pos->y) / vel->y;
                 }
                 else
-                    control->timer = 0.0f;
+                    control->timer = 0.0F;
                 alignAction = true;
             }
         }
     }
 
     HitInfo powerinfo = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cPickup)), *context.ecEngine);
-    for(auto piter = powerinfo.hit.begin(); piter != powerinfo.hit.end(); ++piter)
+    for(auto & piter : powerinfo.hit)
     {
-        cPickup* pickup = static_cast<cPickup*>((*piter)->getComponent(std::type_index(typeid(cPickup))));
+        cPickup* pickup = static_cast<cPickup*>(piter->getComponent(std::type_index(typeid(cPickup))));
         if(pickup->hit)
             continue;
 
-        cPowerup* powerup = static_cast<cPowerup*>((*piter)->getComponent(std::type_index(typeid(cPowerup))));
+        cPowerup* powerup = static_cast<cPowerup*>(piter->getComponent(std::type_index(typeid(cPowerup))));
 
         switch(powerup->powerup)
         {
@@ -361,7 +361,7 @@ void nAIControl::update(sf::Time dt, Context context)
         bool inDanger = Utility::livingInDanger(pos->x, pos->y, pfref->cpf->pf, context);
         if(justPlacedBalloon || inDanger)
         {
-            controlFireTime = 0.0f;
+            controlFireTime = 0.0F;
             control->fired = false;
         }
         else if(!justPlacedBalloon && !inDanger)

@@ -36,8 +36,7 @@ int PF::heuristic(int xOne, int yOne, int xTwo, int yTwo)
 
 PathFinder::PathFinder() :
 dirtyFlag(true)
-{
-}
+{}
 
 std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine& engine, unsigned char obstacles)
 {
@@ -47,7 +46,7 @@ std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine
     return getValidDestinations(pos, engine, obstacles, validGrid);
 }
 
-std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine& engine, unsigned char obstacles, const unsigned char* validGrid)
+std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine& /*engine*/, unsigned char obstacles, const unsigned char* validGrid)
 {
     int x = (pos.x - (float)GRID_OFFSET_X + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
     int y = (pos.y - (float)GRID_OFFSET_Y + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
@@ -184,7 +183,7 @@ const unsigned char* PathFinder::getValidGrid(Engine& engine)
     return validGrid;
 }
 
-bool PathFinder::isDirty()
+bool PathFinder::isDirty() const
 {
     return dirtyFlag;
 }
@@ -223,7 +222,7 @@ void PathFinder::revalidateGrid(Engine& engine)
         else if(iter->second->hasComponent(std::type_index(typeid(cBalloon))))
         {
             validGrid[xy] |= 0x22;
-            balloons.push_back(std::make_pair(xy, static_cast<cBalloon*>(iter->second->getComponent(std::type_index(typeid(cBalloon))))));
+            balloons.emplace_back(xy, static_cast<cBalloon*>(iter->second->getComponent(std::type_index(typeid(cBalloon)))));
         }
         else if(iter->second->hasComponent(std::type_index(typeid(cBreakable))))
         {
@@ -240,45 +239,45 @@ void PathFinder::revalidateGrid(Engine& engine)
     }
 
     int distance;
-    for(auto iter = balloons.begin(); iter != balloons.end(); ++iter)
+    for(auto & balloon : balloons)
     {
-        distance = iter->second->range;
-        for(int i = iter->first - 1; (i + 1) % GRID_WIDTH != 0; --i)
+        distance = balloon.second->range;
+        for(int i = balloon.first - 1; (i + 1) % GRID_WIDTH != 0; --i)
         {
-            if(!iter->second->ghosting && (validGrid[i] & 0x10) != 0)
+            if(!balloon.second->ghosting && (validGrid[i] & 0x10) != 0)
                 break;
             validGrid[i] |= 0x20;
-            if(--distance == 0 || (!iter->second->piercing && (validGrid[i] & 0x4) != 0))
+            if(--distance == 0 || (!balloon.second->piercing && (validGrid[i] & 0x4) != 0))
                 break;
         }
 
-        distance = iter->second->range;
-        for(int i = iter->first + 1; (i - 1) % GRID_WIDTH != GRID_WIDTH - 1; ++i)
+        distance = balloon.second->range;
+        for(int i = balloon.first + 1; (i - 1) % GRID_WIDTH != GRID_WIDTH - 1; ++i)
         {
-            if(!iter->second->ghosting && (validGrid[i] & 0x10) != 0)
+            if(!balloon.second->ghosting && (validGrid[i] & 0x10) != 0)
                 break;
             validGrid[i] |= 0x20;
-            if(--distance == 0 || (!iter->second->piercing && (validGrid[i] & 0x4) != 0))
+            if(--distance == 0 || (!balloon.second->piercing && (validGrid[i] & 0x4) != 0))
                 break;
         }
 
-        distance = iter->second->range;
-        for(int i = iter->first - GRID_WIDTH; i >= 0; i -= GRID_WIDTH)
+        distance = balloon.second->range;
+        for(int i = balloon.first - GRID_WIDTH; i >= 0; i -= GRID_WIDTH)
         {
-            if(!iter->second->ghosting && (validGrid[i] & 0x10) != 0)
+            if(!balloon.second->ghosting && (validGrid[i] & 0x10) != 0)
                 break;
             validGrid[i] |= 0x20;
-            if(--distance == 0 || (!iter->second->piercing && (validGrid[i] & 0x4) != 0))
+            if(--distance == 0 || (!balloon.second->piercing && (validGrid[i] & 0x4) != 0))
                 break;
         }
 
-        distance = iter->second->range;
-        for(int i = iter->first + GRID_WIDTH; i < GRID_TOTAL; i += GRID_WIDTH)
+        distance = balloon.second->range;
+        for(int i = balloon.first + GRID_WIDTH; i < GRID_TOTAL; i += GRID_WIDTH)
         {
-            if(!iter->second->ghosting && (validGrid[i] & 0x10) != 0)
+            if(!balloon.second->ghosting && (validGrid[i] & 0x10) != 0)
                 break;
             validGrid[i] |= 0x20;
-            if(--distance == 0 || (!iter->second->piercing && (validGrid[i] & 0x4) != 0))
+            if(--distance == 0 || (!balloon.second->piercing && (validGrid[i] & 0x4) != 0))
                 break;
         }
     }

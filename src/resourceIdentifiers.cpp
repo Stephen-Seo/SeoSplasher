@@ -2,9 +2,9 @@
 #include "resourceIdentifiers.hpp"
 
 ResourcesSet::ResourcesSet() :
-tset(NULL),
-fset(NULL),
-sset(NULL)
+tset(nullptr),
+fset(nullptr),
+sset(nullptr)
 {}
 
 ResourcesSet::ResourcesSet(TextureSet& tset, FontSet& fset, SoundSet& sset) :

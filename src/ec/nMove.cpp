@@ -31,7 +31,7 @@ void nMove::getCReferencesFromEntity(Entity& entity)
     entityRemoved = &entity.removed;
 }
 
-void nMove::update(sf::Time dt, Context context)
+void nMove::update(sf::Time dt, Context  /*context*/)
 {
     if(!*entityRemoved)
     {

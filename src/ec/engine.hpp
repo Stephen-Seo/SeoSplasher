@@ -27,7 +27,7 @@ public:
 
     void update(sf::Time dt, Context context);
     void draw(Context context);
-    void registerRemoveCall(int eID, std::function<void()> function);
+    void registerRemoveCall(int eID, const std::function<void()> &function);
 private:
     std::vector<std::unique_ptr<System> > systems;
     std::vector<std::unique_ptr<System> > drawSystems;

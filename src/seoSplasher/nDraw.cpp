@@ -8,8 +8,8 @@
 #include "../context.hpp"
 
 nDraw::nDraw() :
-sprite(nullptr),
-pos(nullptr)
+pos(nullptr),
+sprite(nullptr)
 {}
 
 bool nDraw::checkEntity(Entity& entity)
@@ -20,7 +20,7 @@ bool nDraw::checkEntity(Entity& entity)
 
 std::unique_ptr<Node> nDraw::getNewNode()
 {
-    return std::unique_ptr<Node>(new nDraw);
+    return std::unique_ptr<Node>(new nDraw());
 }
 
 void nDraw::getCReferencesFromEntity(Entity& entity)
@@ -30,7 +30,7 @@ void nDraw::getCReferencesFromEntity(Entity& entity)
     entityRemoved = &entity.removed;
 }
 
-void nDraw::update(sf::Time dt, Context context)
+void nDraw::update(sf::Time /*dt*/, Context context)
 {
     if(*entityRemoved)
         return;

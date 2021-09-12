@@ -26,13 +26,13 @@ void Engine::addEntity(std::unique_ptr<Entity> entity)
 {
     entity->removed = false;
     bool nodeAdded = false;
-    for(auto iter = systems.begin(); iter != systems.end(); ++iter)
+    for(auto & system : systems)
     {
-        nodeAdded |= (*iter)->checkEntity(*entity.get());
+        nodeAdded |= system->checkEntity(*entity);
     }
-    for(auto iter = drawSystems.begin(); iter != drawSystems.end(); ++iter)
+    for(auto & drawSystem : drawSystems)
     {
-        nodeAdded |= (*iter)->checkEntity(*entity.get());
+        nodeAdded |= drawSystem->checkEntity(*entity);
     }
     if(!nodeAdded)
         std::clog << "WARNING: Entity (" << entity->getID() << ") added without any paired nodes!\n";
@@ -83,10 +83,10 @@ void Engine::clear()
 
 void Engine::clearEntities()
 {
-    for(auto iter = systems.begin(); iter != systems.end(); ++iter)
-        (*iter)->clearEntities();
-    for(auto iter = drawSystems.begin(); iter != drawSystems.end(); ++iter)
-        (*iter)->clearEntities();
+    for(auto & system : systems)
+        system->clearEntities();
+    for(auto & drawSystem : drawSystems)
+        drawSystem->clearEntities();
     entityMap.clear();
     rfMap.clear();
     while(!deadQueue.empty())
@@ -110,33 +110,33 @@ void Engine::update(sf::Time dt, Context context)
         int eID = deadQueue.front();
         deadQueue.pop();
 
-        for(auto iter = systems.begin(); iter != systems.end(); ++iter)
+        for(auto & system : systems)
         {
-            (*iter)->removeEntity(eID);
+            system->removeEntity(eID);
         }
-        for(auto iter = drawSystems.begin(); iter != drawSystems.end(); ++iter)
+        for(auto & drawSystem : drawSystems)
         {
-            (*iter)->removeEntity(eID);
+            drawSystem->removeEntity(eID);
         }
 
         entityMap.erase(eID);
     }
 
-    for(auto iter = systems.begin(); iter != systems.end(); ++iter)
+    for(auto & system : systems)
     {
-        (*iter)->update(dt, context);
+        system->update(dt, context);
     }
 }
 
 void Engine::draw(Context context)
 {
-    for(auto iter = drawSystems.begin(); iter != drawSystems.end(); ++iter)
+    for(auto & drawSystem : drawSystems)
     {
-        (*iter)->update(sf::Time::Zero, context);
+        drawSystem->update(sf::Time::Zero, context);
     }
 }
 
-void Engine::registerRemoveCall(int eID, std::function<void()> function)
+void Engine::registerRemoveCall(int eID, const std::function<void()> &function)
 {
     rfMap[eID].push(function);
 }

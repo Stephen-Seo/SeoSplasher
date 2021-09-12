@@ -2,7 +2,7 @@
 #ifndef C_ANIMATED_HPP
 #define C_ANIMATED_HPP
 
-#define DEFAULT_FRAME_TIME 0.4f
+#define DEFAULT_FRAME_TIME 0.4F
 
 #include "../ec/component.hpp"
 

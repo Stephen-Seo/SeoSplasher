@@ -14,7 +14,7 @@ struct Context;
 class System : private sf::NonCopyable
 {
 public:
-    System(std::unique_ptr<Node> nodeType);
+    explicit System(std::unique_ptr<Node> nodeType);
 
     bool checkEntity(Entity& entity);
     void removeEntity(int eID);

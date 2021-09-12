@@ -24,9 +24,9 @@ class SplashState : public State
 public:
     SplashState(StateStack& stack, Context context);
 
-    void draw();
-    bool update(sf::Time dt);
-    bool handleEvent(const sf::Event& event);
+    void draw() override;
+    bool update(sf::Time dt) override;
+    bool handleEvent(const sf::Event& event) override;
 private:
     sf::RectangleShape fieldBG;
 

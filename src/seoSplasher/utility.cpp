@@ -103,9 +103,9 @@ HitInfo Utility::collideAgainstComponentList(const float& x, const float& y, con
             continue;
         }
         notFound = false;
-        for(auto tIter = types.begin(); tIter != types.end(); ++tIter)
+        for(auto type : types)
         {
-            if(!eIter->second->hasComponent(*tIter))
+            if(!eIter->second->hasComponent(type))
             {
                 notFound = true;
                 break;
@@ -150,7 +150,7 @@ bool Utility::collidesAgainstComponent(const float& x, const float& y, const std
 
 bool Utility::collide(const float& xOne, const float& yOne, const float& xTwo, const float& yTwo)
 {
-    float halfSquare = ((float)GRID_SQUARE_SIZE) / 2.0f;
+    float halfSquare = ((float)GRID_SQUARE_SIZE) / 2.0F;
     return (xOne < xTwo + (float)GRID_SQUARE_SIZE &&
             xOne > xTwo &&
             yOne > yTwo &&
@@ -199,29 +199,29 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
     sf::Vector2f v = alignToGrid(x,y);
     // check if balloon already exists in spot
     HitInfo hitInfo = collideAgainstComponent(v.x, v.y, std::type_index(typeid(cBalloon)), *context.ecEngine);
-    if(hitInfo.hit.size() > 0)
+    if(!hitInfo.hit.empty())
         return false;
 
     ++living.balloonsInPlay;
 
     bool isSuper = false;
 
-    Entity* balloon = new Entity;
+    Entity* balloon = new Entity();
 
-    cPosition* pos = new cPosition;
+    cPosition* pos = new cPosition();
     pos->x = v.x;
     pos->y = v.y;
-    pos->rot = 0.0f;
+    pos->rot = 0.0F;
     balloon->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
 
-    cVelocity* vel = new cVelocity;
+    cVelocity* vel = new cVelocity();
     vel->x = 0.0;
     vel->y = 0.0;
-    vel->rot = 0.0f;
+    vel->rot = 0.0F;
     balloon->addComponent(std::type_index(typeid(cVelocity)), std::unique_ptr<Component>(vel));
 
     unsigned char distance;
-    cBalloon* cballoon = new cBalloon;
+    cBalloon* cballoon = new cBalloon();
     cballoon->ID = ID;
     if(living.sBalloonsInPlay < living.sBalloonUpgrade)
     {
@@ -244,14 +244,14 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
 
     balloon->addComponent(std::type_index(typeid(cPathFinderRef)), std::unique_ptr<Component>(new cPathFinderRef(pfRef.cpf)));
 
-    cSprite* sprite = new cSprite;
+    cSprite* sprite = new cSprite();
     if(living.rControlUpgrade == 0)
     {
         if(isSuper)
         {
             sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SUPER_BALLOON_0));
 
-            cAnimated* animated = new cAnimated;
+            cAnimated* animated = new cAnimated();
             animated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_0));
             animated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_1));
             animated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_2));
@@ -261,7 +261,7 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
         {
             sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::BALLOON_0));
 
-            cAnimated* animated = new cAnimated;
+            cAnimated* animated = new cAnimated();
             animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_0));
             animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_1));
             animated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_2));
@@ -274,7 +274,7 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
         {
             sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_0));
 
-            cAnimated* animated = new cAnimated;
+            cAnimated* animated = new cAnimated();
             animated->textures.push_back(&context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_0));
             animated->textures.push_back(&context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_1));
             animated->textures.push_back(&context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_2));
@@ -284,7 +284,7 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
         {
             sprite->sprite.setTexture(context.resourceManager->getTexture(Textures::C_BALLOON_0));
 
-            cAnimated* animated = new cAnimated;
+            cAnimated* animated = new cAnimated();
             animated->textures.push_back(&context.resourceManager->getTexture(Textures::C_BALLOON_0));
             animated->textures.push_back(&context.resourceManager->getTexture(Textures::C_BALLOON_1));
             animated->textures.push_back(&context.resourceManager->getTexture(Textures::C_BALLOON_2));
@@ -295,13 +295,13 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
 
     if(living.rControlUpgrade > 0)
     {
-        cControl* ccontrol = new cControl;
+        cControl* ccontrol = new cControl();
         ccontrol->fired = fired;
         balloon->addComponent(std::type_index(typeid(cControl)), std::unique_ptr<Component>(ccontrol));
     }
     else
     {
-        cTimer* timer = new cTimer;
+        cTimer* timer = new cTimer();
         timer->time = BALLOON_ALIVE_TIME;
         balloon->addComponent(std::type_index(typeid(cTimer)), std::unique_ptr<Component>(timer));
     }
@@ -337,19 +337,19 @@ bool Utility::createBalloon(const float& x, const float& y, cLiving& living, con
 
 void Utility::createExplosion(const float& x, const float& y, Direction::Direction dir, const Context& context, unsigned char ID)
 {
-    Entity* splosion = new Entity;
+    Entity* splosion = new Entity();
 
-    cPosition* pos = new cPosition;
+    cPosition* pos = new cPosition();
     pos->x = x;
     pos->y = y;
-    pos->rot = 0.0f;
+    pos->rot = 0.0F;
     splosion->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
 
-    cDamage* damage = new cDamage;
+    cDamage* damage = new cDamage();
     damage->ID = ID;
     splosion->addComponent(std::type_index(typeid(cDamage)), std::unique_ptr<Component>(damage));
 
-    cSprite* sprite = new cSprite;
+    cSprite* sprite = new cSprite();
     switch(dir)
     {
     default:
@@ -365,7 +365,7 @@ void Utility::createExplosion(const float& x, const float& y, Direction::Directi
     }
     splosion->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
 
-    cTimer* timer = new cTimer;
+    cTimer* timer = new cTimer();
     timer->time = SPLOSION_LIFETIME;
     splosion->addComponent(std::type_index(typeid(cTimer)), std::unique_ptr<Component>(timer));
 
@@ -404,22 +404,22 @@ void Utility::createPowerup(const float& x, const float& y, cPowerup& powerup, c
     if(powerup.powerup == cPowerup::NONE)
         return;
 
-    Entity* epowerup = new Entity;
+    Entity* epowerup = new Entity();
 
-    cPosition* pos = new cPosition;
+    cPosition* pos = new cPosition();
     pos->x = x;
     pos->y = y;
-    pos->rot = 0.0f;
+    pos->rot = 0.0F;
     epowerup->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
 
-    cPowerup* cpowerup = new cPowerup;
+    cPowerup* cpowerup = new cPowerup();
     cpowerup->powerup = powerup.powerup;
     epowerup->addComponent(std::type_index(typeid(cPowerup)), std::unique_ptr<Component>(cpowerup));
 
-    cSprite* sprite = new cSprite;
-    cAnimated* animated = new cAnimated;
+    cSprite* sprite = new cSprite();
+    cAnimated* animated = new cAnimated();
 
-    animated->frameTime = 0.3f;
+    animated->frameTime = 0.3F;
     switch(powerup.powerup)
     {
     case cPowerup::BALLOON_UP:
@@ -482,7 +482,7 @@ void Utility::createPowerup(const float& x, const float& y, cPowerup& powerup, c
     epowerup->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
     epowerup->addComponent(std::type_index(typeid(cAnimated)), std::unique_ptr<Component>(animated));
 
-    epowerup->addComponent(std::type_index(typeid(cPickup)), std::unique_ptr<Component>(new cPickup));
+    epowerup->addComponent(std::type_index(typeid(cPickup)), std::unique_ptr<Component>(new cPickup()));
 
     context.ecEngine->addEntity(std::unique_ptr<Entity>(epowerup));
 
@@ -502,15 +502,15 @@ void Utility::createPowerup(const float& x, const float& y, cPowerup& powerup, c
 
 int Utility::createWIndicator(const float& x, const float& y, Direction::Direction dir, const Context& context, unsigned char ID)
 {
-    Entity* indicator = new Entity;
+    Entity* indicator = new Entity();
 
-    cPosition* pos = new cPosition;
+    cPosition* pos = new cPosition();
     pos->x = x;
     pos->y = y;
-    pos->rot = 0.0f;
+    pos->rot = 0.0F;
     indicator->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
 
-    cWIndicator* windicator = new cWIndicator;
+    cWIndicator* windicator = new cWIndicator();
     windicator->dir = dir;
     indicator->addComponent(std::type_index(typeid(cWIndicator)), std::unique_ptr<Component>(windicator));
 
@@ -527,8 +527,8 @@ sf::Vector2f Utility::alignToGrid(const float& x, const float& y)
 {
     sf::Vector2f v;
 
-    v.x = (float)((int)((x - (float)GRID_OFFSET_X) / 32.0f + 0.5f)) * 32.0f + (float)GRID_OFFSET_X;
-    v.y = (float)((int)((y - (float)GRID_OFFSET_Y) / 32.0f + 0.5f)) * 32.0f + (float)GRID_OFFSET_Y;
+    v.x = (float)((int)((x - (float)GRID_OFFSET_X) / 32.0F + 0.5F)) * 32.0F + (float)GRID_OFFSET_X;
+    v.y = (float)((int)((y - (float)GRID_OFFSET_Y) / 32.0F + 0.5F)) * 32.0F + (float)GRID_OFFSET_Y;
 
     return v;
 }
@@ -548,10 +548,10 @@ BalloonInfo Utility::clientCreateBalloon(const float& x, const float& y, sf::Uin
     BalloonInfo balloonInfo;
     balloonInfo.typeRange = typeRange;
 
-    std::unique_ptr<Entity> balloon(new Entity);
+    std::unique_ptr<Entity> balloon(new Entity());
     balloonInfo.EID = balloon->getID();
 
-    std::unique_ptr<Component> pos(new cPosition);
+    std::unique_ptr<Component> pos(new cPosition());
     cPosition* cpos = static_cast<cPosition*>(pos.get());
     cpos->x = x;
     cpos->y = y;
@@ -559,15 +559,15 @@ BalloonInfo Utility::clientCreateBalloon(const float& x, const float& y, sf::Uin
     balloonInfo.posy = &(cpos->y);
     balloon->addComponent(std::type_index(typeid(cPosition)), std::move(pos));
 
-    std::unique_ptr<Component> vel(new cVelocity);
+    std::unique_ptr<Component> vel(new cVelocity());
     cVelocity* cvel = static_cast<cVelocity*>(vel.get());
-    cvel->x = 0.0f;
-    cvel->y = 0.0f;
+    cvel->x = 0.0F;
+    cvel->y = 0.0F;
     balloonInfo.velx = &(cvel->x);
     balloonInfo.vely = &(cvel->y);
     balloon->addComponent(std::type_index(typeid(cVelocity)), std::move(vel));
 
-    std::unique_ptr<Component> sprite(new cSprite);
+    std::unique_ptr<Component> sprite(new cSprite());
     cSprite* csprite = static_cast<cSprite*>(sprite.get());
     if((typeRange & 0x2) == 0)
     {
@@ -575,7 +575,7 @@ BalloonInfo Utility::clientCreateBalloon(const float& x, const float& y, sf::Uin
         {
             csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::SUPER_BALLOON_0));
 
-            std::unique_ptr<Component> animated(new cAnimated);
+            std::unique_ptr<Component> animated(new cAnimated());
             cAnimated* canimated = static_cast<cAnimated*>(animated.get());
             canimated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_0));
             canimated->textures.push_back(&context.resourceManager->getTexture(Textures::SUPER_BALLOON_1));
@@ -586,7 +586,7 @@ BalloonInfo Utility::clientCreateBalloon(const float& x, const float& y, sf::Uin
         {
             csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::BALLOON_0));
 
-            std::unique_ptr<Component> animated(new cAnimated);
+            std::unique_ptr<Component> animated(new cAnimated());
             cAnimated* canimated = static_cast<cAnimated*>(animated.get());
             canimated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_0));
             canimated->textures.push_back(&context.resourceManager->getTexture(Textures::BALLOON_1));
@@ -600,7 +600,7 @@ BalloonInfo Utility::clientCreateBalloon(const float& x, const float& y, sf::Uin
         {
             csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_0));
 
-            std::unique_ptr<Component> animated(new cAnimated);
+            std::unique_ptr<Component> animated(new cAnimated());
             cAnimated* canimated = static_cast<cAnimated*>(animated.get());
             canimated->textures.push_back(&context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_0));
             canimated->textures.push_back(&context.resourceManager->getTexture(Textures::C_SUPER_BALLOON_1));
@@ -611,7 +611,7 @@ BalloonInfo Utility::clientCreateBalloon(const float& x, const float& y, sf::Uin
         {
             csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::C_BALLOON_0));
 
-            std::unique_ptr<Component> animated(new cAnimated);
+            std::unique_ptr<Component> animated(new cAnimated());
             cAnimated* canimated = static_cast<cAnimated*>(animated.get());
             canimated->textures.push_back(&context.resourceManager->getTexture(Textures::C_BALLOON_0));
             canimated->textures.push_back(&context.resourceManager->getTexture(Textures::C_BALLOON_1));
@@ -621,7 +621,7 @@ BalloonInfo Utility::clientCreateBalloon(const float& x, const float& y, sf::Uin
     }
     balloon->addComponent(std::type_index(typeid(cSprite)), std::move(sprite));
 
-    balloon->addComponent(std::type_index(typeid(cBalloon)), std::unique_ptr<Component>(new cBalloon));
+    balloon->addComponent(std::type_index(typeid(cBalloon)), std::unique_ptr<Component>(new cBalloon()));
 
     // trigger explosion on balloon removal
     context.ecEngine->registerRemoveCall(balloon->getID(), [context] () {
@@ -635,15 +635,15 @@ BalloonInfo Utility::clientCreateBalloon(const float& x, const float& y, sf::Uin
 
 int Utility::clientCreateExplosion(sf::Uint8 xy, sf::Uint8 direction, Context context)
 {
-    std::unique_ptr<Entity> explosion(new Entity);
+    std::unique_ptr<Entity> explosion(new Entity());
 
-    std::unique_ptr<Component> pos(new cPosition);
+    std::unique_ptr<Component> pos(new cPosition());
     cPosition* cpos = static_cast<cPosition*>(pos.get());
     cpos->x = (xy % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X;
     cpos->y = (xy / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y;
     explosion->addComponent(std::type_index(typeid(cPosition)), std::move(pos));
 
-    std::unique_ptr<Component> sprite(new cSprite);
+    std::unique_ptr<Component> sprite(new cSprite());
     cSprite* csprite = static_cast<cSprite*>(sprite.get());
     switch(direction)
     {
@@ -669,20 +669,20 @@ int Utility::clientCreateExplosion(sf::Uint8 xy, sf::Uint8 direction, Context co
 
 int Utility::clientCreatePowerup(sf::Uint8 xy, sf::Uint8 type, Context context)
 {
-    std::unique_ptr<Entity> powerup(new Entity);
+    std::unique_ptr<Entity> powerup(new Entity());
 
-    std::unique_ptr<Component> pos(new cPosition);
+    std::unique_ptr<Component> pos(new cPosition());
     cPosition* cpos = static_cast<cPosition*>(pos.get());
     cpos->x = (xy % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X;
     cpos->y = (xy / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y;
     powerup->addComponent(std::type_index(typeid(cPosition)), std::move(pos));
 
-    std::unique_ptr<Component> sprite(new cSprite);
-    std::unique_ptr<Component> animated(new cAnimated);
+    std::unique_ptr<Component> sprite(new cSprite());
+    std::unique_ptr<Component> animated(new cAnimated());
     cSprite* csprite = static_cast<cSprite*>(sprite.get());
     cAnimated* canimated = static_cast<cAnimated*>(animated.get());
 
-    canimated->frameTime = 0.3f;
+    canimated->frameTime = 0.3F;
     switch(type)
     {
     case cPowerup::BALLOON_UP:
@@ -752,20 +752,20 @@ int Utility::clientCreatePowerup(sf::Uint8 xy, sf::Uint8 type, Context context)
 
 int Utility::clientCreateBreakable(sf::Uint8 xy, Context context)
 {
-    std::unique_ptr<Entity> breakable(new Entity);
+    std::unique_ptr<Entity> breakable(new Entity());
 
-    std::unique_ptr<Component> pos(new cPosition);
+    std::unique_ptr<Component> pos(new cPosition());
     cPosition* cpos = static_cast<cPosition*>(pos.get());
     cpos->x = (xy % GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_X;
     cpos->y = (xy / GRID_WIDTH) * GRID_SQUARE_SIZE + GRID_OFFSET_Y;
     breakable->addComponent(std::type_index(typeid(cPosition)), std::move(pos));
 
-    std::unique_ptr<Component> sprite(new cSprite);
+    std::unique_ptr<Component> sprite(new cSprite());
     cSprite* csprite = static_cast<cSprite*>(sprite.get());
     csprite->sprite.setTexture(context.resourceManager->getTexture(Textures::BREAKABLE));
     breakable->addComponent(std::type_index(typeid(cSprite)), std::move(sprite));
 
-    breakable->addComponent(std::type_index(typeid(cBreakable)), std::unique_ptr<Component>(new cBreakable));
+    breakable->addComponent(std::type_index(typeid(cBreakable)), std::unique_ptr<Component>(new cBreakable()));
 
     int EID = breakable->getID();
     context.ecEngine->addEntity(std::move(breakable));
@@ -780,7 +780,7 @@ int Utility::clientCreateBreakable(sf::Uint8 xy, Context context)
 void Utility::centerTextOrigin(sf::Text& text)
 {
     sf::FloatRect rect = text.getLocalBounds();
-    text.setOrigin(rect.width / 2.0f, rect.height / 2.0f);
+    text.setOrigin(rect.width / 2.0F, rect.height / 2.0F);
 }
 
 bool Utility::livingInDanger(const float& x, const float& y, PathFinder& pf, Context context)
@@ -857,7 +857,7 @@ bool Utility::livingInDanger(const float& x, const float& y, PathFinder& pf, Con
 
     /*
     // get approximate grid coordinate of living entity
-    int xy = (int)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE + 0.5f) + ((int)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE + 0.5f) * GRID_WIDTH);
+    int xy = (int)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE + 0.5F) + ((int)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE + 0.5F) * GRID_WIDTH);
 
     // check 9 valid grid cells at/around xy for collision
     for(int i = -1; i <= 1; ++i)
@@ -882,8 +882,8 @@ bool Utility::livingInDanger(const float& x, const float& y, PathFinder& pf, Con
 
     */
 
-    int xCoord0 = (int)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE + 0.5f);
-    int yCoord0 = (int)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE + 0.5f);
+    int xCoord0 = (int)((x - (float)GRID_OFFSET_X) / GRID_SQUARE_SIZE + 0.5F);
+    int yCoord0 = (int)((y - (float)GRID_OFFSET_Y) / GRID_SQUARE_SIZE + 0.5F);
     int xCoord1;
     int yCoord1;
     float alignedX = xCoord0 * GRID_SQUARE_SIZE + GRID_OFFSET_X;

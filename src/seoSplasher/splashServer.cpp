@@ -24,7 +24,7 @@ prevState(SS::WAITING_FOR_PLAYERS)
 
     // set server player's movetime value to something non-zero so s/he can move
     if(*context.mode == 2)
-        context.scontext->movementTime[0] = 1.0f;
+        context.scontext->movementTime[0] = 1.0F;
 }
 
 void SplashServer::update(sf::Time dt)
@@ -41,11 +41,11 @@ void SplashServer::update(sf::Time dt)
         if(i == 0 && *context.mode == 2) // don't stop server player's movement
             continue;
         context.scontext->movementTime[i] -= dt.asSeconds();
-        if(context.scontext->movementTime[i] < 0.0f)
-            context.scontext->movementTime[i] = 0.0f;
+        if(context.scontext->movementTime[i] < 0.0F)
+            context.scontext->movementTime[i] = 0.0F;
     }
     updateTimer -= dt.asSeconds();
-    if(updateTimer <= 0.0f)
+    if(updateTimer <= 0.0F)
     {
         updateTimer = CONNECTION_UPDATE_TIME;
         sendPacket();
@@ -62,9 +62,9 @@ void SplashServer::update(sf::Time dt)
                     continue;
                 if(playerConnected[i])
                 {
-                    for(auto iter = connectionMadeFunctions.begin(); iter != connectionMadeFunctions.end(); ++iter)
+                    for(auto & connectionMadeFunction : connectionMadeFunctions)
                     {
-                        (*iter)(i);
+                        connectionMadeFunction(i);
                     }
                 }
             }
@@ -157,7 +157,7 @@ void SplashServer::connectionMade(sf::Uint32 address)
     if(playerConnected[0] && playerConnected[1] && playerConnected[2] && playerConnected[3])
         acceptNewConnections = false;
 
-    std::for_each(connectionMadeFunctions.begin(), connectionMadeFunctions.end(), [i] (std::function<void(sf::Uint8)> function) {
+    std::for_each(connectionMadeFunctions.begin(), connectionMadeFunctions.end(), [i] (const std::function<void(sf::Uint8)> &function) {
         function(i);
     });
 }
@@ -212,7 +212,7 @@ void SplashServer::sendPacket()
         case SS::WAITING_FOR_SERVER:
         {
             // start timer byte
-            packet << (context.scontext->startTimer >= 0.0f ? (sf::Uint8) (context.scontext->startTimer + 1.0f) : (sf::Uint8) 0xFF);
+            packet << (context.scontext->startTimer >= 0.0F ? (sf::Uint8) (context.scontext->startTimer + 1.0F) : (sf::Uint8) 0xFF);
 
             // connected players byte
             temp = 0;
@@ -234,16 +234,16 @@ void SplashServer::sendPacket()
             }
 
             // players that have custom name byte
-            temp = (context.scontext->customNames[0].size() != 0 ? 0x1 : 0x0);
-            temp |= (context.scontext->customNames[1].size() != 0 ? 0x2 : 0x0);
-            temp |= (context.scontext->customNames[2].size() != 0 ? 0x4 : 0x0);
-            temp |= (context.scontext->customNames[3].size() != 0 ? 0x8 : 0x0);
+            temp = (!context.scontext->customNames[0].empty() ? 0x1 : 0x0);
+            temp |= (!context.scontext->customNames[1].empty() ? 0x2 : 0x0);
+            temp |= (!context.scontext->customNames[2].empty() ? 0x4 : 0x0);
+            temp |= (!context.scontext->customNames[3].empty() ? 0x8 : 0x0);
             packet << temp;
 
             // custom names
             for(int j = 0; j < 4; ++j)
             {
-                if(context.scontext->customNames[j].size() != 0)
+                if(!context.scontext->customNames[j].empty())
                     packet << context.scontext->customNames[j];
             }
         }
@@ -279,49 +279,49 @@ void SplashServer::sendPacket()
             packet << (sf::Uint8) context.scontext->balloons.size();
 
             // BallonInfo bytes
-            for(auto iter = context.scontext->balloons.begin(); iter != context.scontext->balloons.end(); ++iter)
+            for(auto & balloon : context.scontext->balloons)
             {
-                packet << iter->second.EID;
-                packet << *(iter->second.posx);
-                packet << *(iter->second.posy);
-                if(*(iter->second.velx) != 0.0f)
+                packet << balloon.second.EID;
+                packet << *(balloon.second.posx);
+                packet << *(balloon.second.posy);
+                if(*(balloon.second.velx) != 0.0F)
                 {
                     packet << (sf::Uint8) 0x0;
-                    packet << *(iter->second.velx);
-                    iter->second.typeRange |= 0x10;
+                    packet << *(balloon.second.velx);
+                    balloon.second.typeRange |= 0x10;
                 }
-                else if(*(iter->second.vely) != 0.0f)
+                else if(*(balloon.second.vely) != 0.0F)
                 {
                     packet << (sf::Uint8) 0x1;
-                    packet << *(iter->second.vely);
-                    iter->second.typeRange |= 0x10;
+                    packet << *(balloon.second.vely);
+                    balloon.second.typeRange |= 0x10;
                 }
                 else
                 {
                     packet << (sf::Uint8) 0x0;
-                    packet << 0.0f;
+                    packet << 0.0F;
                 }
-                packet << iter->second.typeRange;
+                packet << balloon.second.typeRange;
             }
 
             // # of explosions byte
             packet << (sf::Uint8) context.scontext->explosions.size();
 
             // explosion pos bytes
-            for(auto iter = context.scontext->explosions.begin(); iter != context.scontext->explosions.end(); ++iter)
+            for(auto & explosion : context.scontext->explosions)
             {
-                packet << iter->second.xy;
-                packet << iter->second.direction;
+                packet << explosion.second.xy;
+                packet << explosion.second.direction;
             }
 
             // # of powerups byte
             packet << (sf::Uint8) context.scontext->powerups.size();
 
             // PowerupInfo bytes
-            for(auto iter = context.scontext->powerups.begin(); iter != context.scontext->powerups.end(); ++iter)
+            for(auto & powerup : context.scontext->powerups)
             {
-                packet << iter->second.xy;
-                packet << iter->second.type;
+                packet << powerup.second.xy;
+                packet << powerup.second.type;
             }
 
             // sound info byte

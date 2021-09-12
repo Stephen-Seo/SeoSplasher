@@ -34,8 +34,8 @@ void SceneNode::draw(sf::RenderTarget& target,
     drawChildren(target, states);
 }
 
-void SceneNode::drawCurrent(sf::RenderTarget& target,
-                            sf::RenderStates states) const
+void SceneNode::drawCurrent(sf::RenderTarget& /*target*/,
+                            sf::RenderStates /*states*/) const
 {}
 
 void SceneNode::drawChildren(sf::RenderTarget& target,
@@ -66,7 +66,7 @@ void SceneNode::handleEvent(const sf::Event& event)
     passEvent(event);
 }
 
-void SceneNode::handleEventCurrent(const sf::Event& event)
+void SceneNode::handleEventCurrent(const sf::Event& /*event*/)
 {}
 
 void SceneNode::passEvent(const sf::Event& event)

@@ -26,7 +26,7 @@ public:
     };
 
     Connection();
-    Connection(Mode mode);
+    explicit Connection(Mode mode);
     virtual ~Connection();
 
     void update(sf::Time dt);

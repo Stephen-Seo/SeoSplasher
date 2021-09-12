@@ -22,7 +22,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int 
 
 #else
 
-int main(int argc, char** argv) {
+int main(int /*argc*/, char** /*argv*/) {
     Game game;
     game.run();
     return 0;

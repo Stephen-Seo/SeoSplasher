@@ -3,7 +3,7 @@
 #define N_MOVE_HPP
 
 #define MAX_MOVE_OFFSET 8
-#define MOVE_SNAP_OFFSET 3.0f
+#define MOVE_SNAP_OFFSET 3.0F
 
 #include <list>
 #include <typeindex>
@@ -27,10 +27,10 @@ struct nMove : Node
     bool isBalloon;
     bool isAI;
 
-    bool checkEntity(Entity& entity);
-    std::unique_ptr<Node> getNewNode();
-    void getCReferencesFromEntity(Entity& entity);
-    void update(sf::Time dt, Context context);
+    bool checkEntity(Entity& entity) override;
+    std::unique_ptr<Node> getNewNode() override;
+    void getCReferencesFromEntity(Entity& entity) override;
+    void update(sf::Time dt, Context context) override;
 };
 
 #endif

@@ -2,8 +2,8 @@
 #ifndef SPLASH_MENU_HPP
 #define SPLASH_MENU_HPP
 
-#define BLINK_TIME 1.0f
-#define BLINK_INTERVAL 0.2f
+#define BLINK_TIME 1.0F
+#define BLINK_INTERVAL 0.2F
 
 #include "../state.hpp"
 
@@ -16,9 +16,9 @@ class SplashMenu : public State
 public:
     SplashMenu(StateStack& stack, Context context);
 
-    void draw();
-    bool update(sf::Time dt);
-    bool handleEvent(const sf::Event& event);
+    void draw() override;
+    bool update(sf::Time dt) override;
+    bool handleEvent(const sf::Event& event) override;
 private:
     GuiSystem guiSystem;
 

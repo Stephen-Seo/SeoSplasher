@@ -18,7 +18,7 @@ bool nPickupHit::checkEntity(Entity& entity)
 
 std::unique_ptr<Node> nPickupHit::getNewNode()
 {
-    return std::unique_ptr<Node>(new nPickupHit);
+    return std::unique_ptr<Node>(new nPickupHit());
 }
 
 void nPickupHit::getCReferencesFromEntity(Entity& entity)
@@ -28,7 +28,7 @@ void nPickupHit::getCReferencesFromEntity(Entity& entity)
     ID = entity.getID();
 }
 
-void nPickupHit::update(sf::Time dt, Context context)
+void nPickupHit::update(sf::Time /*dt*/, Context context)
 {
     if(*entityRemoved)
         return;

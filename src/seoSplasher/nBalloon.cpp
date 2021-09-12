@@ -33,7 +33,7 @@ bool nBalloon::checkEntity(Entity& entity)
 
 std::unique_ptr<Node> nBalloon::getNewNode()
 {
-    return std::unique_ptr<Node>(new nBalloon);
+    return std::unique_ptr<Node>(new nBalloon());
 }
 
 void nBalloon::getCReferencesFromEntity(Entity& entity)
@@ -81,7 +81,7 @@ void nBalloon::update(sf::Time dt, Context context)
     else
     {
         timer->time -= dt.asSeconds();
-        if(timer->time <= 0.0f)
+        if(timer->time <= 0.0F)
         {
             --(*balloon->balloonsInPlay);
             if(balloon->super)

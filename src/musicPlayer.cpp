@@ -2,7 +2,7 @@
 #include "musicPlayer.hpp"
 
 MusicPlayer::MusicPlayer()
-: mMusic(), mFilenames(), mVolume(100.0f)
+: mMusic(), mFilenames(), mVolume(100.0F)
 {
 //load music here
 }

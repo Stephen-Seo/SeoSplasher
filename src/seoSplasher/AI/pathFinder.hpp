@@ -41,7 +41,7 @@ public:
     std::map<int, int> getBestPath(const cPosition& pos, int goal, Engine& engine, unsigned char obstacles);
     void invalidateValidGrid();
     const unsigned char* getValidGrid(Engine& engine);
-    bool isDirty();
+    bool isDirty() const;
 private:
     /**
      * array of bitfields.

@@ -69,7 +69,7 @@ public:
     typedef std::unique_ptr<GuiObject> Ptr;
 
     GuiObject(sf::RenderWindow* window, GuiCommand guiCommand);
-    virtual ~GuiObject();
+    ~GuiObject() override;
 
     virtual void processEvent(const sf::Event& event) = 0;
     virtual GuiCommand* update(sf::Time time) = 0;
@@ -87,9 +87,9 @@ public:
     GuiButton(sf::RenderWindow* window, GuiCommand guiCommand, sf::Color color, sf::Color activeColor, sf::Vector2f size, sf::Text text = sf::Text());
     GuiButton(sf::RenderWindow* window, GuiCommand guiCommand, const sf::Texture& texture, const sf::Texture& hovering, const sf::Texture& active, sf::Text text = sf::Text());
 
-    virtual void processEvent(const sf::Event& event);
-    virtual GuiCommand* update(sf::Time time);
-    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+    void processEvent(const sf::Event& event) override;
+    GuiCommand* update(sf::Time time) override;
+    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 protected:
     bool usesTexture;
@@ -114,9 +114,9 @@ public:
     GuiSlider(sf::RenderWindow* window, GuiCommand guiCommand, float currentValue, float llimit, float hlimit, sf::Color slider, sf::Color bg, sf::Vector2f sliderSize, sf::FloatRect sliderRect);
     GuiSlider(sf::RenderWindow* window, GuiCommand guiCommand, float currentValue, float llimit, float hlimit, const sf::Texture& slider, const sf::Texture& bg);
 
-    virtual void processEvent(const sf::Event& event);
-    virtual GuiCommand* update(sf::Time time);
-    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+    void processEvent(const sf::Event& event) override;
+    GuiCommand* update(sf::Time time) override;
+    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 protected:
     bool usesTexture;
@@ -142,7 +142,7 @@ public:
     GuiIntSlider(sf::RenderWindow* window, GuiCommand guiCommand, float currentValue, float llimit, float hlimit, const sf::Texture& slider, const sf::Texture& bg);
 
 protected:
-    GuiCommand* returnValue();
+    GuiCommand* returnValue() override;
 
 };
 
@@ -154,9 +154,9 @@ public:
     GuiCheckbox(sf::RenderWindow* window, GuiCommand guiCommand, bool initialValue, sf::Color color, sf::Vector2f size);
     GuiCheckbox(sf::RenderWindow* window, GuiCommand guiCommand, bool initialValue, const sf::Texture& box, const sf::Texture& check);
 
-    virtual void processEvent(const sf::Event& event);
-    virtual GuiCommand* update(sf::Time time);
-    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+    void processEvent(const sf::Event& event) override;
+    GuiCommand* update(sf::Time time) override;
+    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 protected:
     bool usesTexture;
     bool currentValue;
@@ -175,9 +175,9 @@ public:
 
     GuiText(sf::RenderWindow* window, GuiCommand guiCommand, sf::Text* text);
 
-    virtual void processEvent(const sf::Event& event);
-    virtual GuiCommand* update(sf::Time time);
-    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+    void processEvent(const sf::Event& event) override;
+    GuiCommand* update(sf::Time time) override;
+    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 protected:
     sf::Text* text;
 };
@@ -189,9 +189,9 @@ public:
 
     GuiImage(sf::RenderWindow* window, GuiCommand guiCommand, const sf::Texture& texture);
 
-    virtual void processEvent(const sf::Event& event);
-    virtual GuiCommand* update(sf::Time time);
-    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+    void processEvent(const sf::Event& event) override;
+    GuiCommand* update(sf::Time time) override;
+    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 protected:
     sf::Sprite sprite;
 };

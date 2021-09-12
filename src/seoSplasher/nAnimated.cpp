@@ -22,7 +22,7 @@ bool nAnimated::checkEntity(Entity& entity)
 
 std::unique_ptr<Node> nAnimated::getNewNode()
 {
-    return std::unique_ptr<Node>(new nAnimated);
+    return std::unique_ptr<Node>(new nAnimated());
 }
 
 void nAnimated::getCReferencesFromEntity(Entity& entity)
@@ -32,16 +32,16 @@ void nAnimated::getCReferencesFromEntity(Entity& entity)
     entityRemoved = &entity.removed;
 }
 
-void nAnimated::update(sf::Time dt, Context context)
+void nAnimated::update(sf::Time dt, Context /*context*/)
 {
     if(*entityRemoved)
         return;
 
     sprites->timer -= dt.asSeconds();
-    if(sprites->timer <= 0.0f)
+    if(sprites->timer <= 0.0F)
     {
         sprites->timer = sprites->frameTime;
-        if(sprites->type == cAnimated::REPEAT && sprites->textures.size() > 0)
+        if(sprites->type == cAnimated::REPEAT && !sprites->textures.empty())
         {
             sprites->current = (sprites->current + 1) % sprites->textures.size();
         }

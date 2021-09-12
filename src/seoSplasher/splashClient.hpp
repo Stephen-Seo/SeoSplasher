@@ -16,12 +16,12 @@
 class SplashClient : public Connection
 {
 public:
-    SplashClient(Context context);
+    explicit SplashClient(Context context);
 
     void update(sf::Time dt);
 
-    void registerPlayersChangedCall(std::function<void(sf::Uint8)> function);
-    void registerGameRestartedCall(std::function<void()> function);
+    void registerPlayersChangedCall(const std::function<void(sf::Uint8)> &function);
+    void registerGameRestartedCall(const std::function<void()> &function);
 private:
     Context context;
     sf::Uint32 address;
@@ -42,10 +42,10 @@ private:
 
     bool endMusicPlayed;
 
-    void receivedPacket(sf::Packet packet, sf::Uint32 address);
+    void receivedPacket(sf::Packet packet, sf::Uint32 address) override;
 
-    void connectionMade(sf::Uint32 address);
-    void connectionLost(sf::Uint32 address);
+    void connectionMade(sf::Uint32 address) override;
+    void connectionLost(sf::Uint32 address) override;
 
     void sendPacket();
 

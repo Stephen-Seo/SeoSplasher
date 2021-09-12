@@ -21,7 +21,7 @@ bool nDeath::checkEntity(Entity& entity)
 
 std::unique_ptr<Node> nDeath::getNewNode()
 {
-    return std::unique_ptr<Node>(new nDeath);
+    return std::unique_ptr<Node>(new nDeath());
 }
 
 void nDeath::getCReferencesFromEntity(Entity& entity)
@@ -31,7 +31,7 @@ void nDeath::getCReferencesFromEntity(Entity& entity)
     ID = entity.getID();
 }
 
-void nDeath::update(sf::Time dt, Context context)
+void nDeath::update(sf::Time /*dt*/, Context context)
 {
     if(*entityRemoved)
         return;
@@ -47,7 +47,7 @@ void nDeath::update(sf::Time dt, Context context)
                 {
                     if(!Utility::collidesAll((float)(GRID_OFFSET_X + x * GRID_SQUARE_SIZE), (float)(GRID_OFFSET_Y + y * GRID_SQUARE_SIZE), *context.ecEngine))
                     {
-                        validPoints.push_back(sf::Vector2i(x,y));
+                        validPoints.emplace_back(x,y);
                     }
                 }
             }

@@ -2,7 +2,7 @@
 #ifndef C_PATH_FINDER_HPP
 #define C_PATH_FINDER_HPP
 
-#define PF_UPDATE_TIME 0.5f
+#define PF_UPDATE_TIME 0.5F
 
 #include "../ec/component.hpp"
 #include "AI/pathFinder.hpp"

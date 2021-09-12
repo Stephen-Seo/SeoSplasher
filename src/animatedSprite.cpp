@@ -2,7 +2,6 @@
 #include "animatedSprite.hpp"
 
 AnimatedSprite::AnimatedSprite() :
-sprite(),
 textureLoaded(false),
 currentState(0),
 currentFrame(0),
@@ -117,12 +116,12 @@ void AnimatedSprite::updateSprite(sf::Time dt)
     }
 }
 
-bool AnimatedSprite::isInitialized()
+bool AnimatedSprite::isInitialized() const
 {
-    return textureLoaded && spriteMapping.size() > 0;
+    return textureLoaded && !spriteMapping.empty();
 }
 
-void AnimatedSprite::draw(sf::RenderTarget& target, sf::RenderStates states)
+void AnimatedSprite::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
     assert(isInitialized());
 

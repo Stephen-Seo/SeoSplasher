@@ -17,7 +17,7 @@ bool nPFUpdater::checkEntity(Entity& entity)
 
 std::unique_ptr<Node> nPFUpdater::getNewNode()
 {
-    return std::unique_ptr<Node>(new nPFUpdater);
+    return std::unique_ptr<Node>(new nPFUpdater());
 }
 
 void nPFUpdater::getCReferencesFromEntity(Entity& entity)
@@ -26,10 +26,10 @@ void nPFUpdater::getCReferencesFromEntity(Entity& entity)
     entityRemoved = &entity.removed;
 }
 
-void nPFUpdater::update(sf::Time dt, Context context)
+void nPFUpdater::update(sf::Time dt, Context /*context*/)
 {
     cpf->timer -= dt.asSeconds();
-    if(cpf->timer <= 0.0f)
+    if(cpf->timer <= 0.0F)
     {
         cpf->timer = PF_UPDATE_TIME;
         cpf->pf.invalidateValidGrid();

@@ -3,7 +3,7 @@
 #define N_AI_CONTROL_HPP
 
 #define TICK_TO_ALIGN 30
-#define RCONTROL_TIME 1.5f
+#define RCONTROL_TIME 1.5F
 
 #include "../ec/node.hpp"
 
@@ -39,10 +39,10 @@ struct nAIControl : Node
 
     sf::Vector2f prevPos;
 
-    bool checkEntity(Entity& entity);
-    std::unique_ptr<Node> getNewNode();
-    void getCReferencesFromEntity(Entity& entity);
-    void update(sf::Time dt, Context context);
+    bool checkEntity(Entity& entity) override;
+    std::unique_ptr<Node> getNewNode() override;
+    void getCReferencesFromEntity(Entity& entity) override;
+    void update(sf::Time dt, Context context) override;
 };
 
 #endif

@@ -30,7 +30,7 @@ bool nSplosion::checkEntity(Entity& entity)
 
 std::unique_ptr<Node> nSplosion::getNewNode()
 {
-    return std::unique_ptr<Node>(new nSplosion);
+    return std::unique_ptr<Node>(new nSplosion());
 }
 
 void nSplosion::getCReferencesFromEntity(Entity& entity)
@@ -61,34 +61,34 @@ void nSplosion::update(sf::Time dt, Context context)
 
         HitInfo infoPowerup = Utility::collideAgainstComponent(pos->x, pos->y, std::type_index(typeid(cPickup)), *context.ecEngine);
 
-        for(auto iter = infoBreak.hit.begin(); iter != infoBreak.hit.end(); ++iter)
+        for(auto & iter : infoBreak.hit)
         {
-            cBreakable* breakable = static_cast<cBreakable*>((*iter)->getComponent(std::type_index(typeid(cBreakable))));
+            cBreakable* breakable = static_cast<cBreakable*>(iter->getComponent(std::type_index(typeid(cBreakable))));
             if(breakable->health > 0)
                 --(breakable->health);
         }
 
-        for(auto iter = infoBalloon.hit.begin(); iter != infoBalloon.hit.end(); ++iter)
+        for(auto & iter : infoBalloon.hit)
         {
-            cBalloon* balloon = static_cast<cBalloon*>((*iter)->getComponent(std::type_index(typeid(cBalloon))));
+            cBalloon* balloon = static_cast<cBalloon*>(iter->getComponent(std::type_index(typeid(cBalloon))));
             balloon->hit = true;
         }
 
-        for(auto iter = infoLiving.hit.begin(); iter != infoLiving.hit.end(); ++iter)
+        for(auto & iter : infoLiving.hit)
         {
-            cLiving* living = static_cast<cLiving*>((*iter)->getComponent(std::type_index(typeid(cLiving))));
+            cLiving* living = static_cast<cLiving*>(iter->getComponent(std::type_index(typeid(cLiving))));
             living->hit = true;
         }
 
-        for(auto iter = infoPowerup.hit.begin(); iter != infoPowerup.hit.end(); ++iter)
+        for(auto & iter : infoPowerup.hit)
         {
-            cPickup* pickup = static_cast<cPickup*>((*iter)->getComponent(std::type_index(typeid(cPickup))));
+            cPickup* pickup = static_cast<cPickup*>(iter->getComponent(std::type_index(typeid(cPickup))));
             pickup->hit = true;
         }
     }
 
     timer->time -= dt.asSeconds();
-    if(timer->time <= 0.0f)
+    if(timer->time <= 0.0F)
     {
         context.ecEngine->removeEntity(ID);
     }

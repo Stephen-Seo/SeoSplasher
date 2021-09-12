@@ -6,13 +6,17 @@
 #include "soundContext.hpp"
 #include "../soundPlayer.hpp"
 
+SoundEventManager::SoundEventManager() :
+    soundCheckTimer(0.0F)
+{}
+
 void SoundEventManager::update(sf::Time dt, Context context)
 {
     if(context.sfxContext->mute)
         return;
 
     soundCheckTimer -= dt.asSeconds();
-    if(soundCheckTimer <= 0.0f)
+    if(soundCheckTimer <= 0.0F)
     {
         soundCheckTimer = SOUND_CHECK_TIME;
         context.sPlayer->removeStoppedSounds();

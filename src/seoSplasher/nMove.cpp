@@ -33,7 +33,7 @@ bool nMove::checkEntity(Entity& entity)
 
 std::unique_ptr<Node> nMove::getNewNode()
 {
-    return std::unique_ptr<Node>(new nMove);
+    return std::unique_ptr<Node>(new nMove());
 }
 
 void nMove::getCReferencesFromEntity(Entity& entity)
@@ -59,12 +59,12 @@ void nMove::update(sf::Time dt, Context context)
         return;
     if(disable && disable->disable)
     {
-        vel->x = 0.0f;
-        vel->y = 0.0f;
+        vel->x = 0.0F;
+        vel->y = 0.0F;
         return;
     }
     // don't move continuously if pos/vel of player hasn't been updated for a while
-    if(*context.mode != 0 && living && !isAI && context.scontext->movementTime[living->ID] <= 0.0f)
+    if(*context.mode != 0 && living && !isAI && context.scontext->movementTime[living->ID] <= 0.0F)
         return;
 
     bool ignoreBalloons = Utility::collidesAgainstComponent(pos->x, pos->y, std::type_index(typeid(cBalloon)), *context.ecEngine);
@@ -87,7 +87,7 @@ void nMove::update(sf::Time dt, Context context)
         {
             if(isBalloon)
             {
-                vel->x = 0.0f;
+                vel->x = 0.0F;
             }
             if(info.hit.size() == 1 && infoBreak.hit.empty())
             {
@@ -163,7 +163,7 @@ void nMove::update(sf::Time dt, Context context)
         {
             if(isBalloon)
             {
-                vel->y = 0.0f;
+                vel->y = 0.0F;
             }
             if(info.hit.size() == 1 && infoBreak.hit.empty())
             {

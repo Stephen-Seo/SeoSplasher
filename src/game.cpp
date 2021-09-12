@@ -32,12 +32,13 @@ mPlayer(),
 sPlayer(),
 stateStack(Context(window, resourceManager, mPlayer, sPlayer, ecEngine, rGen, isQuitting, mode, scontext, sfxContext)),
 isQuitting(false),
+rGen(std::random_device{}()),
 mode(0)
 {
     registerResources();
     registerStates();
 
-    frameTime = sf::seconds(1.f / 60.f);
+    frameTime = sf::seconds(1.F / 60.F);
 }
 
 void Game::run()
@@ -71,7 +72,7 @@ void Game::processEvents()
         else if(event.type == sf::Event::Resized)
         {
 //            window.setSize(sf::Vector2u(event.size.width, event.size.height));
-            auto view = sf::View(sf::FloatRect(0.0f, 0.0f, 720.0f, 480.0f));
+            auto view = sf::View(sf::FloatRect(0.0F, 0.0F, 720.0F, 480.0F));
             window.setView(view);
         }
     }

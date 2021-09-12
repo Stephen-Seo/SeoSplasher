@@ -37,7 +37,7 @@
 
 SplashState::SplashState(StateStack& stack, Context context) :
 State(stack, context),
-fieldBG(sf::Vector2f(480.0f,480.0f)),
+fieldBG(sf::Vector2f(480.0F,480.0F)),
 IDcounter(0),
 dir(Direction::NONE),
 placeBalloon(false),
@@ -52,7 +52,9 @@ cFired(false),
 cpf(nullptr),
 controllingPlayerID(0),
 guiSystem(this),
-startPressed(false)
+startPressed(false),
+countdownNumber(4),
+prevState(SS::GameState::WAITING_FOR_PLAYERS)
 {
     // init server context in case of resetting of this state
     for(int i = 0; i < 4; ++i)
@@ -60,7 +62,7 @@ startPressed(false)
         context.scontext->playersAlive[i] = false;
         context.scontext->ppositions[i] = nullptr;
         context.scontext->pvelocities[i] = nullptr;
-        context.scontext->movementTime[i] = 0.0f;
+        context.scontext->movementTime[i] = 0.0F;
         context.scontext->input[i] = 0;
         context.scontext->customNames[i] = "";
         context.scontext->powerupPickedup[i] = false;
@@ -77,12 +79,12 @@ startPressed(false)
 
     if(*context.mode == 0)
     {
-        context.scontext->startTimer = 2.99f;
+        context.scontext->startTimer = 2.99F;
         startPressed = true;
     }
     else
     {
-        context.scontext->startTimer = -1.0f;
+        context.scontext->startTimer = -1.0F;
     }
 
     // set servers based on mode
@@ -98,7 +100,7 @@ startPressed(false)
 
     // seed random generator
     {
-        std::seed_seq seq{std::random_device()(),(unsigned int)std::time(NULL)};
+        std::seed_seq seq{std::random_device()(),(unsigned int)std::time(nullptr)};
         context.rGen->seed(seq);
     }
 
@@ -175,37 +177,37 @@ startPressed(false)
 
     // add systems
 
-    context.ecEngine->addSystem(std::unique_ptr<Node>(new nPControl));
-    context.ecEngine->addSystem(std::unique_ptr<Node>(new nMove));
+    context.ecEngine->addSystem(std::unique_ptr<Node>(new nPControl()));
+    context.ecEngine->addSystem(std::unique_ptr<Node>(new nMove()));
 
     if(!client)
     {
         if(*context.mode != 0) // not singleplayer)
         {
-            context.ecEngine->addSystem(std::unique_ptr<Node>(new nCControl));
+            context.ecEngine->addSystem(std::unique_ptr<Node>(new nCControl()));
         }
-        context.ecEngine->addSystem(std::unique_ptr<Node>(new nAIControl));
-        context.ecEngine->addSystem(std::unique_ptr<Node>(new nBalloon));
-        context.ecEngine->addSystem(std::unique_ptr<Node>(new nSplosion));
-        context.ecEngine->addSystem(std::unique_ptr<Node>(new nBreakable));
-        context.ecEngine->addSystem(std::unique_ptr<Node>(new nDeath));
-        context.ecEngine->addSystem(std::unique_ptr<Node>(new nPickupHit));
-        context.ecEngine->addSystem(std::unique_ptr<Node>(new nPFUpdater));
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nAIControl()));
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nBalloon()));
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nSplosion()));
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nBreakable()));
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nDeath()));
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nPickupHit()));
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nPFUpdater()));
     }
 
     if(*context.mode != 4) // is not no-draw mode
     {
-        context.ecEngine->addSystem(std::unique_ptr<Node>(new nAnimated));
-        context.ecEngine->addDrawSystem(std::unique_ptr<Node>(new nDraw));
+        context.ecEngine->addSystem(std::unique_ptr<Node>(new nAnimated()));
+        context.ecEngine->addDrawSystem(std::unique_ptr<Node>(new nDraw()));
     }
 
     // init playerInfo text
     playerInfoText.setFont(context.resourceManager->getFont(Fonts::CLEAR_SANS));
     playerInfoText.setCharacterSize(40);
     if(*context.mode == 0)
-        playerInfoText.setPosition(360.0f, 360.0f);
+        playerInfoText.setPosition(360.0F, 360.0F);
     else
-        playerInfoText.setPosition(360.0f, 240.0f);
+        playerInfoText.setPosition(360.0F, 240.0F);
 
     // add entities
     addPathFinder();
@@ -262,24 +264,24 @@ startPressed(false)
 
     // init fieldBG
     fieldBG.setFillColor(sf::Color(127,127,127));
-    fieldBG.setPosition(120.0f, 0.0f);
+    fieldBG.setPosition(120.0F, 0.0F);
 
     // init status
     statusText.setFont(context.resourceManager->getFont(Fonts::CLEAR_SANS));
     statusText.setCharacterSize(30);
-    statusText.setPosition(360.0f, 50.0f);
+    statusText.setPosition(360.0F, 50.0F);
     setStatusText();
 
     statusBG.setFillColor(sf::Color(0,0,0,127));
-    statusBG.setSize(sf::Vector2f(600.0f, 400.0f));
+    statusBG.setSize(sf::Vector2f(600.0F, 400.0F));
     sf::FloatRect rect = statusBG.getLocalBounds();
     statusBG.setOrigin(rect.width / 2, rect.height / 2);
-    statusBG.setPosition(360.0f, 240.0f);
+    statusBG.setPosition(360.0F, 240.0F);
 
     // init countdown text
     countdownText.setFont(context.resourceManager->getFont(Fonts::CLEAR_SANS));
     countdownText.setCharacterSize(70);
-    countdownText.setPosition(360.0f, 240.0f);
+    countdownText.setPosition(360.0F, 240.0F);
 
 
 
@@ -288,7 +290,7 @@ startPressed(false)
     if(*context.mode != 1) // not client
     {
         sf::Text startText(
-        GuiButton startButton(context.window, GuiCommand(GuiCommand::VALUE_BOOL, GuiCommand::Value(false), GuiCommand::Ptr(&startPressed)), sf::Color::Green, sf::Color(127,255,127), sf::Vector2f(200.0f, 90.0f), 
+        GuiButton startButton(context.window, GuiCommand(GuiCommand::VALUE_BOOL, GuiCommand::Value(false), GuiCommand::Ptr(&startPressed)), sf::Color::Green, sf::Color(127,255,127), sf::Vector2f(200.0F, 90.0F), 
     }
     */
 
@@ -296,12 +298,12 @@ startPressed(false)
     if(client)
     {
         client->registerPlayersChangedCall( [this] (sf::Uint8 playerInfo) {
-            if(playerIDToEntityID.size() > 0)
+            if(!playerIDToEntityID.empty())
             {
                 std::map<int, int> pIDToEIDCopy = playerIDToEntityID;
-                for(auto iter = pIDToEIDCopy.begin(); iter != pIDToEIDCopy.end(); ++iter)
+                for(auto & iter : pIDToEIDCopy)
                 {
-                    this->getContext().ecEngine->removeEntity(iter->second);
+                    this->getContext().ecEngine->removeEntity(iter.second);
                 }
                 playerIDToEntityID.clear();
             }
@@ -343,7 +345,7 @@ void SplashState::draw()
         {
             getContext().window->draw(statusBG);
 
-            if(getContext().scontext->startTimer > 0.0f)
+            if(getContext().scontext->startTimer > 0.0F)
             {
                 getContext().window->draw(countdownText);
             }
@@ -352,7 +354,7 @@ void SplashState::draw()
                 getContext().window->draw(statusText);
             }
 
-            if(((getContext().scontext->gameState == SS::WAITING_FOR_PLAYERS || getContext().scontext->gameState == SS::WAITING_FOR_SERVER) && (*getContext().mode == 0 || getContext().scontext->startTimer < 0.0f)) || (getContext().scontext->gameState == SS::ENDED))
+            if(((getContext().scontext->gameState == SS::WAITING_FOR_PLAYERS || getContext().scontext->gameState == SS::WAITING_FOR_SERVER) && (*getContext().mode == 0 || getContext().scontext->startTimer < 0.0F)) || (getContext().scontext->gameState == SS::ENDED))
             {
                 getContext().window->draw(playerInfoText);
             }
@@ -406,18 +408,18 @@ bool SplashState::update(sf::Time dt)
             countdownText.setString("");
         }
     }
-    else if(getContext().scontext->startTimer >= 0.0f && (getContext().scontext->gameState == SS::WAITING_FOR_PLAYERS || getContext().scontext->gameState == SS::WAITING_FOR_SERVER))
+    else if(getContext().scontext->startTimer >= 0.0F && (getContext().scontext->gameState == SS::WAITING_FOR_PLAYERS || getContext().scontext->gameState == SS::WAITING_FOR_SERVER))
     {
         if(server || *getContext().mode == 0)
             getContext().scontext->startTimer -= dt.asSeconds();
 
-        if(getContext().scontext->startTimer >= 0.0f)
+        if(getContext().scontext->startTimer >= 0.0F)
         {
             if(server || *getContext().mode == 0)
             {
-                if(countdownNumber != (int)(getContext().scontext->startTimer + 1.0f))
+                if(countdownNumber != (int)(getContext().scontext->startTimer + 1.0F))
                     getContext().sfxContext->happened[SoundContext::COUNTDOWN_COUNTED] = true;
-                countdownNumber = (getContext().scontext->startTimer + 1.0f);
+                countdownNumber = (getContext().scontext->startTimer + 1.0F);
                 countdownText.setString(std::to_string(countdownNumber));
             }
             else if(client)
@@ -574,7 +576,7 @@ bool SplashState::handleEvent(const sf::Event& event)
     {
         if(!client && !startPressed && (getContext().scontext->gameState == SS::WAITING_FOR_PLAYERS || getContext().scontext->gameState == SS::WAITING_FOR_SERVER))
         {
-            getContext().scontext->startTimer = 2.99f;
+            getContext().scontext->startTimer = 2.99F;
             startPressed = true;
 
             if(*getContext().mode != 0)
@@ -607,21 +609,21 @@ bool SplashState::handleEvent(const sf::Event& event)
 
 void SplashState::addWall(float x, float y)
 {
-    Entity* wall = new Entity;
+    Entity* wall = new Entity();
 
-    cPosition* pos = new cPosition;
+    cPosition* pos = new cPosition();
     pos->x = x;
     pos->y = y;
     wall->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
 
     if(*getContext().mode != 4)
     {
-        cSprite* sprite = new cSprite;
+        cSprite* sprite = new cSprite();
         sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::WALL));
         wall->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
     }
 
-    cWall* cwall = new cWall;
+    cWall* cwall = new cWall();
     wall->addComponent(std::type_index(typeid(cWall)), std::unique_ptr<Component>(cwall));
 
     getContext().ecEngine->addEntity(std::unique_ptr<Entity>(wall));
@@ -635,21 +637,21 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
     else
         ID = IDcounter++;
 
-    std::unique_ptr<Entity> combatant = std::unique_ptr<Entity>(new Entity);
+    std::unique_ptr<Entity> combatant = std::unique_ptr<Entity>(new Entity());
 
-    std::unique_ptr<Component> posP = std::unique_ptr<Component>(new cPosition);
+    std::unique_ptr<Component> posP = std::unique_ptr<Component>(new cPosition());
     cPosition* pos = static_cast<cPosition*>(posP.get());
 
     std::unique_ptr<Component> spriteP;
     if(*getContext().mode != 4)
-        spriteP = std::unique_ptr<Component>(new cSprite);
+        spriteP = std::unique_ptr<Component>(new cSprite());
 
     switch(ID)
     {
     case 0:
-        pos->x = 120.0f;
-        pos->y = 0.0f;
-        pos->rot = 0.0f;
+        pos->x = 120.0F;
+        pos->y = 0.0F;
+        pos->rot = 0.0F;
         if(spriteP)
         {
             cSprite* sprite = static_cast<cSprite*>(spriteP.get());
@@ -660,9 +662,9 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
         }
         break;
     case 1:
-        pos->x = 568.0f;
-        pos->y = 0.0f;
-        pos->rot = 0.0f;
+        pos->x = 568.0F;
+        pos->y = 0.0F;
+        pos->rot = 0.0F;
         if(spriteP)
         {
             cSprite* sprite = static_cast<cSprite*>(spriteP.get());
@@ -673,9 +675,9 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
         }
         break;
     case 2:
-        pos->x = 120.0f;
-        pos->y = 448.0f;
-        pos->rot = 0.0f;
+        pos->x = 120.0F;
+        pos->y = 448.0F;
+        pos->rot = 0.0F;
         if(spriteP)
         {
             cSprite* sprite = static_cast<cSprite*>(spriteP.get());
@@ -686,9 +688,9 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
         }
         break;
     case 3:
-        pos->x = 568.0f;
-        pos->y = 448.0f;
-        pos->rot = 0.0f;
+        pos->x = 568.0F;
+        pos->y = 448.0F;
+        pos->rot = 0.0F;
         if(spriteP)
         {
             cSprite* sprite = static_cast<cSprite*>(spriteP.get());
@@ -707,14 +709,14 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
     combatant->addComponent(std::type_index(typeid(cPosition)), std::move(posP));
     combatant->addComponent(std::type_index(typeid(cSprite)), std::move(spriteP));
 
-    std::unique_ptr<Component> velP = std::unique_ptr<Component>(new cVelocity);
+    std::unique_ptr<Component> velP = std::unique_ptr<Component>(new cVelocity());
     cVelocity* vel = static_cast<cVelocity*>(velP.get());
-    vel->x = 0.0f;
-    vel->y = 0.0f;
-    vel->rot = 0.0f;
+    vel->x = 0.0F;
+    vel->y = 0.0F;
+    vel->rot = 0.0F;
     combatant->addComponent(std::type_index(typeid(cVelocity)), std::move(velP));
 
-    std::unique_ptr<Component> livingP = std::unique_ptr<Component>(new cLiving);
+    std::unique_ptr<Component> livingP = std::unique_ptr<Component>(new cLiving());
     cLiving* living = static_cast<cLiving*>(livingP.get());
     living->ID = ID;
     combatant->addComponent(std::type_index(typeid(cLiving)), std::move(livingP));
@@ -732,11 +734,11 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
     }
     else if(isPlayer && server)
     {
-        combatant->addComponent(std::type_index(typeid(cClientControl)), std::unique_ptr<Component>(new cClientControl));
+        combatant->addComponent(std::type_index(typeid(cClientControl)), std::unique_ptr<Component>(new cClientControl()));
     }
     else if(!isPlayer && !client)
     {
-        std::unique_ptr<Component> controlP = std::unique_ptr<Component>(new cAIControl);
+        std::unique_ptr<Component> controlP = std::unique_ptr<Component>(new cAIControl());
         cAIControl* control = static_cast<cAIControl*>(controlP.get());
         control->ID = ID;
         control->pf = &cpf->pf;
@@ -773,9 +775,9 @@ void SplashState::addCombatant(bool isPlayer, bool isPlayerLocallyControlled, in
 
 void SplashState::addPathFinder()
 {
-    Entity* pfHolder = new Entity;
+    Entity* pfHolder = new Entity();
 
-    cpf = new cPathFinder;
+    cpf = new cPathFinder();
     pfHolder->addComponent(std::type_index(typeid(cPathFinder)), std::unique_ptr<Component>(cpf));
 
     getContext().ecEngine->addEntity(std::unique_ptr<Entity>(pfHolder));
@@ -810,21 +812,21 @@ void SplashState::checkReleasedInput()
 
 void SplashState::addBreakable(float x, float y, cPowerup::Powerup powerup)
 {
-    Entity* breakable = new Entity;
+    Entity* breakable = new Entity();
 
-    cPosition* pos = new cPosition;
+    cPosition* pos = new cPosition();
     pos->x = x;
     pos->y = y;
-    pos->rot = 0.0f;
+    pos->rot = 0.0F;
     breakable->addComponent(std::type_index(typeid(cPosition)), std::unique_ptr<Component>(pos));
 
-    cPowerup* cpowerup = new cPowerup;
+    cPowerup* cpowerup = new cPowerup();
     cpowerup->powerup = powerup;
     breakable->addComponent(std::type_index(typeid(cPowerup)), std::unique_ptr<Component>(cpowerup));
 
-    breakable->addComponent(std::type_index(typeid(cBreakable)), std::unique_ptr<Component>(new cBreakable));
+    breakable->addComponent(std::type_index(typeid(cBreakable)), std::unique_ptr<Component>(new cBreakable()));
 
-    cSprite* sprite = new cSprite;
+    cSprite* sprite = new cSprite();
     sprite->sprite.setTexture(getContext().resourceManager->getTexture(Textures::BREAKABLE));
     breakable->addComponent(std::type_index(typeid(cSprite)), std::unique_ptr<Component>(sprite));
 
@@ -850,7 +852,7 @@ void SplashState::initBreakables()
         for(int j = 0; j < GRID_HEIGHT; ++j)
         {
             if(validBreakableCoordinate(i,j))
-                validPoints.push_back(sf::Vector2i(i,j));
+                validPoints.emplace_back(i,j);
         }
     }
 
@@ -1087,7 +1089,7 @@ void SplashState::reset()
             addCombatant(false, false);
 
             startPressed = true;
-            getContext().scontext->startTimer = 2.99f;
+            getContext().scontext->startTimer = 2.99F;
         }
         else if(*getContext().mode == 2) // server multiplayer
         {

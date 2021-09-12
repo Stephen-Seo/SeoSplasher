@@ -2,7 +2,7 @@
 #ifndef SPLASH_SERVER_HPP
 #define SPLASH_SERVER_HPP
 
-#define START_TIMER_SECONDS 3.0f
+#define START_TIMER_SECONDS 3.0F
 
 #include <queue>
 #include <functional>
@@ -15,7 +15,7 @@
 class SplashServer : public Connection
 {
 public:
-    SplashServer(Context context);
+    explicit SplashServer(Context context);
 
     void update(sf::Time dt);
 
@@ -35,10 +35,10 @@ private:
 
     SS::GameState prevState;
 
-    void receivedPacket(sf::Packet packet, sf::Uint32 address);
+    void receivedPacket(sf::Packet packet, sf::Uint32 address) override;
 
-    void connectionMade(sf::Uint32 address);
-    void connectionLost(sf::Uint32 address);
+    void connectionMade(sf::Uint32 address) override;
+    void connectionLost(sf::Uint32 address) override;
 
     void sendPacket();
 };

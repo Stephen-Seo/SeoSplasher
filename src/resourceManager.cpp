@@ -42,37 +42,37 @@ void ResourceManager::registerSoundBuffer(Sound::ID id, const std::string& filen
 void ResourceManager::loadResources(ResourcesSet rset)
 {
     // load textures if not loaded
-    if(rset.tset != NULL)
+    if(rset.tset != nullptr)
     {
-        for(auto iter = rset.tset->begin(); iter != rset.tset->end(); ++iter)
+        for(auto iter : *rset.tset)
         {
-            if(!textureHolder.isLoaded(*iter))
+            if(!textureHolder.isLoaded(iter))
             {
-                textureHolder.load(*iter);
+                textureHolder.load(iter);
             }
         }
     }
 
     // load fonts if not loaded
-    if(rset.fset != NULL)
+    if(rset.fset != nullptr)
     {
-        for(auto iter = rset.fset->begin(); iter != rset.fset->end(); ++iter)
+        for(auto iter : *rset.fset)
         {
-            if(!fontHolder.isLoaded(*iter))
+            if(!fontHolder.isLoaded(iter))
             {
-                fontHolder.load(*iter);
+                fontHolder.load(iter);
             }
         }
     }
 
     // load sound buffers if not loaded
-    if(rset.sset != NULL)
+    if(rset.sset != nullptr)
     {
-        for(auto iter = rset.sset->begin(); iter != rset.sset->end(); ++iter)
+        for(auto iter : *rset.sset)
         {
-            if(!soundBufferHolder.isLoaded(*iter))
+            if(!soundBufferHolder.isLoaded(iter))
             {
-                soundBufferHolder.load(*iter);
+                soundBufferHolder.load(iter);
             }
         }
     }

@@ -12,8 +12,8 @@ guiSystem(this),
 singlePlayer(false),
 client(false),
 server(false),
-blinkTime(0.0f),
-blinkInterval(0.0f),
+blinkTime(0.0F),
+blinkInterval(0.0F),
 blinking(false)
 {
     // load needed resources
@@ -24,35 +24,35 @@ blinking(false)
     // setup gui
     const sf::Font& cSans = context.resourceManager->getFont(Fonts::CLEAR_SANS);
 
-    GuiButton* singlePlayerButton = new GuiButton(context.window, GuiCommand(GuiCommand::VALUE_BOOL, GuiCommand::Value(false), GuiCommand::Ptr(&singlePlayer)), sf::Color(0,192,0), sf::Color::Green, sf::Vector2f(120.0f, 30.0f), sf::Text("SinglePlayer", cSans, 18));
+    GuiButton* singlePlayerButton = new GuiButton(context.window, GuiCommand(GuiCommand::VALUE_BOOL, GuiCommand::Value(false), GuiCommand::Ptr(&singlePlayer)), sf::Color(0,192,0), sf::Color::Green, sf::Vector2f(120.0F, 30.0F), sf::Text("SinglePlayer", cSans, 18));
 
-    singlePlayerButton->setPosition((720.0f - 120.0f) / 2.0f, 220.0f);
+    singlePlayerButton->setPosition((720.0F - 120.0F) / 2.0F, 220.0F);
 
     guiSystem.add(singlePlayerButton);
 
-    GuiButton* clientConnectButton = new GuiButton(context.window, GuiCommand(GuiCommand::VALUE_BOOL, GuiCommand::Value(false), GuiCommand::Ptr(&client)), sf::Color(0,127,0), sf::Color::Green, sf::Vector2f(120.0f, 30.0f), sf::Text("Multiplayer", cSans, 18));
+    GuiButton* clientConnectButton = new GuiButton(context.window, GuiCommand(GuiCommand::VALUE_BOOL, GuiCommand::Value(false), GuiCommand::Ptr(&client)), sf::Color(0,127,0), sf::Color::Green, sf::Vector2f(120.0F, 30.0F), sf::Text("Multiplayer", cSans, 18));
 
-    clientConnectButton->setPosition((720.0f - 120.0f) / 2.0f, 270.0f);
+    clientConnectButton->setPosition((720.0F - 120.0F) / 2.0F, 270.0F);
 
     guiSystem.add(clientConnectButton);
 
-    GuiButton* serverButton = new GuiButton(context.window, GuiCommand(GuiCommand::VALUE_BOOL, GuiCommand::Value(false), GuiCommand::Ptr(&server)), sf::Color(0,127,0), sf::Color::Green, sf::Vector2f(120.0f, 30.0f), sf::Text("Host a Game", cSans, 18));
+    GuiButton* serverButton = new GuiButton(context.window, GuiCommand(GuiCommand::VALUE_BOOL, GuiCommand::Value(false), GuiCommand::Ptr(&server)), sf::Color(0,127,0), sf::Color::Green, sf::Vector2f(120.0F, 30.0F), sf::Text("Host a Game", cSans, 18));
 
-    serverButton->setPosition((720.0f - 120.0f) / 2.0f, 320.0f);
+    serverButton->setPosition((720.0F - 120.0F) / 2.0F, 320.0F);
 
     guiSystem.add(serverButton);
 
     IPText.setString("");
     IPText.setCharacterSize(30);
     IPText.setFont(cSans);
-    IPText.setColor(sf::Color(220,255,220));
-    IPText.setPosition(360.0f, 450.0f);
+    IPText.setFillColor(sf::Color(220,255,220));
+    IPText.setPosition(360.0F, 450.0F);
 
     infoIPText.setString("Start typing an ip address if you want to connect to a server.");
     infoIPText.setCharacterSize(15);
     infoIPText.setFont(cSans);
-    infoIPText.setColor(sf::Color::White);
-    infoIPText.setPosition(360.0f, 430.0f);
+    infoIPText.setFillColor(sf::Color::White);
+    infoIPText.setPosition(360.0F, 430.0F);
     Utility::centerTextOrigin(infoIPText);
 }
 
@@ -60,7 +60,7 @@ void SplashMenu::draw()
 {
     guiSystem.draw(*getContext().window);
 
-    if(blinkTime == 0.0f || !blinking)
+    if(blinkTime == 0.0F || !blinking)
     {
         getContext().window->draw(infoIPText);
     }
@@ -79,7 +79,7 @@ bool SplashMenu::update(sf::Time dt)
     }
     else if(client)
     {
-        if(getContext().scontext->serverIP.size() == 0)
+        if(getContext().scontext->serverIP.empty())
         {
             client = false;
             blinkTime = BLINK_TIME;
@@ -100,16 +100,16 @@ bool SplashMenu::update(sf::Time dt)
         requestStackPush(States::SPLASH);
     }
 
-    if(blinkTime > 0.0f)
+    if(blinkTime > 0.0F)
     {
         blinkTime -= dt.asSeconds();
-        if(blinkTime < 0.0f)
+        if(blinkTime < 0.0F)
         {
-            blinkTime = 0.0f;
+            blinkTime = 0.0F;
         }
 
         blinkInterval -= dt.asSeconds();
-        if(blinkInterval <= 0.0f)
+        if(blinkInterval <= 0.0F)
         {
             blinking = !blinking;
             blinkInterval = BLINK_INTERVAL;
@@ -131,7 +131,7 @@ bool SplashMenu::handleEvent(const sf::Event& event)
     }
     if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::BackSpace)
     {
-        if(getContext().scontext->serverIP.size() > 0)
+        if(!getContext().scontext->serverIP.empty())
             getContext().scontext->serverIP.pop_back();
         IPText.setString(getContext().scontext->serverIP);
         Utility::centerTextOrigin(IPText);

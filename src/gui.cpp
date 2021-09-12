@@ -1,6 +1,8 @@
 
 #include "gui.hpp"
 
+#include <utility>
+
 GuiCommand::Value::Value(bool b) :
 b(b)
 {}
@@ -34,7 +36,7 @@ s(s)
 {}
 
 GuiCommand::Ptr::Ptr() :
-b(NULL)
+b(nullptr)
 {}
 
 GuiCommand::GuiCommand(GuiCommand::Type type, GuiCommand::Value value, GuiCommand::Ptr ptr) :
@@ -55,7 +57,7 @@ GuiObject::~GuiObject()
 GuiButton::GuiButton(sf::RenderWindow* window, GuiCommand guiCommand, sf::Color color, sf::Color activeColor, sf::Vector2f size, sf::Text text) :
 GuiObject(window, guiCommand),
 usesTexture(false),
-text(text),
+text(std::move(text)),
 color(color),
 activeColor(activeColor),
 hovering(false),
@@ -64,7 +66,7 @@ clickedOn(false)
     rect.setSize(size);
     rect.setFillColor(color);
     rect.setOutlineColor(color);
-    rect.setOutlineThickness(1.0f);
+    rect.setOutlineThickness(1.0F);
 }
 
 GuiButton::GuiButton(sf::RenderWindow* window, GuiCommand guiCommand, const sf::Texture& texture, const sf::Texture& hovering, const sf::Texture& active, sf::Text text) :
@@ -87,16 +89,16 @@ void GuiButton::processEvent(const sf::Event& event)
         coords = getInverseTransform().transformPoint(coords);
         if(usesTexture)
         {
-            if(coords.x >= 0.0f && coords.x <= normalSprite.getLocalBounds().width &&
-               coords.y >= 0.0f && coords.y <= normalSprite.getLocalBounds().height)
+            if(coords.x >= 0.0F && coords.x <= normalSprite.getLocalBounds().width &&
+               coords.y >= 0.0F && coords.y <= normalSprite.getLocalBounds().height)
             {
                 clickedOn = true;
             }
         }
         else
         {
-            if(coords.x >= 0.0f && coords.x <= rect.getSize().x &&
-               coords.y >= 0.0f && coords.y <= rect.getSize().y)
+            if(coords.x >= 0.0F && coords.x <= rect.getSize().x &&
+               coords.y >= 0.0F && coords.y <= rect.getSize().y)
             {
                 clickedOn = true;
             }
@@ -110,16 +112,16 @@ void GuiButton::processEvent(const sf::Event& event)
         coords = getInverseTransform().transformPoint(coords);
         if(usesTexture)
         {
-            if(coords.x >= 0.0f && coords.x <= normalSprite.getLocalBounds().width &&
-               coords.y >= 0.0f && coords.y <= normalSprite.getLocalBounds().height)
+            if(coords.x >= 0.0F && coords.x <= normalSprite.getLocalBounds().width &&
+               coords.y >= 0.0F && coords.y <= normalSprite.getLocalBounds().height)
             {
                 passCommand = true;
             }
         }
         else
         {
-            if(coords.x >= 0.0f && coords.x <= rect.getSize().x &&
-               coords.y >= 0.0f && coords.y <= rect.getSize().y)
+            if(coords.x >= 0.0F && coords.x <= rect.getSize().x &&
+               coords.y >= 0.0F && coords.y <= rect.getSize().y)
             {
                 passCommand = true;
             }
@@ -129,30 +131,20 @@ void GuiButton::processEvent(const sf::Event& event)
     }
 }
 
-GuiCommand* GuiButton::update(sf::Time time)
+GuiCommand* GuiButton::update(sf::Time /*time*/)
 {
     sf::Vector2f coords(sf::Mouse::getPosition(*window));
     coords = getInverseTransform().transformPoint(coords);
 
     if(usesTexture)
     {
-        if(coords.x >= 0 && coords.x <= normalSprite.getLocalBounds().width &&
-           coords.y >= 0 && coords.y <= normalSprite.getLocalBounds().height)
-        {
-            hovering = true;
-        }
-        else
-            hovering = false;
+        hovering = coords.x >= 0 && coords.x <= normalSprite.getLocalBounds().width &&
+           coords.y >= 0 && coords.y <= normalSprite.getLocalBounds().height;
     }
     else
     {
-        if(coords.x >= 0 && coords.x <= rect.getSize().x &&
-           coords.y >= 0 && coords.y <= rect.getSize().y)
-        {
-            hovering = true;
-        }
-        else
-            hovering = false;
+        hovering = coords.x >= 0 && coords.x <= rect.getSize().x &&
+           coords.y >= 0 && coords.y <= rect.getSize().y;
 
         if(clickedOn)
         {
@@ -179,7 +171,7 @@ GuiCommand* GuiButton::update(sf::Time time)
         return &guiCommand;
     }
     else
-        return NULL;
+        return nullptr;
 }
 
 void GuiButton::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -200,7 +192,7 @@ void GuiButton::draw(sf::RenderTarget& target, sf::RenderStates states) const
         target.draw(rect, states);
     }
 
-    if(text.getFont() != NULL)
+    if(text.getFont() != nullptr)
         target.draw(text, states);
 }
 
@@ -218,11 +210,11 @@ clickedOn(false)
     bgShape.setFillColor(bg);
 
     sliderShape.setSize(sliderSize);
-    bgShape.setSize(sf::Vector2f(rect.width, rect.height / 7.0f));
+    bgShape.setSize(sf::Vector2f(rect.width, rect.height / 7.0F));
 
     float ratio = (currentValue - llimit) / (hlimit - llimit);
-    sliderShape.setPosition(ratio * (bgShape.getSize().x - sliderShape.getSize().x), rect.height / 2.0f - sliderShape.getSize().y / 2.0f);
-    bgShape.setPosition(0.0f, rect.height / 2.0f - bgShape.getSize().y / 2.0f);
+    sliderShape.setPosition(ratio * (bgShape.getSize().x - sliderShape.getSize().x), rect.height / 2.0F - sliderShape.getSize().y / 2.0F);
+    bgShape.setPosition(0.0F, rect.height / 2.0F - bgShape.getSize().y / 2.0F);
 }
 
 GuiSlider::GuiSlider(sf::RenderWindow* window, GuiCommand guiCommand, float currentValue, float llimit, float hlimit, const sf::Texture& slider, const sf::Texture& bg) :
@@ -236,14 +228,14 @@ hlimit(hlimit),
 offset(),
 clickedOn(false)
 {
-    rect.left = 0.0f;
-    rect.top = 0.0f;
+    rect.left = 0.0F;
+    rect.top = 0.0F;
     rect.width = bgSprite.getLocalBounds().width;
     rect.height = sliderSprite.getLocalBounds().height;
 
     float ratio = (currentValue - llimit) / (hlimit - llimit);
-    sliderSprite.setPosition(ratio * (bgSprite.getLocalBounds().width - sliderSprite.getLocalBounds().width), rect.height / 2.0f - sliderSprite.getLocalBounds().height / 2.0f);
-    bgSprite.setPosition(0.0f, rect.height / 2.0f - bgSprite.getLocalBounds().height / 2.0f);
+    sliderSprite.setPosition(ratio * (bgSprite.getLocalBounds().width - sliderSprite.getLocalBounds().width), rect.height / 2.0F - sliderSprite.getLocalBounds().height / 2.0F);
+    bgSprite.setPosition(0.0F, rect.height / 2.0F - bgSprite.getLocalBounds().height / 2.0F);
 }
 
 void GuiSlider::processEvent(const sf::Event& event)
@@ -284,7 +276,7 @@ void GuiSlider::processEvent(const sf::Event& event)
     }
 }
 
-GuiCommand* GuiSlider::update(sf::Time time)
+GuiCommand* GuiSlider::update(sf::Time /*time*/)
 {
     if(clickedOn)
     {
@@ -295,8 +287,8 @@ GuiCommand* GuiSlider::update(sf::Time time)
         {
             float pos = coords.x - offset;
 
-            if(pos < 0.0f)
-                pos = 0.0f;
+            if(pos < 0.0F)
+                pos = 0.0F;
             else if(pos > bgSprite.getLocalBounds().width - sliderSprite.getLocalBounds().width)
                 pos = bgSprite.getLocalBounds().width - sliderSprite.getLocalBounds().width;
 
@@ -309,8 +301,8 @@ GuiCommand* GuiSlider::update(sf::Time time)
         {
             float pos = coords.x - offset;
 
-            if(pos < 0.0f)
-                pos = 0.0f;
+            if(pos < 0.0F)
+                pos = 0.0F;
             else if(pos > bgShape.getSize().x - sliderShape.getSize().x)
                 pos = bgShape.getSize().x - sliderShape.getSize().x;
 
@@ -334,7 +326,7 @@ GuiCommand* GuiSlider::returnValue()
         return &guiCommand;
     }
     else
-        return NULL;
+        return nullptr;
 }
 
 void GuiSlider::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -366,12 +358,12 @@ GuiCommand* GuiIntSlider::returnValue()
     if(passCommand || clickedOn)
     {
         guiCommand.type = GuiCommand::Type::VALUE_INT;
-        guiCommand.value.i = int(currentValue + 0.5f);
+        guiCommand.value.i = int(currentValue + 0.5F);
         passCommand = false;
         return &guiCommand;
     }
     else
-        return NULL;
+        return nullptr;
 }
 
 GuiCheckbox::GuiCheckbox(sf::RenderWindow* window, GuiCommand guiCommand, bool initialValue, sf::Color color, sf::Vector2f size) :
@@ -383,13 +375,13 @@ checkLines(sf::PrimitiveType::Lines, 4)
 {
     boxShape.setFillColor(sf::Color::Transparent);
     boxShape.setOutlineColor(color);
-    boxShape.setOutlineThickness(3.0f);
+    boxShape.setOutlineThickness(3.0F);
     boxShape.setSize(size);
 
-    checkLines[0].position = sf::Vector2f(0.0f, 0.0f);
+    checkLines[0].position = sf::Vector2f(0.0F, 0.0F);
     checkLines[1].position = sf::Vector2f(size.x, size.y);
-    checkLines[2].position = sf::Vector2f(size.x, 0.0f);
-    checkLines[3].position = sf::Vector2f(0.0f, size.y);
+    checkLines[2].position = sf::Vector2f(size.x, 0.0F);
+    checkLines[3].position = sf::Vector2f(0.0F, size.y);
 
     for(int i = 0; i < 4; ++i)
         checkLines[i].color = color;
@@ -414,16 +406,16 @@ void GuiCheckbox::processEvent(const sf::Event& event)
 
         if(usesTexture)
         {
-            if(coords.x >= 0.0f && coords.x <= boxSprite.getLocalBounds().width &&
-               coords.y >= 0.0f && coords.y <= boxSprite.getLocalBounds().height)
+            if(coords.x >= 0.0F && coords.x <= boxSprite.getLocalBounds().width &&
+               coords.y >= 0.0F && coords.y <= boxSprite.getLocalBounds().height)
             {
                 clickedOn = true;
             }
         }
         else
         {
-            if(coords.x >= 0.0f && coords.x <= boxShape.getSize().x &&
-               coords.y >= 0.0f && coords.y <= boxShape.getSize().y)
+            if(coords.x >= 0.0F && coords.x <= boxShape.getSize().x &&
+               coords.y >= 0.0F && coords.y <= boxShape.getSize().y)
             {
                 clickedOn = true;
             }
@@ -438,8 +430,8 @@ void GuiCheckbox::processEvent(const sf::Event& event)
 
         if(usesTexture)
         {
-            if(coords.x >= 0.0f && coords.x <= boxSprite.getLocalBounds().width &&
-               coords.y >= 0.0f && coords.y <= boxSprite.getLocalBounds().height)
+            if(coords.x >= 0.0F && coords.x <= boxSprite.getLocalBounds().width &&
+               coords.y >= 0.0F && coords.y <= boxSprite.getLocalBounds().height)
             {
                 currentValue = !currentValue;
                 passCommand = true;
@@ -447,8 +439,8 @@ void GuiCheckbox::processEvent(const sf::Event& event)
         }
         else
         {
-            if(coords.x >= 0.0f && coords.x <= boxShape.getSize().x &&
-               coords.y >= 0.0f && coords.y <= boxShape.getSize().y)
+            if(coords.x >= 0.0F && coords.x <= boxShape.getSize().x &&
+               coords.y >= 0.0F && coords.y <= boxShape.getSize().y)
             {
                 currentValue = !currentValue;
                 passCommand = true;
@@ -459,7 +451,7 @@ void GuiCheckbox::processEvent(const sf::Event& event)
     }
 }
 
-GuiCommand* GuiCheckbox::update(sf::Time time)
+GuiCommand* GuiCheckbox::update(sf::Time /*time*/)
 {
     if(passCommand)
     {
@@ -469,7 +461,7 @@ GuiCommand* GuiCheckbox::update(sf::Time time)
         return &guiCommand;
     }
     else
-        return NULL;
+        return nullptr;
 }
 
 void GuiCheckbox::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -500,12 +492,12 @@ GuiObject(window, guiCommand),
 text(text)
 {}
 
-void GuiText::processEvent(const sf::Event& event)
+void GuiText::processEvent(const sf::Event& /*event*/)
 {}
 
-GuiCommand* GuiText::update(sf::Time time)
+GuiCommand* GuiText::update(sf::Time /*time*/)
 {
-    return NULL;
+    return nullptr;
 }
 
 void GuiText::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -520,12 +512,12 @@ GuiObject(window, guiCommand),
 sprite(texture)
 {}
 
-void GuiImage::processEvent(const sf::Event& event)
+void GuiImage::processEvent(const sf::Event& /*event*/)
 {}
 
-GuiCommand* GuiImage::update(sf::Time time)
+GuiCommand* GuiImage::update(sf::Time /*time*/)
 {
-    return NULL;
+    return nullptr;
 }
 
 void GuiImage::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -541,18 +533,18 @@ state(state)
 
 void GuiSystem::processEvent(const sf::Event& event)
 {
-    for(auto iter = guiList.begin(); iter != guiList.end(); ++iter)
+    for(auto & iter : guiList)
     {
-        (*iter)->processEvent(event);
+        iter->processEvent(event);
     }
 }
 
 void GuiSystem::update(sf::Time time)
 {
-    for(auto iter = guiList.begin(); iter != guiList.end(); ++iter)
+    for(auto & iter : guiList)
     {
-        GuiCommand* command = (*iter)->update(time);
-        if(command != NULL)
+        GuiCommand* command = iter->update(time);
+        if(command != nullptr)
         {
             if(command->type == GuiCommand::Type::STATE)
             {
@@ -607,11 +599,11 @@ void GuiSystem::draw(sf::RenderWindow& window)
     sf::Vector2f center = window.getView().getCenter();
     sf::Vector2f size = window.getView().getSize();
     float rotation = window.getView().getRotation();
-    window.setView(sf::View(sf::Vector2f(size.x/2.0f, size.y/2.0f), size));
+    window.setView(sf::View(sf::Vector2f(size.x/2.0F, size.y/2.0F), size));
 
-    for(auto iter = guiList.begin(); iter != guiList.end(); ++iter)
+    for(auto & iter : guiList)
     {
-        window.draw(*(*iter));
+        window.draw(*iter);
     }
 
     sf::View view(center, size);

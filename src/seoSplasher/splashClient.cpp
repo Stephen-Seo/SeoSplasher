@@ -32,22 +32,22 @@ void SplashClient::update(sf::Time dt)
         for(int i = 0; i < 4; ++i)
         {
             context.scontext->movementTime[i] -= dt.asSeconds();
-            if(context.scontext->movementTime[i] < 0.0f)
-                context.scontext->movementTime[i] = 0.0f;
+            if(context.scontext->movementTime[i] < 0.0F)
+                context.scontext->movementTime[i] = 0.0F;
         }
 
         updateTimer -= dt.asSeconds();
-        if(updateTimer <= 0.0f)
+        if(updateTimer <= 0.0F)
         {
             updateTimer = CONNECTION_UPDATE_TIME;
             sendPacket();
 
-            if(!context.scontext->breakablesSet && breakables.size() > 0)
+            if(!context.scontext->breakablesSet && !breakables.empty())
             {
                 context.scontext->breakablesSet = true;
-                for(int i = 0; i < breakables.size(); ++i)
+                for(unsigned char & breakable : breakables)
                 {
-                    context.scontext->breakableXYToEID.insert(std::make_pair(breakables[i], Utility::clientCreateBreakable(breakables[i], context)));
+                    context.scontext->breakableXYToEID.insert(std::make_pair(breakable, Utility::clientCreateBreakable(breakable, context)));
                 }
             }
         }
@@ -55,17 +55,17 @@ void SplashClient::update(sf::Time dt)
     }
 }
 
-void SplashClient::registerPlayersChangedCall(std::function<void(sf::Uint8)> function)
+void SplashClient::registerPlayersChangedCall(const std::function<void(sf::Uint8)> &function)
 {
     playerChangedFunctions.push_back(function);
 }
 
-void SplashClient::registerGameRestartedCall(std::function<void()> function)
+void SplashClient::registerGameRestartedCall(const std::function<void()> &function)
 {
     gameRestartedFunctions.push_back(function);
 }
 
-void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
+void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 /*address*/)
 {
     bool playersChanged = false;
     sf::Uint8 playerInfo;
@@ -79,9 +79,9 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
     {
         if(context.scontext->gameState == SS::ENDED && (gs == SS::WAITING_FOR_PLAYERS || gs == SS::WAITING_FOR_SERVER))
         {
-            for(auto iter = gameRestartedFunctions.begin(); iter != gameRestartedFunctions.end(); ++iter)
+            for(auto & gameRestartedFunction : gameRestartedFunctions)
             {
-                (*iter)();
+                gameRestartedFunction();
             }
             numberOfPlayers = 0;
             breakables.clear();
@@ -93,7 +93,7 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
         else if((context.scontext->gameState == SS::WAITING_FOR_PLAYERS || context.scontext->gameState == SS::WAITING_FOR_SERVER) && gs == SS::STARTED)
         {
             context.sfxContext->happened[SoundContext::COUNTDOWN_ENDED] = true;
-            context.scontext->startTimer = 0.0f;
+            context.scontext->startTimer = 0.0F;
         }
 
         context.scontext->gameState = gs;
@@ -113,7 +113,7 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
         }
         else
         {
-            context.scontext->startTimer = -1.0f;
+            context.scontext->startTimer = -1.0F;
         }
 
         // # of connected players
@@ -176,9 +176,9 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
 
         if(playersChanged)
         {
-            for(auto iter = playerChangedFunctions.begin(); iter != playerChangedFunctions.end(); ++iter)
+            for(auto & playerChangedFunction : playerChangedFunctions)
             {
-                (*iter)(playerInfo);
+                playerChangedFunction(playerInfo);
             }
         }
     }
@@ -277,7 +277,7 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 address)
         // balloon info
         sf::Uint8 direction, typeRange;
         int SEID;
-        float posx, posy, velx = 0.0f, vely = 0.0f;
+        float posx, posy, velx = 0.0F, vely = 0.0F;
         while(!IDqueue.empty())
         {
             IDqueue.pop();
@@ -416,7 +416,7 @@ void SplashClient::connectionMade(sf::Uint32 address)
     connectedToServer = true;
 }
 
-void SplashClient::connectionLost(sf::Uint32 address)
+void SplashClient::connectionLost(sf::Uint32 /*address*/)
 {
     connectedToServer = false;
     context.scontext->gameState = SS::CONNECTION_LOST;
@@ -438,7 +438,7 @@ void SplashClient::sendPacket()
     case SS::WAITING_FOR_PLAYERS:
     case SS::WAITING_FOR_SERVER:
     {
-        if(context.scontext->ownName.size() == 0)
+        if(context.scontext->ownName.empty())
         {
             // has custom name
             packet << (sf::Uint8) 0x1;
@@ -478,10 +478,10 @@ void SplashClient::removeUnmentionedBalloons()
         IDqueue.pop();
     }
 
-    for(auto iter = removalMap.begin(); iter != removalMap.end(); ++iter)
+    for(auto & iter : removalMap)
     {
-        context.ecEngine->removeEntity(context.scontext->balloons[iter->first].EID);
-        context.scontext->balloons.erase(iter->first);
+        context.ecEngine->removeEntity(context.scontext->balloons[iter.first].EID);
+        context.scontext->balloons.erase(iter.first);
     }
 }
 
@@ -495,10 +495,10 @@ void SplashClient::removeUnmentionedExplosions()
         IDqueue.pop();
     }
 
-    for(auto iter = removalMap.begin(); iter != removalMap.end(); ++iter)
+    for(auto & iter : removalMap)
     {
-        context.ecEngine->removeEntity(context.scontext->explosionXYToEID[iter->first]);
-        context.scontext->explosionXYToEID.erase(iter->first);
+        context.ecEngine->removeEntity(context.scontext->explosionXYToEID[iter.first]);
+        context.scontext->explosionXYToEID.erase(iter.first);
     }
 }
 
@@ -512,9 +512,9 @@ void SplashClient::removeUnmentionedPowerups()
         IDqueue.pop();
     }
 
-    for(auto iter = removalMap.begin(); iter != removalMap.end(); ++iter)
+    for(auto & iter : removalMap)
     {
-        context.ecEngine->removeEntity(context.scontext->powerupXYToEID[iter->first]);
-        context.scontext->powerupXYToEID.erase(iter->first);
+        context.ecEngine->removeEntity(context.scontext->powerupXYToEID[iter.first]);
+        context.scontext->powerupXYToEID.erase(iter.first);
     }
 }

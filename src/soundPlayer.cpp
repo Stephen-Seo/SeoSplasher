@@ -6,9 +6,9 @@
 
 namespace
 {
-    const float Listenerz = 300.0f;
-    const float Attenuation = 8.0f;
-    const float MinDistance2D = 200.0f;
+    const float Listenerz = 300.0F;
+    const float Attenuation = 8.0F;
+    const float MinDistance2D = 200.0F;
     const float MinDistance3D =
         std::sqrt(MinDistance2D*MinDistance2D + Listenerz*Listenerz);
 }
@@ -23,12 +23,12 @@ void SoundPlayer::play(sf::SoundBuffer& soundBuffer, bool looping)
 
 void SoundPlayer::play(sf::SoundBuffer& soundBuffer, sf::Vector2f position, bool looping)
 {
-    mSounds.push_back(sf::Sound(soundBuffer));
+    mSounds.emplace_back(soundBuffer);
     sf::Sound& sound = mSounds.back();
 
     sound.setLoop(looping);
 
-    sound.setPosition(position.x, -position.y, 0.0f);
+    sound.setPosition(position.x, -position.y, 0.0F);
     sound.setAttenuation(Attenuation);
     sound.setMinDistance(MinDistance3D);
 

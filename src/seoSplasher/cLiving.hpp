@@ -4,8 +4,8 @@
 
 #define DEFAULT_BALLOONS 1
 #define DEFAULT_RANGE 2
-#define DEFAULT_SPEED 80.0f
-#define SPEED_UP_MULT 15.0f
+#define DEFAULT_SPEED 80.0F
+#define SPEED_UP_MULT 15.0F
 #define SUPER_RANGE 10
 
 #include "../ec/component.hpp"

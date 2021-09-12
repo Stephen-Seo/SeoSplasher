@@ -25,7 +25,7 @@ bool nBreakable::checkEntity(Entity& entity)
 
 std::unique_ptr<Node> nBreakable::getNewNode()
 {
-    return std::unique_ptr<Node>(new nBreakable);
+    return std::unique_ptr<Node>(new nBreakable());
 }
 
 void nBreakable::getCReferencesFromEntity(Entity& entity)
@@ -38,7 +38,7 @@ void nBreakable::getCReferencesFromEntity(Entity& entity)
     ID = entity.getID();
 }
 
-void nBreakable::update(sf::Time dt, Context context)
+void nBreakable::update(sf::Time /*dt*/, Context context)
 {
     if(*entityRemoved)
         return;

@@ -20,7 +20,7 @@ public:
     };
 
     AnimatedSprite();
-    AnimatedSprite(const sf::Texture& texture);
+    explicit AnimatedSprite(const sf::Texture& texture);
 
     void setTexture(const sf::Texture& texture);
 
@@ -39,14 +39,14 @@ public:
 
     void updateSprite(sf::Time dt);
 private:
-    sf::Sprite sprite;
+    mutable sf::Sprite sprite;
     bool textureLoaded;
     int currentState;
     int currentFrame;
     bool reversed;
 
     sf::IntRect rect;
-    bool rectDirty;
+    mutable bool rectDirty;
 
     RotationType type;
 
@@ -55,8 +55,8 @@ private:
 
     std::vector<SpriteState> spriteMapping;
 
-    bool isInitialized();
-    void draw(sf::RenderTarget& target, sf::RenderStates states);
+    bool isInitialized() const;
+    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 };
 
 #endif

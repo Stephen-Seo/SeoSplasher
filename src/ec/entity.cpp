@@ -46,9 +46,9 @@ Component* Entity::getComponent(std::type_index typeIndex)
 std::list<Component*> Entity::getAllComponents()
 {
     std::list<Component*> list;
-    for(auto iter = cMap.begin(); iter != cMap.end(); ++iter)
+    for(auto & iter : cMap)
     {
-        list.push_back(iter->second.get());
+        list.push_back(iter.second.get());
     }
 
     return list;

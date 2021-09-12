@@ -2,8 +2,10 @@
 #ifndef SPLASH_NETWORK_IDENTIFIERS_HPP
 #define SPLASH_NETWORK_IDENTIFIERS_HPP
 
-#define CONNECTION_UPDATE_TIME (1.0f / 15.0f)
-#define MOVEMENT_TIMEOUT_TIME 1.0f
+#define CONNECTION_UPDATE_TIME (1.0F / 15.0F)
+#define MOVEMENT_TIMEOUT_TIME 1.0F
+
+#include <SFML/System.hpp>
 
 /*
 PACKET INFORMATION:
@@ -133,6 +135,6 @@ namespace SS
         ENDED,
         CONNECTION_LOST
     };
-}
+} // namespace SS
 
 #endif

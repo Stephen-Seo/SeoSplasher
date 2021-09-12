@@ -2,8 +2,8 @@
 #ifndef C_BALLOON_HPP
 #define C_BALLOON_HPP
 
-#define BALLOON_ALIVE_TIME 3.0f
-#define BALLOON_KICK_SPEED 200.0f
+#define BALLOON_ALIVE_TIME 3.0F
+#define BALLOON_KICK_SPEED 200.0F
 
 #include "../ec/component.hpp"
 

@@ -2,6 +2,7 @@
 #include "uai.hpp"
 
 #include <queue>
+#include <utility>
 
 #ifndef NDEBUG
     #include <iostream>
@@ -16,14 +17,14 @@
 #include "../cWIndicator.hpp"
 
 PAMapping::PAMapping() :
-priority(0.0f),
+priority(0.0F),
 paths(),
 destination(-1)
 {}
 
 PAMapping::PAMapping(float priority, std::map<int, int> paths, int destination) :
 priority(priority),
-paths(paths),
+paths(std::move(paths)),
 destination(destination)
 {}
 
@@ -34,7 +35,7 @@ pm()
 
 ActionElement::ActionElement(AI::Action action, PAMapping pm) :
 action(action),
-pm(pm)
+pm(std::move(pm))
 {}
 
 bool ActionElement::operator< (const ActionElement& other) const
@@ -97,16 +98,16 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
 
     const unsigned char* grid = pf.getValidGrid(engine);
     int xy = (int)((pos.x + (float)(-GRID_OFFSET_X + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE) + (int)((pos.y + (float)(-GRID_OFFSET_Y + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE) * GRID_WIDTH;
-    bool collidingWithWIndicator = false;
+    //bool collidingWithWIndicator = false;
 
     unsigned char postGrid[GRID_TOTAL + 1];
     unsigned short info = nearbyInfo(pos, grid, engine);
-    unsigned short postInfo;
+    //unsigned short postInfo;
     for(int i = 0; i <= GRID_TOTAL; ++i)
         postGrid[i] = grid[i];
 
     int temp, range;
-    float ret = 0.0f, mult = 0.0f;
+    float ret = 0.0F, mult = 0.0F;
 
     switch(action)
     {
@@ -171,24 +172,24 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
         }
 
         validDestinations = pf.getValidDestinations(pos, engine, 0x14, postGrid);
-        for(auto iter = validDestinations.begin(); iter != validDestinations.end(); ++iter)
+        for(auto & validDestination : validDestinations)
         {
-            if((postGrid[iter->first] & 0x20) == 0)
+            if((postGrid[validDestination.first] & 0x20) == 0)
             {
-                mult = 1.0f;
+                mult = 1.0F;
                 break;
             }
         }
 
-        ret = 0.4f;
+        ret = 0.4F;
         if((info & 0x1) != 0)
-            ret += 0.3f;
+            ret += 0.3F;
         else if((info & 0x2) != 0)
-            ret -= 0.2f;
+            ret -= 0.2F;
         if((info & 0x100) != 0)
-            ret += 0.3f;
+            ret += 0.3F;
         if((info & 0x8) != 0)
-            ret -= 0.3f;
+            ret -= 0.3F;
         break;
     }
     case AI::GET_POWERUP:
@@ -200,7 +201,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
             {
                 if((grid[iter->first] & 0x8) != 0)
                 {
-                    mult = 1.0f;
+                    mult = 1.0F;
                     tx = iter->first % GRID_WIDTH;
                     ty = iter->first / GRID_WIDTH;
                     if(pdist == -1 || (tdist = PF::heuristic(tx, ty, xy % GRID_WIDTH, xy / GRID_WIDTH)) < pdist)
@@ -210,10 +211,10 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
                     }
                 }
             }
-            if(mult == 0.0f)
+            if(mult == 0.0F)
                 break;
 
-            ret = 1.0f / (float) pdist;
+            ret = 1.0F / (float) pdist;
         }
         break;
     case AI::MOVE_TO_ENEMY:
@@ -225,7 +226,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
             {
                 if(xy != iter->first && (grid[iter->first] & 0x1) != 0)
                 {
-                    mult = 1.0f;
+                    mult = 1.0F;
                     tx = iter->first % GRID_WIDTH;
                     ty = iter->first / GRID_WIDTH;
                     if(pdist == -1 || (tdist = PF::heuristic(tx, ty, xy % GRID_WIDTH, xy / GRID_WIDTH)) < pdist)
@@ -235,11 +236,11 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
                     }
                 }
             }
-            if(mult == 0.0f)
+            if(mult == 0.0F)
                 break;
-            ret = (float)pdist / 28.0f;
+            ret = (float)pdist / 28.0F;
             if((info & 0x20) != 0)
-                ret -= 0.2f;
+                ret -= 0.2F;
         }
         break;
     case AI::MOVE_TO_BREAKABLE:
@@ -251,7 +252,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
             {
                 if(iter->first % GRID_WIDTH != 0 && (grid[iter->first - 1] & 0x4) != 0)
                 {
-                    mult = 1.0f;
+                    mult = 1.0F;
                     tx = (iter->first - 1) % GRID_WIDTH;
                     ty = (iter->first - 1) / GRID_WIDTH;
                     if(pdist == -1 || (tdist = PF::heuristic(tx, ty, xy % GRID_WIDTH, xy / GRID_WIDTH)) < pdist)
@@ -262,7 +263,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
                 }
                 if(iter->first % GRID_WIDTH != GRID_WIDTH - 1 && (grid[iter->first + 1] & 0x4) != 0)
                 {
-                    mult = 1.0f;
+                    mult = 1.0F;
                     tx = (iter->first + 1) % GRID_WIDTH;
                     ty = (iter->first + 1) / GRID_WIDTH;
                     if(pdist == -1 || (tdist = PF::heuristic(tx, ty, xy % GRID_WIDTH, xy / GRID_WIDTH)) < pdist)
@@ -273,7 +274,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
                 }
                 if(iter->first - GRID_WIDTH >= 0 && (grid[iter->first - GRID_WIDTH] & 0x4) != 0)
                 {
-                    mult = 1.0f;
+                    mult = 1.0F;
                     tx = iter->first % GRID_WIDTH;
                     ty = iter->first / GRID_WIDTH - 1;
                     if(pdist == -1 || (tdist = PF::heuristic(tx, ty, xy % GRID_WIDTH, xy / GRID_WIDTH)) < pdist)
@@ -284,7 +285,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
                 }
                 if(iter->first + GRID_WIDTH < GRID_TOTAL && (grid[iter->first + GRID_WIDTH] & 0x4) != 0)
                 {
-                    mult = 1.0f;
+                    mult = 1.0F;
                     tx = iter->first % GRID_WIDTH;
                     ty = iter->first / GRID_WIDTH + 1;
                     if(pdist == -1 || (tdist = PF::heuristic(tx, ty, xy % GRID_WIDTH, xy / GRID_WIDTH)) < pdist)
@@ -294,22 +295,22 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
                     }
                 }
             }
-            if(mult == 0.0f)
+            if(mult == 0.0F)
             {
                 break;
             }
-            ret = (float)pdist / 20.0f;
-            if(ret == 0.0f)
-                ret = 0.2f;
+            ret = (float)pdist / 20.0F;
+            if(ret == 0.0F)
+                ret = 0.2F;
         }
         break;
     case AI::MOVE_TO_SAFETY:
         if((info & 0x2) != 0)
         {
-            mult = 1.0f;
-            ret = 0.7f;
+            mult = 1.0F;
+            ret = 0.7F;
             if((info & 0x80) != 0)
-                ret += 0.3f;
+                ret += 0.3F;
 
             postGrid[xy] &= 0xFD;
             pm.paths = pf.getValidDestinations(pos, engine, 0x16, postGrid);
@@ -334,15 +335,15 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
     case AI::PANIC:
         if((info & 0x400) != 0 && (info & 0x2) != 0)
         {
-            mult = 1.0f;
-            ret = 0.9f;
+            mult = 1.0F;
+            ret = 0.9F;
         }
         break;
     case AI::WAIT:
         if((info & 0x400) != 0 && (info & 0x2) == 0)
         {
-            mult = 1.0f;
-            ret = 0.5f;
+            mult = 1.0F;
+            ret = 0.5F;
         }
         break;
     default:
@@ -350,15 +351,15 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
     }
 
     pm.priority = ret * mult;
-    if(pm.priority > 1.0f)
-        pm.priority = 1.0f;
-    else if(pm.priority < 0.0f)
-        pm.priority = 0.0f;
+    if(pm.priority > 1.0F)
+        pm.priority = 1.0F;
+    else if(pm.priority < 0.0F)
+        pm.priority = 0.0F;
 
     return pm;
 }
 
-unsigned short UAI::nearbyInfo(const cPosition& pos, const unsigned char* grid, Engine& engine)
+unsigned short UAI::nearbyInfo(const cPosition& pos, const unsigned char* grid, Engine& /*engine*/)
 {
     int xy = (int)((pos.x + (float)(-GRID_OFFSET_X + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE) + (int)((pos.y + (float)(-GRID_OFFSET_Y + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE) * GRID_WIDTH;
 

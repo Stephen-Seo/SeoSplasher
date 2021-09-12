@@ -15,8 +15,8 @@ struct cAIControl : Component
     PathFinder* pf;
     UAI ai;
 
-    float aiTickTime = 0.3f;
-    float timer = 0.3f;
+    float aiTickTime = 0.3F;
+    float timer = 0.3F;
 
     AI::Action currentAction = AI::NONE;
 

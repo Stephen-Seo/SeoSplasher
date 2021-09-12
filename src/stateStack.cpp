@@ -41,17 +41,17 @@ void StateStack::handleEvent(const sf::Event& event)
 
 void StateStack::pushState(States::ID stateID)
 {
-    pendingList.push_back(PendingChange(StateStack::Push, stateID));
+    pendingList.emplace_back(StateStack::Push, stateID);
 }
 
 void StateStack::popState()
 {
-    pendingList.push_back(PendingChange(StateStack::Pop));
+    pendingList.emplace_back(StateStack::Pop);
 }
 
 void StateStack::clearStates()
 {
-    pendingList.push_back(PendingChange(StateStack::Clear));
+    pendingList.emplace_back(StateStack::Clear);
 }
 
 bool StateStack::isEmpty() const
@@ -62,34 +62,34 @@ bool StateStack::isEmpty() const
 ResourcesSet StateStack::getNeededResources()
 {
     ResourcesSet resourcesSet;
-    resourcesSet.tset = new TextureSet;
-    resourcesSet.fset = new FontSet;
-    resourcesSet.sset = new SoundSet;
+    resourcesSet.tset = new TextureSet();
+    resourcesSet.fset = new FontSet();
+    resourcesSet.sset = new SoundSet();
 
-    for(auto iter = stack.begin(); iter != stack.end(); ++iter)
+    for(auto & iter : stack)
     {
-        ResourcesSet stateSet = (*iter)->getNeededResources();
-        if(stateSet.tset != NULL)
+        ResourcesSet stateSet = iter->getNeededResources();
+        if(stateSet.tset != nullptr)
         {
-            for(auto siter = stateSet.tset->begin(); siter != stateSet.tset->end(); ++siter)
+            for(auto siter : *stateSet.tset)
             {
-                resourcesSet.tset->insert(*siter);
+                resourcesSet.tset->insert(siter);
             }
         }
 
-        if(stateSet.fset != NULL)
+        if(stateSet.fset != nullptr)
         {
-            for(auto siter = stateSet.fset->begin(); siter != stateSet.fset->end(); ++siter)
+            for(auto siter : *stateSet.fset)
             {
-                resourcesSet.fset->insert(*siter);
+                resourcesSet.fset->insert(siter);
             }
         }
 
-        if(stateSet.sset != NULL)
+        if(stateSet.sset != nullptr)
         {
-            for(auto siter = stateSet.sset->begin(); siter != stateSet.sset->end(); ++siter)
+            for(auto siter : *stateSet.sset)
             {
-                resourcesSet.sset->insert(*siter);
+                resourcesSet.sset->insert(siter);
             }
         }
     }

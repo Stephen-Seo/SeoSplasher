@@ -31,30 +31,30 @@ void Connection::update(sf::Time dt)
     {
         // check if clients have timed out
         std::list<sf::Uint32> disconnectQueue;
-        for(auto iter = elapsedTimeMap.begin(); iter != elapsedTimeMap.end(); ++iter)
+        for(auto & iter : elapsedTimeMap)
         {
-            if(iter->second.getElapsedTime().asMilliseconds() >= CONNECTION_TIMEOUT_MILLISECONDS)
+            if(iter.second.getElapsedTime().asMilliseconds() >= CONNECTION_TIMEOUT_MILLISECONDS)
             {
-                disconnectQueue.push_front(iter->first);
+                disconnectQueue.push_front(iter.first);
             }
         }
 
-        for(auto iter = disconnectQueue.begin(); iter != disconnectQueue.end(); ++iter)
+        for(unsigned int & iter : disconnectQueue)
         {
 #ifndef NDEBUG
-            std::cout << "Disconnected " << sf::IpAddress(*iter).toString() << '\n';
+            std::cout << "Disconnected " << sf::IpAddress(iter).toString() << '\n';
 #endif
-            unregisterConnection(*iter);
+            unregisterConnection(iter);
         }
 
         // heartbeat packet
-        for(auto tIter = heartbeatTimeMap.begin(); tIter != heartbeatTimeMap.end(); ++tIter)
+        for(auto & tIter : heartbeatTimeMap)
         {
-            tIter->second += dt;
-            if(tIter->second.asMilliseconds() >= HEARTBEAT_MILLISECONDS)
+            tIter.second += dt;
+            if(tIter.second.asMilliseconds() >= HEARTBEAT_MILLISECONDS)
             {
-                tIter->second = sf::Time::Zero;
-                heartbeat(tIter->first);
+                tIter.second = sf::Time::Zero;
+                heartbeat(tIter.first);
             }
         }
 
@@ -423,13 +423,13 @@ void Connection::sendPacket(sf::Packet& packet, sf::Uint32 sequenceID, sf::IpAdd
     sendPacketQueue.push_front(PacketInfo(packet, sequenceID, address.toInteger()));
 }
 
-void Connection::receivedPacket(sf::Packet packet, sf::Uint32 address)
+void Connection::receivedPacket(sf::Packet /*packet*/, sf::Uint32 /*address*/)
 {}
 
-void Connection::connectionMade(sf::Uint32 address)
+void Connection::connectionMade(sf::Uint32 /*address*/)
 {}
 
-void Connection::connectionLost(sf::Uint32 address)
+void Connection::connectionLost(sf::Uint32 /*address*/)
 {}
 
 void Connection::registerConnection(sf::Uint32 address, sf::Uint32 ID)
@@ -528,9 +528,9 @@ void Connection::checkSentPackets(sf::Uint32 ack, sf::Uint32 bitfield, sf::Uint3
 
 void Connection::heartbeat()
 {
-    for(auto iter = IDMap.begin(); iter != IDMap.end(); ++iter)
+    for(auto & iter : IDMap)
     {
-        heartbeat(iter->first);
+        heartbeat(iter.first);
     }
 }
 
@@ -553,11 +553,11 @@ void Connection::lookupRtt(sf::Uint32 address, sf::Uint32 ack)
             sf::Time time = iter->sentTime.getElapsedTime();
             if(time > rttMap[address])
             {
-                rttMap[address] += (time - rttMap[address]) * 0.1f;
+                rttMap[address] += (time - rttMap[address]) * 0.1F;
             }
             else
             {
-                rttMap[address] -= (rttMap[address] - time) * 0.1f;
+                rttMap[address] -= (rttMap[address] - time) * 0.1F;
             }
 #ifndef NDEBUG
             std::cout << "RTT of " << sf::IpAddress(address).toString() << " = " << rttMap[address].asMilliseconds() << '\n';

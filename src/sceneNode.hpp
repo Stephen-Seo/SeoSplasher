@@ -27,8 +27,8 @@ public:
     sf::Transform getWorldTransform() const;
     sf::Vector2f getWorldPosition() const;
 private:
-    virtual void draw(sf::RenderTarget& target,
-                      sf::RenderStates states) const;
+    void draw(sf::RenderTarget& target,
+                      sf::RenderStates states) const override;
     virtual void drawCurrent(sf::RenderTarget& target,
                              sf::RenderStates states) const;
     void drawChildren(sf::RenderTarget& target,

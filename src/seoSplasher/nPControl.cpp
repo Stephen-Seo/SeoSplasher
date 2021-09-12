@@ -24,8 +24,8 @@ pfref(nullptr)
 {
     if(nPControl::powerupFilter.empty())
     {
-        nPControl::powerupFilter.push_back(std::type_index(typeid(cPowerup)));
-        nPControl::powerupFilter.push_back(std::type_index(typeid(cPickup)));
+        nPControl::powerupFilter.emplace_back(typeid(cPowerup));
+        nPControl::powerupFilter.emplace_back(typeid(cPickup));
     }
 }
 
@@ -40,7 +40,7 @@ bool nPControl::checkEntity(Entity& entity)
 
 std::unique_ptr<Node> nPControl::getNewNode()
 {
-    return std::unique_ptr<Node>(new nPControl);
+    return std::unique_ptr<Node>(new nPControl());
 }
 
 void nPControl::getCReferencesFromEntity(Entity& entity)
@@ -54,7 +54,7 @@ void nPControl::getCReferencesFromEntity(Entity& entity)
     entityRemoved = &entity.removed;
 }
 
-void nPControl::update(sf::Time dt, Context context)
+void nPControl::update(sf::Time /*dt*/, Context context)
 {
     if(*entityRemoved)
         return;
@@ -64,23 +64,23 @@ void nPControl::update(sf::Time dt, Context context)
     {
     case Direction::RIGHT:
         vel->x = speed;
-        vel->y = 0.0f;
+        vel->y = 0.0F;
         break;
     case Direction::LEFT:
         vel->x = -speed;
-        vel->y = 0.0f;
+        vel->y = 0.0F;
         break;
     case Direction::UP:
-        vel->x = 0.0f;
+        vel->x = 0.0F;
         vel->y = -speed;
         break;
     case Direction::DOWN:
-        vel->x = 0.0f;
+        vel->x = 0.0F;
         vel->y = speed;
         break;
     default:
-        vel->x = 0.0f;
-        vel->y = 0.0f;
+        vel->x = 0.0F;
+        vel->y = 0.0F;
         break;
     }
 
@@ -91,13 +91,13 @@ void nPControl::update(sf::Time dt, Context context)
     }
 
     HitInfo powerinfo = Utility::collideAgainstComponentList(pos->x, pos->y, nPControl::powerupFilter, *context.ecEngine);
-    for(auto piter = powerinfo.hit.begin(); piter != powerinfo.hit.end(); ++piter)
+    for(auto & piter : powerinfo.hit)
     {
-        cPickup* pickup = static_cast<cPickup*>((*piter)->getComponent(std::type_index(typeid(cPickup))));
+        cPickup* pickup = static_cast<cPickup*>(piter->getComponent(std::type_index(typeid(cPickup))));
         if(pickup->hit)
             continue;
 
-        cPowerup* powerup = static_cast<cPowerup*>((*piter)->getComponent(std::type_index(typeid(cPowerup))));
+        cPowerup* powerup = static_cast<cPowerup*>(piter->getComponent(std::type_index(typeid(cPowerup))));
 
         switch(powerup->powerup)
         {
