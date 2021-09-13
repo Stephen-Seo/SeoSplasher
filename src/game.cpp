@@ -39,6 +39,7 @@ mode(0)
     registerStates();
 
     frameTime = sf::seconds(1.F / 60.F);
+    window.setFramerateLimit(60);
 }
 
 void Game::run()
