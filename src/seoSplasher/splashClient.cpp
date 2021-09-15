@@ -1,13 +1,10 @@
 
 #include "splashClient.hpp"
 
-#ifndef NDEBUG
-  #include <iostream>
-#endif
-
 #include "../ec/engine.hpp"
 #include "utility.hpp"
 #include "soundContext.hpp"
+#include "../debugPrint.hpp"
 
 SplashClient::SplashClient(Context context) :
 Connection(Connection::CLIENT),
@@ -329,7 +326,7 @@ void SplashClient::receivedPacket(sf::Packet packet, sf::Uint32 /*address*/)
 #ifndef NDEBUG
                 else
                 {
-                    std::clog << "SplashClient> WARNING: Balloon EID " << findIter->second.EID << " not found in engine!\n";
+                    SS_DPRINT(DPLevel::DP_WARNING, "SplashClient> WARNING: Balloon EID ", findIter->second.EID, " not found in engine!");
                 }
 #endif
             }

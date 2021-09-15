@@ -1,6 +1,8 @@
 
 #include "connection.hpp"
 
+#include "debugPrint.hpp"
+
 Connection::Connection() :
 acceptNewConnections(true),
 ignoreOutOfSequence(false),
@@ -41,9 +43,7 @@ void Connection::update(sf::Time dt)
 
         for(unsigned int & iter : disconnectQueue)
         {
-#ifndef NDEBUG
-            std::cout << "Disconnected " << sf::IpAddress(iter).toString() << '\n';
-#endif
+            SS_DPRINT(DPLevel::DP_INFO, "Disconnected ", sf::IpAddress(iter).toString());
             unregisterConnection(iter);
         }
 
@@ -100,10 +100,8 @@ void Connection::update(sf::Time dt)
             {
                 if(IDMap.find(address.toInteger()) == IDMap.end())
                 {
-#ifndef NDEBUG
-                    std::cout << "SERVER: Establishing new connection with " << address.toString() << '\n';
-                    std::cout << "\taddress->int = " << address.toInteger() << '\n';
-#endif
+                    SS_DPRINT(DPLevel::DP_INFO, "SERVER: Establishing new connection with ", address.toString());
+                    SS_DPRINT(DPLevel::DP_INFO, "\taddress->int = ", address.toInteger());
                     // Establish connection
                     registerConnection(address.toInteger());
                     sf::Packet newPacket;
@@ -132,9 +130,7 @@ void Connection::update(sf::Time dt)
             }
 
             // packet is valid
-#ifndef NDEBUG
-            std::cout << "Valid packet received from " << address.toString() << '\n';
-#endif
+            SS_DPRINT(DPLevel::DP_INFO, "Valid packet received from ", address.toString());
 
             sf::Uint32 clientAddress = address.toInteger();
 
@@ -213,9 +209,7 @@ void Connection::update(sf::Time dt)
             sf::Time elapsedTime = elapsedTimeMap[serverAddress].getElapsedTime();
             if(elapsedTime.asMilliseconds() > CONNECTION_TIMEOUT_MILLISECONDS)
             {
-#ifndef NDEBUG
-                std::cout << "Disconnected from server " << clientSentAddress.toString() << '\n';
-#endif
+                SS_DPRINT(DPLevel::DP_INFO, "Disconnected from server ", clientSentAddress.toString());
                 unregisterConnection(serverAddress);
                 return;
             }
@@ -278,9 +272,7 @@ void Connection::update(sf::Time dt)
                     return;
 
                 // packet is valid
-#ifndef NDEBUG
-                std::cout << "Valid packet received from " << address.toString() << '\n';
-#endif
+                SS_DPRINT(DPLevel::DP_INFO, "Valid packet received from ", address.toString());
 
                 lookupRtt(serverAddress, ack);
 
@@ -384,9 +376,7 @@ void Connection::connectToServer(sf::IpAddress address)
 {
     if(mode != CLIENT)
         return;
-#ifndef NDEBUG
-    std::cout << "CLIENT: sending connection request to server at " << address.toString() << '\n';
-#endif
+    SS_DPRINT(DPLevel::DP_INFO, "CLIENT: sending connection request to server at ", address.toString());
     sf::Packet packet;
     packet << (sf::Uint32) GAME_PROTOCOL_ID << (sf::Uint32) network::CONNECT << (sf::Uint32) 0 << (sf::Uint32) 0 << (sf::Uint32) 0xFFFFFFFF;
     socket.send(packet, address, GAME_PORT);
@@ -506,10 +496,8 @@ void Connection::checkSentPackets(sf::Uint32 ack, sf::Uint32 bitfield, sf::Uint3
                 // timed out, adding to send queue
                 if(iter->sentTime.getElapsedTime() >= sf::milliseconds(PACKET_LOST_TIMEOUT_MILLISECONDS))
                 {
-#ifndef NDEBUG
-                    std::cout << "Packet " << std::hex << std::showbase << ack << std::dec;
-                    std::cout << " timed out\n";
-#endif
+                    SS_DPRINT(DPLevel::DP_INFO, "Packet ", std::hex, std::showbase, ack, std::dec);
+                    SS_DPRINT(DPLevel::DP_INFO, " timed out");
                     sf::Packet packetCopy = iter->packet;
                     sf::Uint32 sequenceID;
                     packetCopy >> sequenceID; // protocol ID
@@ -559,9 +547,7 @@ void Connection::lookupRtt(sf::Uint32 address, sf::Uint32 ack)
             {
                 rttMap[address] -= (rttMap[address] - time) * 0.1F;
             }
-#ifndef NDEBUG
-            std::cout << "RTT of " << sf::IpAddress(address).toString() << " = " << rttMap[address].asMilliseconds() << '\n';
-#endif
+            SS_DPRINT(DPLevel::DP_INFO, "RTT of ", sf::IpAddress(address).toString(), " = ", rttMap[address].asMilliseconds());
             break;
         }
     }

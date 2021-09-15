@@ -18,6 +18,8 @@
 #include <ResourcePacker.hpp>
 #endif
 
+#include "debugPrint.hpp"
+
 template <class Resource, class Identifier>
 class ResourceHolder
 {

@@ -12,8 +12,9 @@ void ResourceHolder<Resource, Identifier>::registerResource(Identifier id, const
 {
     if(pathMap.find(id) == pathMap.end())
         pathMap[id] = filename;
-    else
-        std::cout << "WARNING: Failed to register resource as ID is already registered!\n";
+    else {
+        SS_DPRINT(DPLevel::DP_WARNING, "Failed to register resource as ID is already registered!");
+    }
 }
 
 template <class Resource, class Identifier>

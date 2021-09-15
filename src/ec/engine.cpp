@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "../context.hpp"
+#include "../debugPrint.hpp"
 
 Engine::Engine()
 {
@@ -34,8 +35,9 @@ void Engine::addEntity(std::unique_ptr<Entity> entity)
     {
         nodeAdded |= drawSystem->checkEntity(*entity);
     }
-    if(!nodeAdded)
-        std::clog << "WARNING: Entity (" << entity->getID() << ") added without any paired nodes!\n";
+    if(!nodeAdded) {
+        SS_DPRINT(DPLevel::DP_WARNING, "Entity (", entity->getID(), ") added without any paired nodes!");
+    }
     entityMap.insert(std::make_pair(entity->getID(), std::move(entity)));
 }
 

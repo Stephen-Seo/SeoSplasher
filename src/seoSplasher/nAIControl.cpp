@@ -3,9 +3,6 @@
 
 #include <typeindex>
 #include <algorithm>
-#ifndef NDEBUG
-#include <iostream>
-#endif
 #include <random>
 
 #include "cAIControl.hpp"
@@ -23,6 +20,7 @@
 #include "cWIndicator.hpp"
 #include "cBalloon.hpp"
 #include "cPathFinder.hpp"
+#include "../debugPrint.hpp"
 
 nAIControl::nAIControl() :
 control(nullptr),
@@ -56,6 +54,9 @@ void nAIControl::getCReferencesFromEntity(Entity& entity)
     vel = static_cast<cVelocity*>(entity.getComponent(std::type_index(typeid(cVelocity))));
     pfref = static_cast<cPathFinderRef*>(entity.getComponent(std::type_index(typeid(cPathFinderRef))));
     entityRemoved = &entity.removed;
+#ifndef NDEBUG
+    eid = entity.getID();
+#endif
 }
 
 void nAIControl::update(sf::Time dt, Context context)
@@ -103,7 +104,35 @@ void nAIControl::update(sf::Time dt, Context context)
         //}
 
 #ifndef NDEBUG
-        std::clog << "STATE: " << control->currentAction << '\n';
+        switch(control->currentAction) {
+        case AI::PLACE_BALLOON:
+            SS_DPRINT(DPLevel::DP_DEBUG, '[', eid, "] STATE: PLACE_BALLOON");
+            break;
+        case AI::GET_POWERUP:
+            SS_DPRINT(DPLevel::DP_DEBUG, '[', eid, "] STATE: GET_POWERUP");
+            break;
+        case AI::MOVE_TO_ENEMY:
+            SS_DPRINT(DPLevel::DP_DEBUG, '[', eid, "] STATE: MOVE_TO_ENEMY");
+            break;
+        case AI::MOVE_TO_BREAKABLE:
+            SS_DPRINT(DPLevel::DP_DEBUG, '[', eid, "] STATE: MOVE_TO_BREAKABLE");
+            break;
+        case AI::MOVE_TO_SAFETY:
+            SS_DPRINT(DPLevel::DP_DEBUG, '[', eid, "] STATE: MOVE_TO_SAFETY");
+            break;
+        case AI::KICK_BALLOON:
+            SS_DPRINT(DPLevel::DP_DEBUG, '[', eid, "] STATE: KICK_BALLOON");
+            break;
+        case AI::PANIC:
+            SS_DPRINT(DPLevel::DP_DEBUG, '[', eid, "] STATE: PANIC");
+            break;
+        case AI::WAIT:
+            SS_DPRINT(DPLevel::DP_DEBUG, '[', eid, "] STATE: WAIT");
+            break;
+        default:
+            SS_DPRINT(DPLevel::DP_DEBUG, '[', eid, "] STATE: INVALID/UNKNOWN");
+            break;
+        }
 #endif
         vel->x = 0.0F;
         vel->y = 0.0F;
@@ -123,7 +152,7 @@ void nAIControl::update(sf::Time dt, Context context)
                 if(pam.destination == -1)
                 {
 #ifndef NDEBUG
-                    std::clog << "WARNING: failed to find valid powerup path\n";
+                    SS_DPRINT(DPLevel::DP_DEBUG, '[', eid, "] WARNING: failed to find valid powerup path");
 #endif
                     control->timer = 0.0F;
                     break;
@@ -133,7 +162,7 @@ void nAIControl::update(sf::Time dt, Context context)
                 if(pam.destination == -1)
                 {
 #ifndef NDEBUG
-                    std::clog << "WARNING: failed to find valid path to enemy\n";
+                    SS_DPRINT(DPLevel::DP_DEBUG, '[', eid, "] WARNING: failed to find valid path to enemy");
 #endif
                     control->timer = 0.0F;
                     break;
@@ -143,7 +172,7 @@ void nAIControl::update(sf::Time dt, Context context)
                 if(pam.destination == -1)
                 {
 #ifndef NDEBUG
-                    std::clog << "WARNING: failed to find adjacent breakable\n";
+                    SS_DPRINT(DPLevel::DP_DEBUG, '[', eid, "] WARNING: failed to find adjacent breakable");
 #endif
                     control->timer = 0.0F;
                     break;
@@ -153,7 +182,7 @@ void nAIControl::update(sf::Time dt, Context context)
                 if(pam.destination == -1)
                 {
 #ifndef NDEBUG
-                    std::clog << "WARNING: failed to find safe spot\n";
+                    SS_DPRINT(DPLevel::DP_DEBUG, '[', eid, "] WARNING: failed to find safe spot");
 #endif
                     control->timer = 0.0F;
                     break;
@@ -198,7 +227,7 @@ void nAIControl::update(sf::Time dt, Context context)
                     if(rpaths.find(dest) == rpaths.end())
                     {
 #ifndef NDEBUG
-                        std::clog << "WARNING: dest not in rpaths\n";
+                        SS_DPRINT(DPLevel::DP_DEBUG, '[', eid, "] WARNING: dest not in rpaths");
 #endif
                         break;
                     }
@@ -272,7 +301,7 @@ void nAIControl::update(sf::Time dt, Context context)
                 if(prevDir == Direction::NONE)
                 {
 #ifndef NDEBUG
-                    std::cerr << "ERROR: Failed to validate next tile on move, aligning to grid\n";
+                    SS_DPRINT(DPLevel::DP_ERROR, "Failed to validate next tile on move, aligning to grid");
 #endif
                     rpaths.clear();
                 }
