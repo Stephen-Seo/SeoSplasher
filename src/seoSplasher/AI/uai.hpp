@@ -7,6 +7,8 @@
 #include <map>
 #include <random>
 
+#include "pathFinder.hpp"
+
 struct cPosition;
 struct cLiving;
 class Engine;
@@ -80,7 +82,7 @@ private:
      * 0010 0000 0000 - adjacent to WIndicator
      * 0100 0000 0000 - surrounded
      */
-    unsigned short nearbyInfo(const cPosition& pos, const unsigned char* grid, Engine& engine);
+    unsigned short nearbyInfo(const cPosition& pos, const PathFinder::ValidGridT &grid, Engine& engine);
 };
 
 #endif
