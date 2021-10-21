@@ -3,6 +3,7 @@
 
 #include <queue>
 #include <utility>
+#include <memory>
 
 #ifndef NDEBUG
     #include <iostream>
@@ -56,7 +57,7 @@ PAMapping UAI::determineAction(const cPosition& pos, const cLiving& living, Path
         levels.push(ActionElement(static_cast<AI::Action>(i),utility(static_cast<AI::Action>(i), pos, living, pf, engine)));
     }
 
-    ActionElement picked[wildness];
+    std::unique_ptr<ActionElement[]> picked = std::make_unique<ActionElement[]>(wildness);
     for(unsigned char i = 0; i < wildness; ++i)
     {
         picked[i] = levels.top();
@@ -96,15 +97,15 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
 {
     PAMapping pm;
 
-    const unsigned char* grid = pf.getValidGrid(engine);
+    const PathFinder::ValidGridT &grid = pf.getValidGrid(engine);
     int xy = (int)((pos.x + (float)(-GRID_OFFSET_X + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE) + (int)((pos.y + (float)(-GRID_OFFSET_Y + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE) * GRID_WIDTH;
     //bool collidingWithWIndicator = false;
 
-    unsigned char postGrid[GRID_TOTAL + 1];
+    PathFinder::ValidGridT postGrid;
     unsigned short info = nearbyInfo(pos, grid, engine);
     //unsigned short postInfo;
     for(int i = 0; i <= GRID_TOTAL; ++i)
-        postGrid[i] = grid[i];
+        postGrid.at(i) = grid.at(i);
 
     int temp, range;
     float ret = 0.0F, mult = 0.0F;
@@ -117,7 +118,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
         if(validDestinations.size() < 2)
             break;
 
-        postGrid[xy] |= 0x22;
+        postGrid.at(xy) |= 0x22;
         if(living.sBalloonsInPlay < living.sBalloonUpgrade)
             range = SUPER_RANGE;
         else
@@ -127,22 +128,22 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
         temp = range;
         for(int i = xy - 1; (i + 1) % GRID_WIDTH != 0 && temp > 0; --i)
         {
-            if(living.ghostUpgrade == 0 && (postGrid[i] & 0x10) != 0)
+            if(living.ghostUpgrade == 0 && (postGrid.at(i) & 0x10) != 0)
                 break;
-            postGrid[i] |= 0x20;
-            if(living.pierceUpgrade == 0 && (postGrid[i] & 0x4) != 0)
+            postGrid.at(i) |= 0x20;
+            if(living.pierceUpgrade == 0 && (postGrid.at(i) & 0x4) != 0)
                 break;
             --temp;
         }
 
         // predict explosion right
         temp = range;
-        for(int i = xy + 1; (i - 1) % GRID_WIDTH != GRID_WIDTH - 1 && temp > 0; --i)
+        for(int i = xy + 1; (i - 1) % GRID_WIDTH != GRID_WIDTH - 1 && temp > 0; ++i)
         {
-            if(living.ghostUpgrade == 0 && (postGrid[i] & 0x10) != 0)
+            if(living.ghostUpgrade == 0 && (postGrid.at(i) & 0x10) != 0)
                 break;
-            postGrid[i] |= 0x20;
-            if(living.pierceUpgrade == 0 && (postGrid[i] & 0x4) != 0)
+            postGrid.at(i) |= 0x20;
+            if(living.pierceUpgrade == 0 && (postGrid.at(i) & 0x4) != 0)
                 break;
             --temp;
         }
@@ -151,10 +152,10 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
         temp = range;
         for(int i = xy - GRID_WIDTH; i >= 0 && temp > 0; i -= GRID_WIDTH)
         {
-            if(living.ghostUpgrade == 0 && (postGrid[i] & 0x10) != 0)
+            if(living.ghostUpgrade == 0 && (postGrid.at(i) & 0x10) != 0)
                 break;
-            postGrid[i] |= 0x20;
-            if(living.pierceUpgrade == 0 && (postGrid[i] & 0x4) != 0)
+            postGrid.at(i) |= 0x20;
+            if(living.pierceUpgrade == 0 && (postGrid.at(i) & 0x4) != 0)
                 break;
             --temp;
         }
@@ -163,10 +164,10 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
         temp = range;
         for(int i = xy + GRID_WIDTH; i < GRID_TOTAL && temp > 0; i += GRID_WIDTH)
         {
-            if(living.ghostUpgrade == 0 && (postGrid[i] & 0x10) != 0)
+            if(living.ghostUpgrade == 0 && (postGrid.at(i) & 0x10) != 0)
                 break;
-            postGrid[i] |= 0x20;
-            if(living.pierceUpgrade == 0 && (postGrid[i] & 0x4) != 0)
+            postGrid.at(i) |= 0x20;
+            if(living.pierceUpgrade == 0 && (postGrid.at(i) & 0x4) != 0)
                 break;
             --temp;
         }
@@ -174,7 +175,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
         validDestinations = pf.getValidDestinations(pos, engine, 0x14, postGrid);
         for(auto & validDestination : validDestinations)
         {
-            if((postGrid[validDestination.first] & 0x20) == 0)
+            if((postGrid.at(validDestination.first) & 0x20) == 0)
             {
                 mult = 1.0F;
                 break;
@@ -199,7 +200,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
             int pdist = -1, tdist = 0, tx, ty;
             for(auto iter = pm.paths.begin(); iter != pm.paths.end(); ++iter)
             {
-                if((grid[iter->first] & 0x8) != 0)
+                if((grid.at(iter->first) & 0x8) != 0)
                 {
                     mult = 1.0F;
                     tx = iter->first % GRID_WIDTH;
@@ -224,7 +225,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
             int tx, ty, pdist = -1, tdist = 0;
             for(auto iter = pm.paths.begin(); iter != pm.paths.end(); ++iter)
             {
-                if(xy != iter->first && (grid[iter->first] & 0x1) != 0)
+                if(xy != iter->first && (grid.at(iter->first) & 0x1) != 0)
                 {
                     mult = 1.0F;
                     tx = iter->first % GRID_WIDTH;
@@ -250,7 +251,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
             int tx, ty, pdist = -1, tdist = 0;
             for(auto iter = pm.paths.begin(); iter != pm.paths.end(); ++iter)
             {
-                if(iter->first % GRID_WIDTH != 0 && (grid[iter->first - 1] & 0x4) != 0)
+                if(iter->first % GRID_WIDTH != 0 && (grid.at(iter->first - 1) & 0x4) != 0)
                 {
                     mult = 1.0F;
                     tx = (iter->first - 1) % GRID_WIDTH;
@@ -261,7 +262,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
                         pdist = tdist;
                     }
                 }
-                if(iter->first % GRID_WIDTH != GRID_WIDTH - 1 && (grid[iter->first + 1] & 0x4) != 0)
+                if(iter->first % GRID_WIDTH != GRID_WIDTH - 1 && (grid.at(iter->first + 1) & 0x4) != 0)
                 {
                     mult = 1.0F;
                     tx = (iter->first + 1) % GRID_WIDTH;
@@ -272,7 +273,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
                         pdist = tdist;
                     }
                 }
-                if(iter->first - GRID_WIDTH >= 0 && (grid[iter->first - GRID_WIDTH] & 0x4) != 0)
+                if(iter->first - GRID_WIDTH >= 0 && (grid.at(iter->first - GRID_WIDTH) & 0x4) != 0)
                 {
                     mult = 1.0F;
                     tx = iter->first % GRID_WIDTH;
@@ -283,7 +284,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
                         pdist = tdist;
                     }
                 }
-                if(iter->first + GRID_WIDTH < GRID_TOTAL && (grid[iter->first + GRID_WIDTH] & 0x4) != 0)
+                if(iter->first + GRID_WIDTH < GRID_TOTAL && (grid.at(iter->first + GRID_WIDTH) & 0x4) != 0)
                 {
                     mult = 1.0F;
                     tx = iter->first % GRID_WIDTH;
@@ -312,12 +313,12 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
             if((info & 0x80) != 0)
                 ret += 0.3F;
 
-            postGrid[xy] &= 0xFD;
+            postGrid.at(xy) &= 0xFD;
             pm.paths = pf.getValidDestinations(pos, engine, 0x16, postGrid);
             int tx, ty, pdist = -1, tdist = 0;
             for(auto iter = pm.paths.begin(); iter != pm.paths.end(); ++iter)
             {
-                if((grid[iter->first] & 0x20) == 0)
+                if((grid.at(iter->first) & 0x20) == 0)
                 {
                     tx = iter->first % GRID_WIDTH;
                     ty = iter->first / GRID_WIDTH;
@@ -359,43 +360,43 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
     return pm;
 }
 
-unsigned short UAI::nearbyInfo(const cPosition& pos, const unsigned char* grid, Engine& /*engine*/)
+unsigned short UAI::nearbyInfo(const cPosition& pos, const PathFinder::ValidGridT &grid, Engine& /*engine*/)
 {
     int xy = (int)((pos.x + (float)(-GRID_OFFSET_X + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE) + (int)((pos.y + (float)(-GRID_OFFSET_Y + GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE) * GRID_WIDTH;
 
     unsigned short info = 0;
 
-    info |= ((grid[xy] & 0x2) << 6);
-    info |= ((grid[xy] & 0x20) >> 4);
+    info |= ((grid.at(xy) & 0x2) << 6);
+    info |= ((grid.at(xy) & 0x20) >> 4);
 
     unsigned char surrounding = 0;
     // check directly adjacent
     if(xy % GRID_WIDTH != 0)
     {
-        info |= ((grid[xy - 1] & 0x4) << 6);
-        info |= ((grid[xy - 1] & 0x20) << 4);
-        if((grid[xy - 1] & 0x36) != 0)
+        info |= ((grid.at(xy - 1) & 0x4) << 6);
+        info |= ((grid.at(xy - 1) & 0x20) << 4);
+        if((grid.at(xy - 1) & 0x36) != 0)
             surrounding += 1;
     }
     if(xy % GRID_WIDTH != GRID_WIDTH - 1)
     {
-        info |= ((grid[xy + 1] & 0x4) << 6);
-        info |= ((grid[xy + 1] & 0x20) << 4);
-        if((grid[xy + 1] & 0x36) != 0)
+        info |= ((grid.at(xy + 1) & 0x4) << 6);
+        info |= ((grid.at(xy + 1) & 0x20) << 4);
+        if((grid.at(xy + 1) & 0x36) != 0)
             surrounding += 1;
     }
     if(xy - GRID_WIDTH >= 0)
     {
-        info |= ((grid[xy - GRID_WIDTH] & 0x4) << 6);
-        info |= ((grid[xy - GRID_WIDTH] & 0x20) << 4);
-        if((grid[xy - GRID_WIDTH] & 0x36) != 0)
+        info |= ((grid.at(xy - GRID_WIDTH) & 0x4) << 6);
+        info |= ((grid.at(xy - GRID_WIDTH) & 0x20) << 4);
+        if((grid.at(xy - GRID_WIDTH) & 0x36) != 0)
             surrounding += 1;
     }
     if(xy + GRID_WIDTH < GRID_TOTAL)
     {
-        info |= ((grid[xy + GRID_WIDTH] & 0x4) << 6);
-        info |= ((grid[xy + GRID_WIDTH] & 0x20) << 4);
-        if((grid[xy + GRID_WIDTH] & 0x36) != 0)
+        info |= ((grid.at(xy + GRID_WIDTH) & 0x4) << 6);
+        info |= ((grid.at(xy + GRID_WIDTH) & 0x20) << 4);
+        if((grid.at(xy + GRID_WIDTH) & 0x36) != 0)
             surrounding += 1;
     }
 
@@ -405,54 +406,58 @@ unsigned short UAI::nearbyInfo(const cPosition& pos, const unsigned char* grid, 
     // check up
     for(int c = xy - GRID_WIDTH; c >= 0; c -= GRID_WIDTH)
     {
-        if(grid[c] == 0)
+        if(grid.at(c) == 0)
             continue;
-        else if((grid[c] & 0x10) != 0)
+        else if((grid.at(c) & 0x10) != 0)
             break;
-        info |= (grid[c] & 0x1);
-        info |= (grid[c] & 0x4);
-        info |= (grid[c] & 0x8);
+        info |= (grid.at(c) & 0x1);
+        info |= (grid.at(c) & 0x4);
+        info |= (grid.at(c) & 0x8);
     }
 
     // check down
     for(int c = xy + GRID_WIDTH; c < GRID_TOTAL; c += GRID_WIDTH)
     {
-        if(grid[c] == 0)
+        if(grid.at(c) == 0)
             continue;
-        else if((grid[c] & 0x10) != 0)
+        else if((grid.at(c) & 0x10) != 0)
             break;
-        info |= (grid[c] & 0x1);
-        info |= (grid[c] & 0x4);
-        info |= (grid[c] & 0x8);
+        info |= (grid.at(c) & 0x1);
+        info |= (grid.at(c) & 0x4);
+        info |= (grid.at(c) & 0x8);
     }
 
     // check left
-    for(int c = xy - 1; c % GRID_WIDTH != 0; --c)
-    {
-        if(grid[c] == 0)
-            continue;
-        else if((grid[c] & 0x10) != 0)
-            break;
-        info |= (grid[c] & 0x1);
-        info |= (grid[c] & 0x4);
-        info |= (grid[c] & 0x8);
+    if(xy % GRID_WIDTH > 0) {
+        for(int c = xy - 1; c % GRID_WIDTH != 0; --c)
+        {
+            if(grid.at(c) == 0)
+                continue;
+            else if((grid.at(c) & 0x10) != 0)
+                break;
+            info |= (grid.at(c) & 0x1);
+            info |= (grid.at(c) & 0x4);
+            info |= (grid.at(c) & 0x8);
+        }
     }
 
     // check right
-    for(int c = xy + 1; c % GRID_WIDTH != GRID_WIDTH - 1; ++c)
-    {
-        if(grid[c] == 0)
-            continue;
-        else if((grid[c] & 0x10) != 0)
-            break;
-        info |= (grid[c] & 0x1);
-        info |= (grid[c] & 0x4);
-        info |= (grid[c] & 0x8);
+    if(xy % GRID_WIDTH < GRID_WIDTH - 1) {
+        for(int c = xy + 1; c % GRID_WIDTH != GRID_WIDTH - 1; ++c)
+        {
+            if(grid.at(c) == 0)
+                continue;
+            else if((grid.at(c) & 0x10) != 0)
+                break;
+            info |= (grid.at(c) & 0x1);
+            info |= (grid.at(c) & 0x4);
+            info |= (grid.at(c) & 0x8);
+        }
     }
 
-    info |= ((grid[GRID_TOTAL] & 0x1) << 4);
-    info |= ((grid[GRID_TOTAL] & 0x2) << 4);
-    info |= ((grid[GRID_TOTAL] & 0x4) << 4);
+    info |= ((grid.at(GRID_TOTAL) & 0x1) << 4);
+    info |= ((grid.at(GRID_TOTAL) & 0x2) << 4);
+    info |= ((grid.at(GRID_TOTAL) & 0x4) << 4);
 
     return info;
 }

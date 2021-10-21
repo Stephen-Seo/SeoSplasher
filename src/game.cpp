@@ -77,6 +77,10 @@ void Game::processEvents()
             window.setView(view);
         }
     }
+    // TODO remove this when done debugging
+    //event.type = sf::Event::KeyPressed;
+    //event.key.code = sf::Keyboard::Return;
+    //stateStack.handleEvent(event);
 }
 
 void Game::update(sf::Time deltaTime)

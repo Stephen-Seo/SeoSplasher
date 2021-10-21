@@ -6,6 +6,7 @@
 #include <queue>
 #include <map>
 #include <typeindex>
+#include <array>
 
 #include <SFML/System.hpp>
 
@@ -33,14 +34,16 @@ namespace PF
 class PathFinder
 {
 public:
+    using ValidGridT = std::array<unsigned char, GRID_TOTAL + 1>;
+
     PathFinder();
 
     std::map<int, int> getValidDestinations(const cPosition& pos, Engine& engine, unsigned char obstacles);
-    std::map<int, int> getValidDestinations(const cPosition& pos, Engine& engine, unsigned char obstacles, const unsigned char* validGrid);
+    std::map<int, int> getValidDestinations(const cPosition& pos, Engine& engine, unsigned char obstacles, const ValidGridT &validGrid);
     std::map<int, int> getBestPath(const cPosition& pos, const sf::Vector2f& goal, Engine& engine, unsigned char obstacles);
     std::map<int, int> getBestPath(const cPosition& pos, int goal, Engine& engine, unsigned char obstacles);
     void invalidateValidGrid();
-    const unsigned char* getValidGrid(Engine& engine);
+    const ValidGridT& getValidGrid(Engine& engine);
     bool isDirty() const;
 private:
     /**
@@ -58,7 +61,7 @@ private:
      * 0000 0010 - breakable exists
      * 0000 0100 - powerup exists
      */
-    unsigned char validGrid[GRID_TOTAL + 1];
+    ValidGridT validGrid;
     bool dirtyFlag;
 
     void revalidateGrid(Engine& engine);

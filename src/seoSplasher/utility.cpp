@@ -786,12 +786,12 @@ void Utility::centerTextOrigin(sf::Text& text)
 bool Utility::livingInDanger(const float& x, const float& y, PathFinder& pf, Context context)
 {
     unsigned char postGrid[GRID_TOTAL];
-    const unsigned char* grid = pf.getValidGrid(*context.ecEngine);
+    const PathFinder::ValidGridT &grid = pf.getValidGrid(*context.ecEngine);
 
     // get copy of grid
     for(int i = 0; i < GRID_TOTAL; ++i)
     {
-        postGrid[i] = grid[i];
+        postGrid[i] = grid.at(i);
     }
 
     // populate copy with WIndicators

@@ -39,6 +39,10 @@ struct nAIControl : Node
 
     sf::Vector2f prevPos;
 
+#ifndef NDEBUG
+    int eid;
+#endif
+
     bool checkEntity(Entity& entity) override;
     std::unique_ptr<Node> getNewNode() override;
     void getCReferencesFromEntity(Entity& entity) override;

@@ -3,9 +3,7 @@
 
 #include <algorithm>
 
-#ifndef NDEBUG
-  #include <iostream>
-#endif
+#include "../debugPrint.hpp"
 
 SplashServer::SplashServer(Context context) :
 Connection(Connection::SERVER),
@@ -337,9 +335,7 @@ void SplashServer::sendPacket()
         }
             break;
         default:
-#ifndef NDEBUG
-            std::clog << "WARNING: server in state CONNECTION_LOST, this should never happen!\n";
-#endif
+            SS_DPRINT(DPLevel::DP_WARNING, "server in state CONNECTION_LOST, this should never happen!");
             break;
         }
 

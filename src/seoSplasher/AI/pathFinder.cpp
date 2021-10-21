@@ -46,7 +46,7 @@ std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine
     return getValidDestinations(pos, engine, obstacles, validGrid);
 }
 
-std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine& /*engine*/, unsigned char obstacles, const unsigned char* validGrid)
+std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine& /*engine*/, unsigned char obstacles, const ValidGridT &validGrid)
 {
     int x = (pos.x - (float)GRID_OFFSET_X + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
     int y = (pos.y - (float)GRID_OFFSET_Y + (float)(GRID_SQUARE_SIZE / 2)) / GRID_SQUARE_SIZE;
@@ -61,22 +61,22 @@ std::map<int, int> PathFinder::getValidDestinations(const cPosition& pos, Engine
         n = next.front();
         next.pop();
 
-        if(n % GRID_WIDTH != GRID_WIDTH - 1 && paths.find(n + 1) == paths.end() && (validGrid[n + 1] & obstacles) == 0)
+        if(n % GRID_WIDTH != GRID_WIDTH - 1 && paths.find(n + 1) == paths.end() && (validGrid.at(n + 1) & obstacles) == 0)
         {
             next.push(n + 1);
             paths.insert(std::make_pair(n + 1, n));
         }
-        if(n % GRID_WIDTH != 0 && paths.find(n - 1) == paths.end() && (validGrid[n - 1] & obstacles) == 0)
+        if(n % GRID_WIDTH != 0 && paths.find(n - 1) == paths.end() && (validGrid.at(n - 1) & obstacles) == 0)
         {
             next.push(n - 1);
             paths.insert(std::make_pair(n - 1, n));
         }
-        if(n + GRID_WIDTH < GRID_TOTAL && paths.find(n + GRID_WIDTH) == paths.end() && (validGrid[n + GRID_WIDTH] & obstacles) == 0)
+        if(n + GRID_WIDTH < GRID_TOTAL && paths.find(n + GRID_WIDTH) == paths.end() && (validGrid.at(n + GRID_WIDTH) & obstacles) == 0)
         {
             next.push(n + GRID_WIDTH);
             paths.insert(std::make_pair(n + GRID_WIDTH, n));
         }
-        if(n - GRID_WIDTH >= 0 && paths.find(n - GRID_WIDTH) == paths.end() && (validGrid[n - GRID_WIDTH] & obstacles) == 0)
+        if(n - GRID_WIDTH >= 0 && paths.find(n - GRID_WIDTH) == paths.end() && (validGrid.at(n - GRID_WIDTH) & obstacles) == 0)
         {
             next.push(n - GRID_WIDTH);
             paths.insert(std::make_pair(n - GRID_WIDTH, n));
@@ -123,7 +123,7 @@ std::map<int, int> PathFinder::getBestPath(const cPosition& pos, int goal, Engin
         if(n == goal)
             break;
 
-        if(n % GRID_WIDTH != 0 && (validGrid[n - 1] & obstacles) == 0)
+        if(n % GRID_WIDTH != 0 && (validGrid.at(n - 1) & obstacles) == 0)
         {
             cost = costs[n] + 1;
             if(costs.find(n - 1) == costs.end() || cost < costs[n - 1])
@@ -133,7 +133,7 @@ std::map<int, int> PathFinder::getBestPath(const cPosition& pos, int goal, Engin
                 paths.insert(std::make_pair(n - 1, n));
             }
         }
-        if(n % GRID_WIDTH != GRID_WIDTH - 1 && (validGrid[n + 1] & obstacles) == 0)
+        if(n % GRID_WIDTH != GRID_WIDTH - 1 && (validGrid.at(n + 1) & obstacles) == 0)
         {
             cost = costs[n] + 1;
             if(costs.find(n + 1) == costs.end() || cost < costs[n + 1])
@@ -143,7 +143,7 @@ std::map<int, int> PathFinder::getBestPath(const cPosition& pos, int goal, Engin
                 paths.insert(std::make_pair(n + 1, n));
             }
         }
-        if(n - GRID_WIDTH >= 0 && (validGrid[n - GRID_WIDTH] & obstacles) == 0)
+        if(n - GRID_WIDTH >= 0 && (validGrid.at(n - GRID_WIDTH) & obstacles) == 0)
         {
             cost = costs[n - GRID_WIDTH] + 1;
             if(costs.find(n - GRID_WIDTH) == costs.end() || cost < costs[n - GRID_WIDTH])
@@ -153,7 +153,7 @@ std::map<int, int> PathFinder::getBestPath(const cPosition& pos, int goal, Engin
                 paths.insert(std::make_pair(n - GRID_WIDTH, n));
             }
         }
-        if(n + GRID_WIDTH < GRID_TOTAL && (validGrid[n + GRID_WIDTH] & obstacles) == 0)
+        if(n + GRID_WIDTH < GRID_TOTAL && (validGrid.at(n + GRID_WIDTH) & obstacles) == 0)
         {
             cost = costs[n + GRID_WIDTH] + 1;
             if(costs.find(n + GRID_WIDTH) == costs.end() || cost < costs[n + GRID_WIDTH])
@@ -175,7 +175,7 @@ void PathFinder::invalidateValidGrid()
     dirtyFlag = true;
 }
 
-const unsigned char* PathFinder::getValidGrid(Engine& engine)
+const PathFinder::ValidGridT& PathFinder::getValidGrid(Engine& engine)
 {
     if(dirtyFlag)
         revalidateGrid(engine);
@@ -194,7 +194,7 @@ void PathFinder::revalidateGrid(Engine& engine)
 
     for(int i = 0; i <= GRID_TOTAL; ++i)
     {
-        validGrid[i] = 0;
+        validGrid.at(i) = 0;
     }
 
     int x,y,xy;
@@ -216,26 +216,26 @@ void PathFinder::revalidateGrid(Engine& engine)
 
         if(iter->second->hasComponent(std::type_index(typeid(cLiving))))
         {
-            validGrid[xy] |= 0x1;
-            validGrid[GRID_TOTAL] |= 0x1;
+            validGrid.at(xy) |= 0x1;
+            validGrid.at(GRID_TOTAL) |= 0x1;
         }
         else if(iter->second->hasComponent(std::type_index(typeid(cBalloon))))
         {
-            validGrid[xy] |= 0x22;
+            validGrid.at(xy) |= 0x22;
             balloons.emplace_back(xy, static_cast<cBalloon*>(iter->second->getComponent(std::type_index(typeid(cBalloon)))));
         }
         else if(iter->second->hasComponent(std::type_index(typeid(cBreakable))))
         {
-            validGrid[xy] |= 0x4;
-            validGrid[GRID_TOTAL] |= 0x2;
+            validGrid.at(xy) |= 0x4;
+            validGrid.at(GRID_TOTAL) |= 0x2;
         }
         else if(iter->second->hasComponent(std::type_index(typeid(cPickup))))
         {
-            validGrid[xy] |= 0x8;
-            validGrid[GRID_TOTAL] |= 0x4;
+            validGrid.at(xy) |= 0x8;
+            validGrid.at(GRID_TOTAL) |= 0x4;
         }
         else if(iter->second->hasComponent(std::type_index(typeid(cWall))))
-            validGrid[xy] |= 0x10;
+            validGrid.at(xy) |= 0x10;
     }
 
     int distance;
@@ -244,40 +244,40 @@ void PathFinder::revalidateGrid(Engine& engine)
         distance = balloon.second->range;
         for(int i = balloon.first - 1; (i + 1) % GRID_WIDTH != 0; --i)
         {
-            if(!balloon.second->ghosting && (validGrid[i] & 0x10) != 0)
+            if(!balloon.second->ghosting && (validGrid.at(i) & 0x10) != 0)
                 break;
-            validGrid[i] |= 0x20;
-            if(--distance == 0 || (!balloon.second->piercing && (validGrid[i] & 0x4) != 0))
+            validGrid.at(i) |= 0x20;
+            if(--distance == 0 || (!balloon.second->piercing && (validGrid.at(i) & 0x4) != 0))
                 break;
         }
 
         distance = balloon.second->range;
         for(int i = balloon.first + 1; (i - 1) % GRID_WIDTH != GRID_WIDTH - 1; ++i)
         {
-            if(!balloon.second->ghosting && (validGrid[i] & 0x10) != 0)
+            if(!balloon.second->ghosting && (validGrid.at(i) & 0x10) != 0)
                 break;
-            validGrid[i] |= 0x20;
-            if(--distance == 0 || (!balloon.second->piercing && (validGrid[i] & 0x4) != 0))
+            validGrid.at(i) |= 0x20;
+            if(--distance == 0 || (!balloon.second->piercing && (validGrid.at(i) & 0x4) != 0))
                 break;
         }
 
         distance = balloon.second->range;
         for(int i = balloon.first - GRID_WIDTH; i >= 0; i -= GRID_WIDTH)
         {
-            if(!balloon.second->ghosting && (validGrid[i] & 0x10) != 0)
+            if(!balloon.second->ghosting && (validGrid.at(i) & 0x10) != 0)
                 break;
-            validGrid[i] |= 0x20;
-            if(--distance == 0 || (!balloon.second->piercing && (validGrid[i] & 0x4) != 0))
+            validGrid.at(i) |= 0x20;
+            if(--distance == 0 || (!balloon.second->piercing && (validGrid.at(i) & 0x4) != 0))
                 break;
         }
 
         distance = balloon.second->range;
         for(int i = balloon.first + GRID_WIDTH; i < GRID_TOTAL; i += GRID_WIDTH)
         {
-            if(!balloon.second->ghosting && (validGrid[i] & 0x10) != 0)
+            if(!balloon.second->ghosting && (validGrid.at(i) & 0x10) != 0)
                 break;
-            validGrid[i] |= 0x20;
-            if(--distance == 0 || (!balloon.second->piercing && (validGrid[i] & 0x4) != 0))
+            validGrid.at(i) |= 0x20;
+            if(--distance == 0 || (!balloon.second->piercing && (validGrid.at(i) & 0x4) != 0))
                 break;
         }
     }
