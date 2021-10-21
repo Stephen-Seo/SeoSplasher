@@ -3,6 +3,7 @@
 
 #include <queue>
 #include <utility>
+#include <memory>
 
 #ifndef NDEBUG
     #include <iostream>
@@ -56,7 +57,7 @@ PAMapping UAI::determineAction(const cPosition& pos, const cLiving& living, Path
         levels.push(ActionElement(static_cast<AI::Action>(i),utility(static_cast<AI::Action>(i), pos, living, pf, engine)));
     }
 
-    ActionElement picked[wildness];
+    std::unique_ptr<ActionElement[]> picked = std::make_unique<ActionElement[]>(wildness);
     for(unsigned char i = 0; i < wildness; ++i)
     {
         picked[i] = levels.top();

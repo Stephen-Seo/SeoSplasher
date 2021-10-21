@@ -23,10 +23,10 @@ enum class DPLevel {
             std::clog << "WARNING "; \
             break; \
         case DPLevel::DP_INFO: \
-            std::clog << "INFO"; \
+            std::clog << "INFO "; \
             break; \
         case DPLevel::DP_VERBOSE: \
-            std::clog << "VERBOSE"; \
+            std::clog << "VERBOSE "; \
             break; \
         case DPLevel::DP_DEBUG: \
             std::clog << "DEBUG "; \
@@ -39,30 +39,15 @@ enum class DPLevel {
     } while (false);
 #else
 #define SS_DPRINT(type, ...) \
-    do { \
-        bool willPrint = true; \
-        switch(type) { \
-        case DPLevel::DP_ERROR: \
-            std::clog << __FILE__ << ':' << __LINE__ << ' '; \
-            std::clog << "ERROR "; \
-            break; \
-        case DPLevel::DP_WARNING: \
-            std::clog << __FILE__ << ':' << __LINE__ << ' '; \
-            std::clog << "WARNING "; \
-            break; \
-        case DPLevel::DP_INFO: \
-        case DPLevel::DP_VERBOSE: \
-        case DPLevel::DP_DEBUG: \
-            willPrint = false; \
-            break; \
-        default: \
-            std::clog << __FILE__ << ':' << __LINE__ << ' '; \
-            std::clog << "??? "; \
-            break; \
-        } \
-        if(willPrint) \
-            DebugPrint::printMsgs(__VA_ARGS__); \
-    } while (false);
+    if constexpr (type == DPLevel::DP_ERROR) { \
+        std::clog << __FILE__ << ':' << __LINE__ << ' '; \
+        std::clog << "ERROR "; \
+        DebugPrint::printMsgs(__VA_ARGS__); \
+    } else if constexpr (type == DPLevel::DP_WARNING) { \
+        std::clog << __FILE__ << ':' << __LINE__ << ' '; \
+        std::clog << "WARNING "; \
+        DebugPrint::printMsgs(__VA_ARGS__); \
+    }
 #endif
 
 namespace DebugPrint {
