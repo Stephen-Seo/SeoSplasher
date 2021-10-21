@@ -137,7 +137,7 @@ PAMapping UAI::utility(AI::Action action, const cPosition& pos, const cLiving& l
 
         // predict explosion right
         temp = range;
-        for(int i = xy + 1; (i - 1) % GRID_WIDTH != GRID_WIDTH - 1 && temp > 0; --i)
+        for(int i = xy + 1; (i - 1) % GRID_WIDTH != GRID_WIDTH - 1 && temp > 0; ++i)
         {
             if(living.ghostUpgrade == 0 && (postGrid.at(i) & 0x10) != 0)
                 break;
@@ -427,27 +427,31 @@ unsigned short UAI::nearbyInfo(const cPosition& pos, const PathFinder::ValidGrid
     }
 
     // check left
-    for(int c = xy - 1; c % GRID_WIDTH != 0; --c)
-    {
-        if(grid.at(c) == 0)
-            continue;
-        else if((grid.at(c) & 0x10) != 0)
-            break;
-        info |= (grid.at(c) & 0x1);
-        info |= (grid.at(c) & 0x4);
-        info |= (grid.at(c) & 0x8);
+    if(xy % GRID_WIDTH > 0) {
+        for(int c = xy - 1; c % GRID_WIDTH != 0; --c)
+        {
+            if(grid.at(c) == 0)
+                continue;
+            else if((grid.at(c) & 0x10) != 0)
+                break;
+            info |= (grid.at(c) & 0x1);
+            info |= (grid.at(c) & 0x4);
+            info |= (grid.at(c) & 0x8);
+        }
     }
 
     // check right
-    for(int c = xy + 1; c % GRID_WIDTH != GRID_WIDTH - 1; ++c)
-    {
-        if(grid.at(c) == 0)
-            continue;
-        else if((grid.at(c) & 0x10) != 0)
-            break;
-        info |= (grid.at(c) & 0x1);
-        info |= (grid.at(c) & 0x4);
-        info |= (grid.at(c) & 0x8);
+    if(xy % GRID_WIDTH < GRID_WIDTH - 1) {
+        for(int c = xy + 1; c % GRID_WIDTH != GRID_WIDTH - 1; ++c)
+        {
+            if(grid.at(c) == 0)
+                continue;
+            else if((grid.at(c) & 0x10) != 0)
+                break;
+            info |= (grid.at(c) & 0x1);
+            info |= (grid.at(c) & 0x4);
+            info |= (grid.at(c) & 0x8);
+        }
     }
 
     info |= ((grid.at(GRID_TOTAL) & 0x1) << 4);
