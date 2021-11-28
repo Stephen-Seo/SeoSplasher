@@ -9,5 +9,5 @@ Exec=SeoSplasher
 Terminal=false
 Categories=Game
 X-AppImage-Name=SeoSplasher
-X-AppImage-Version=1.5
+X-AppImage-Version=1.5.1
 X-AppImage-Arch=x86_64
